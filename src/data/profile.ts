@@ -1,5 +1,7 @@
 import {
 	Award,
+	Activity,
+	BookOpen,
 	Briefcase,
 	Code,
 	Code2,
@@ -13,7 +15,6 @@ import {
 	Smartphone,
 	Trophy,
 	Twitter,
-	Users,
 	Zap,
 } from 'lucide-react';
 import type { Profile } from '@/types/profile';
@@ -23,9 +24,9 @@ export const profile = {
 		fullName: 'Syed Zain Qalandar',
 		displayName: 'Syed Zain.',
 		brandName: 'Zain Qalandar',
-		headline: 'Full-Stack Developer',
+		headline: 'Full Stack Developer',
 		shortBio:
-			"I'm a Front-end focused Full-Stack (MERN) developer building accessible, performant interfaces and solid backends.",
+			'Frontend-focused Full Stack Developer building scalable, SEO-optimized products with Next.js, React, Node.js, and MongoDB.',
 		location: 'Sheikhupura, Pakistan',
 	},
 	images: {
@@ -34,7 +35,8 @@ export const profile = {
 	},
 	contact: {
 		email: 'zainqlandar@gmail.com',
-		website: 'https://zainqalandar.com',
+		phone: '0336-4157981',
+		website: 'https://www.zainqalandar.online',
 	},
 	socials: {
 		github: 'https://github.com/Zainqalandar',
@@ -44,14 +46,14 @@ export const profile = {
 		facebook: '#',
 	},
 	resume: {
-		resumeUrl: '/pro/ZainQalandar-FrontEndDev-CV.pdf',
-		label: 'Resume',
+		resumeUrl: '/pro/Zain_Qalandar_CV.pdf',
+		label: 'View CV',
 		ariaLabel: 'Open resume in a new tab',
 	},
 	primaryCta: {
 		label: 'Download CV',
-		href: '/pro/ZainQalandar-FrontEndDev-CV.pdf',
-		download: 'ZainQalandar-CVs.pdf',
+		href: '/pro/Zain_Qalandar_CV.pdf',
+		download: 'Zain_Qalandar_CV.pdf',
 	},
 	secondaryCta: {
 		label: 'See my work',
@@ -64,15 +66,14 @@ export const profile = {
 		{ id: 'experience', label: 'Experience', href: '#experience', showInNav: true, showInHighlight: true },
 		{ id: 'skills', label: 'Skills', href: '#skills', showInNav: true, showInHighlight: true },
 		{ id: 'projects', label: 'Projects', href: '#projects', showInNav: true, showInHighlight: true },
-		{ id: 'testimonials', label: 'Testimonials', href: '#testimonials', showInNav: true, showInHighlight: true },
-		{ id: 'faq', label: 'FAQ', href: '#faq', showInNav: true, showInHighlight: true },
+		{ id: 'faq', label: 'FAQ', href: '#faq', showInNav: false, showInHighlight: true },
 		{ id: 'contact', label: 'Contact', href: '#contact', showInNav: true, showInHighlight: true },
 	],
 	hero: {
-		welcome: 'Welcome to my portfolio',
+		welcome: 'Next.js • React.js • Node.js • MongoDB',
 		greetingPrefix: "Hello, my name's",
 		subheading:
-			"I'm a Front-end focused Full-Stack (MERN) developer building accessible, performant interfaces and solid backends.",
+			'I build scalable, high-performance web applications with modern rendering, reusable architecture, secure APIs, and user-focused interfaces.',
 		scrollHint: 'Scroll down',
 		socialLinks: [
 			{
@@ -101,54 +102,54 @@ export const profile = {
 	stats: [
 		{
 			icon: Code2,
-			label: 'Projects Completed',
+			label: 'Projects Contributed To',
 			value: 50,
 			suffix: '+',
 			colorClass: 'from-blue-500 to-cyan-500',
 		},
 		{
-			icon: Users,
-			label: 'Clients Worked With',
-			value: 10,
-			suffix: '+',
+			icon: Activity,
+			label: 'ReadAlQuran Daily Users',
+			value: 60,
+			suffix: '–70',
 			colorClass: 'from-purple-500 to-pink-500',
 		},
 		{
 			icon: Trophy,
-			label: 'Years Experience',
-			value: 3,
+			label: 'Years in Web Development',
+			value: 4,
 			suffix: '+',
 			colorClass: 'from-yellow-500 to-orange-500',
 		},
 		{
-			icon: Zap,
-			label: 'Performance Score',
-			value: 95,
-			suffix: '%',
+			icon: BookOpen,
+			label: 'Quran Surahs Available',
+			value: 114,
+			suffix: '',
 			colorClass: 'from-green-500 to-emerald-500',
 		},
 	],
 	about: {
 		title: 'About Me',
 		longBio:
-			"I'm a passionate Full-Stack Developer (MERN), front-end focused with strong experience in building responsive user interfaces using React, Next.js and Tailwind CSS. I'm also familiar with Node.js, Express and MongoDB for APIs and data management. I love translating Figma designs into production-ready code while optimizing performance and user experience.",
+			'I am a frontend-focused Full Stack Developer experienced in building scalable web applications with Next.js, React.js, and the MERN stack.',
 		intro: {
 			prefix: "I'm a passionate ",
-			highlight: 'Full-Stack Developer (MERN)',
+			highlight: 'frontend-focused Full Stack Developer',
 			suffix:
-				', front-end focused with strong experience in building responsive user interfaces using React, Next.js and Tailwind CSS. I\'m also familiar with Node.js, Express and MongoDB for APIs and data management. I love translating Figma designs into production-ready code while optimizing performance and user experience.',
+				' experienced in building scalable applications with Next.js, React.js, and MERN technologies. I create responsive, SEO-optimized interfaces using SSR, SSG, and ISR while integrating secure APIs and maintainable backend architecture.',
 		},
 		paragraphs: [
-			"Beyond coding, I'm passionate about open-source contributions, mentoring developers, and staying updated with the latest web technologies. I believe in writing clean, maintainable code and delivering solutions that exceed expectations.",
+			'I enjoy turning Figma designs into pixel-perfect products, optimizing performance with code splitting and image optimization, and delivering clean, reusable component systems backed by reliable data flows.',
 		],
 		highlights: [
-			'Front-end focused MERN developer with a love for polished UI work.',
-			'Experienced with Node.js, Express, and MongoDB for full-stack delivery.',
-			'Enjoys turning Figma designs into production-ready experiences.',
-			'Passionate about open-source, mentoring, and modern web tech.',
+			'Advanced Next.js rendering with SSR, SSG, and ISR.',
+			'Reusable React architecture and REST API integration.',
+			'JWT authentication and role-based authorization.',
+			'Performance, technical SEO, and responsive UX.',
 		],
 		summaryCards: [
-			{ title: 'Education', value: 'BSIT (In progress)', icon: Award },
+			{ title: 'Education', value: 'BS Information Technology', icon: Award },
 			{ title: 'Location', value: 'Sheikhupura, Pakistan', icon: MapPin },
 			{ title: 'Availability', value: 'Remote / Hybrid', icon: Briefcase },
 		],
@@ -190,34 +191,40 @@ export const profile = {
 	experience: [
 		{
 			role: 'Next.js Developer',
-			company: 'StepSharp Digital Pty Ltd, South Australia',
-			start: 'Nov 2025',
-			end: 'present',
+			company: 'StepSharp Digital Pty Ltd',
+			start: 'Jun 2025',
+			end: 'May 2026',
+			location: 'South Australia · Remote',
 			bullets: [
-				'Developed scalable admin dashboards and management systems using Next.js, with a focus on maintainable architecture and clean code practices. Implemented robust form validation and type-safe data handling using Zod, while improving application performance and reliability through optimization and efficient state management.',
+				'Developed scalable admin dashboards with the Next.js App Router, reusable components, REST API integrations, and resilient loading and error states.',
+				'Applied SSR, SSG, and ISR for performance and SEO, then improved stability through code splitting, lazy loading, efficient state management, and Next/Image optimization.',
 			],
-			tech: ['Next.js', 'Rizz UI', 'Zod', 'Jotai', 'Docker', 'Node.js', 'MongoDB'],
+			links: [{ label: 'Company', href: 'https://stepsharp.com/about-us/' }],
+			tech: ['Next.js', 'React.js', 'REST APIs', 'SSR', 'SSG', 'ISR', 'Next/Image'],
 		},
 		{
-			role: 'Freelance Web Designer & Developer',
-			company: 'Freelance',
-			start: 'Dec 2024',
-			end: 'Aug 2025',
+			role: 'Frontend Engineer',
+			company: 'Kodestudio Company',
+			start: 'Mar 2022',
+			end: 'Feb 2024',
+			location: 'Sheikhupura, Pakistan · On-site',
 			bullets: [
-				'Designed and developed custom websites for local clients, delivering complete front-end solutions from concept to deployment. Collaborated directly with clients to refine requirements and improve user experience across different devices.',
+				'Developed responsive, pixel-perfect React interfaces with Tailwind CSS and Material UI, converting Figma designs into cross-browser compatible products.',
+				'Integrated REST APIs and managed application state with efficient, reusable data-handling patterns.',
 			],
-			tech: ['React',  'Next.js', 'Tailwind CSS', 'Material UI', 'Chakra UI', 'Vercel'],
-			// tech: ['React', 'Node.js', 'MongoDB', 'Express', 'Redux'],
+			links: [{ label: 'Company', href: 'https://kodestudio.net/' }],
+			tech: ['React.js', 'Tailwind CSS', 'Material UI', 'Figma to Code', 'REST APIs'],
 		},
 		{
-			role: 'Junior Frontend Developer',
-			company: 'KodeStudio Company, SKP',
-			start: 'Aug 2023',
-			end: 'Nov 2024',
+			role: 'Backend Development (MERN)',
+			company: 'Self-Driven Projects',
+			start: 'Jan 2026',
+			end: 'Present',
+			location: 'Remote',
 			bullets: [
-				'Built responsive web interfaces using React.js and modern CSS frameworks, with a strong focus on mobile-first design and cross-browser compatibility. Translated Figma designs into pixel-accurate frontend layouts while strengthening core React concepts such as component architecture, state handling, and reusable UI development.',
+				'Built RESTful APIs with Node.js, Express.js, and MongoDB, including JWT authentication, role-based authorization, middleware, validation, and robust error handling.',
 			],
-			tech: ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'Git & GitHub' , 'React', 'Redux', 'Tailwind CSS'],
+			tech: ['Node.js', 'Express.js', 'MongoDB', 'JWT', 'REST APIs'],
 		}
 	],
 	skills: {
@@ -225,15 +232,15 @@ export const profile = {
 		categories: [
 			{
 				title: 'Frontend',
-				items: ['JavaScript (ES6+)', 'React.js', 'Next.js', 'Tailwind CSS', 'MUI'],
+				items: ['JavaScript (ES6+)', 'TypeScript', 'React.js', 'Next.js (App & Pages Router)', 'SSR / SSG / ISR'],
 			},
 			{
-				title: 'Backend',
-				items: ['Node.js', 'Express', 'MongoDB', 'Appwrite', 'Firebase'],
+				title: 'UI, State & Data',
+				items: ['Tailwind CSS', 'Chakra UI', 'Material UI', 'Framer Motion', 'Redux Toolkit', 'REST APIs', 'Axios', 'Zod'],
 			},
 			{
-				title: 'Tools & Others',
-				items: ['Git & GitHub', 'Vercel', 'Docker'],
+				title: 'Backend & Tools',
+				items: ['Node.js', 'Express.js', 'MongoDB', 'PostgreSQL', 'Appwrite', 'Git & GitHub', 'Docker', 'Postman', 'Vercel', 'Render'],
 			},
 		],
 		itemPrefix: '✓',
@@ -242,74 +249,56 @@ export const profile = {
 			items: [
 				{ name: 'React & Next.js', level: 95 },
 				{ name: 'Tailwind CSS', level: 95 },
-				{ name: 'JavaScript/ES6+', level: 80 },
-				{ name: 'Node.js & Express', level: 50 },
-				{ name: 'MongoDB', level: 50 },
+				{ name: 'JavaScript & TypeScript', level: 88 },
+				{ name: 'REST APIs & State Management', level: 85 },
+				{ name: 'Node.js, Express & MongoDB', level: 72 },
 			],
 		},
 	},
 	projectsSection: {
-		title: 'Featured Projects',
+		title: 'Selected Projects',
 		cardSymbol: '#',
-		primaryActionLabel: 'View Project',
+		primaryActionLabel: 'Visit Live Project',
 		secondaryActionLabel: 'Code',
 		fallbackLink: '#',
 	},
 	projects: [
 		{
-			title: 'MERN E-Commerce Platform',
+			title: 'Read Al Quran',
+			eyebrow: 'Flagship Full-Stack Project',
+			featured: true,
 			description:
-				'Full-featured e-commerce platform with product CRUD operations, JWT authentication, order management, and Redux state management.',
-			tech: ['MongoDB', 'Express', 'React', 'Node', 'Tailwind', 'Redux'],
+				'A full-stack Islamic learning platform for reading all 114 Surahs with Urdu and English translations, Tafseer, audio recitations, Hadith, bookmarks, favourites, and reading progress.',
+			image: '/images/projects/read-al-quran-preview.png',
+			logo: '/images/projects/read-al-quran-logo.png',
+			tech: ['Next.js', 'React.js', 'TypeScript', 'MongoDB', 'Redux Toolkit', 'PWA'],
+			highlights: [
+				'Secure admin dashboard for users, analytics, feedback, reader activity, and broadcast notifications',
+				'Technical SEO, structured data, optimized metadata, and XML sitemaps',
+				'Responsive PWA experience generating consistent traffic of 60–70 daily users',
+			],
 			links: {
-				live: '#',
+				live: 'https://www.readalquran.online/',
 			},
 		},
 		{
-			title: 'Web-Kayana (Frontend)',
+			title: 'ERPfy',
+			eyebrow: 'Restaurant Management & Analytics SaaS',
 			description:
-				'Converted Figma designs to responsive Next.js and Chakra UI components for a professional web agency.',
-			tech: ['Next.js', 'Chakra UI', 'Axios', 'Responsive Design'],
+				'Contributed to a large-scale platform managing restaurant sales, orders, reservations, inventory, transactions, and staff operations. Built KPI dashboards, reports, analytics, and location/date filters with server-side data fetching.',
+			tech: ['Next.js', 'TypeScript', 'Redux Toolkit', 'Server-side Data', 'Dynamic Imports'],
 			links: {
-				live: 'https://hirekayana.com',
-				repo: 'https://hirekayana.com',
+				live: 'https://admin.erpfy.app/sign-in',
 			},
 		},
 		{
-			title: 'Task Management Dashboard',
+			title: 'Propteq',
+			eyebrow: 'Real Estate CRM & Property Management SaaS',
 			description:
-				'Interactive task management application with real-time updates, user authentication, and beautiful UI. Features drag-and-drop functionality.',
-			tech: ['React', 'Node.js', 'MongoDB', 'Socket.io', 'Tailwind'],
+				'Contributed to a real estate platform spanning listings, leads, enquiries, sales, marketing, contacts, and agency management. Built reusable listings, advanced search, filters, pagination, assignments, and API-integrated workflows.',
+			tech: ['Next.js', 'TypeScript', 'SSR', 'Caching', 'REST APIs', 'Dynamic Imports'],
 			links: {
-				live: '#',
-			},
-		},
-		{
-			title: 'Social Media Analytics Tool',
-			description:
-				'Analytics dashboard for tracking social media performance with charts, real-time data visualization, and detailed insights.',
-			tech: ['Next.js', 'Chart.js', 'API Integration', 'Tailwind CSS'],
-			links: {
-				live: '#',
-			},
-		},
-		{
-			title: 'Portfolio Website',
-			description:
-				'Modern, responsive portfolio showcasing projects with smooth animations, contact form, and optimized performance.',
-			tech: ['Next.js', 'Tailwind CSS', 'Framer Motion', 'Responsive'],
-			links: {
-				live: 'https://zainqalandar.com',
-				repo: 'https://zainqalandar.com',
-			},
-		},
-		{
-			title: 'Blog Platform with CMS',
-			description:
-				'Full-featured blogging platform with content management, categories, comments, and beautiful markdown rendering.',
-			tech: ['Next.js', 'Strapi CMS', 'React', 'MongoDB', 'Tailwind'],
-			links: {
-				live: '#',
+				live: 'https://app.propteq.ai/auth/sign-in',
 			},
 		},
 	],
@@ -454,7 +443,8 @@ export const profile = {
 			},
 			{
 				title: 'Response Time',
-				value: '24-48 hours',
+				value: '0336-4157981',
+				href: 'tel:+923364157981',
 				icon: Phone,
 			},
 		],
@@ -499,7 +489,7 @@ export const profile = {
 			},
 			{
 				label: 'LinkedIn',
-				href: 'https://linkedin.com/in/zain-qalandar',
+				href: 'https://www.linkedin.com/in/zainqalandar-online/',
 				icon: Linkedin,
 				className: 'hover:text-blue-400 hover:bg-blue-500/10',
 			},
@@ -513,7 +503,7 @@ export const profile = {
 	},
 	footer: {
 		brandName: 'Syed Zain Qalandar',
-		tagline: 'Full Stack Developer & Creative Builder',
+		tagline: 'Full Stack Developer · React.js · Next.js · Node.js',
 		quickLinksTitle: 'Quick Links',
 		quickLinks: [
 			{ label: 'About', href: '#about' },
@@ -584,12 +574,12 @@ export const profile = {
 		},
 	},
 	seo: {
-		siteTitle: 'Syed Zain Qalandar — Full-Stack (MERN) Developer | React & Next.js',
+		siteTitle: 'Syed Zain Qalandar — Full Stack Developer | React & Next.js',
 		siteDescription:
-			'Full-Stack (MERN) developer specializing in React, Next.js, and Tailwind CSS. Expertise in building modern, responsive web applications.',
+			'Frontend-focused Full Stack Developer building scalable, SEO-optimized web applications with Next.js, React.js, Node.js, Express.js, and MongoDB.',
 		openGraphTitle: 'Syed Zain Qalandar — Full-Stack Developer',
 		openGraphDescription:
-			'Building beautiful, responsive web applications with React and Next.js',
+			'Building scalable, high-performance web products with React, Next.js, and the MERN stack.',
 		ogImage: '/images/profile.png',
 		keywords: [
 			'MERN stack',
@@ -602,8 +592,8 @@ export const profile = {
 	},
 	education: [
 		{
-			institute: 'GCB Sheikhupura',
-			degree: 'BSIT (In progress)',
+			institute: 'Punjab University (Aff.)',
+			degree: 'BS Information Technology',
 			start: '2021',
 			end: 'Present',
 		},

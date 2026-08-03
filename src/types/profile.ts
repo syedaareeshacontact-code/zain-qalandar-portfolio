@@ -68,9 +68,12 @@ export type ProjectLinks = {
 
 export type ProjectItem = {
 	title: string;
+	eyebrow?: string;
 	description: string;
 	tech: string[];
 	image?: string;
+	logo?: string;
+	featured?: boolean;
 	links: ProjectLinks;
 	highlights?: string[];
 };

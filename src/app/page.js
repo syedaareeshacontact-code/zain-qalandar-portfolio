@@ -6,8 +6,6 @@ import {
 	Stats,
 	Skills,
 	Projects,
-	Testimonials,
-	Articles,
 	FAQ,
 	CTA,
 	Contact,
@@ -34,8 +32,6 @@ export default function Home() {
 					<Experience />
 					<Skills />
 					<Projects />
-					<Testimonials />
-					<Articles />
 					<FAQ />
 					<CTA />
 					<Contact />

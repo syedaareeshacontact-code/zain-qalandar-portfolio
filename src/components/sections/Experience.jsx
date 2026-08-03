@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { Briefcase, Calendar } from 'lucide-react';
+import { Briefcase, Calendar, ExternalLink } from 'lucide-react';
 import { profile } from '@/data/profile';
 
 export default function Experience() {
@@ -26,7 +26,6 @@ export default function Experience() {
 					const durationLabel = exp.location
 						? `${duration}${experienceSection.locationSeparator}${exp.location}`
 						: duration;
-					const description = exp.bullets.join(' ');
 					return (
 						<motion.div
 							key={idx}
@@ -37,7 +36,7 @@ export default function Experience() {
 							className="relative pl-8 pb-8"
 						>
 							{/* Timeline dot */}
-							<div className="absolute left-0 top-0 w-4 h-4 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 ring-4 ring-white shadow-lg" />
+							<div className="absolute left-0 top-0 w-4 h-4 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 ring-4 ring-slate-900 shadow-lg" />
 							{/* Timeline line */}
 							{idx !== experience.length - 1 && (
 								<div className="absolute left-[7px] top-8 w-[2px] h-20 bg-gradient-to-b from-green-500 to-transparent" />
@@ -46,21 +45,44 @@ export default function Experience() {
 							<div className="glass-effect rounded-2xl p-6 md:p-8">
 								<div className="flex items-start justify-between flex-wrap gap-3 mb-3">
 									<div className="flex items-center gap-3">
-										<div className="p-2 rounded-lg bg-gradient-to-br from-green-100 to-emerald-100">
-											<Briefcase className="text-green-600" size={20} />
+										<div className="p-2 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20">
+											<Briefcase className="text-green-400" size={20} />
 										</div>
 										<div>
-											<h3 className="text-xl font-bold text-gray-900">{exp.role}</h3>
-											<p className="text-green-600 font-medium">{exp.company}</p>
+											<h3 className="text-xl font-bold text-white">{exp.role}</h3>
+											<p className="text-green-400 font-medium">{exp.company}</p>
 										</div>
 									</div>
-									<div className="flex items-center gap-2 text-gray-600 text-sm">
+									<div className="flex items-center gap-2 text-gray-400 text-sm">
 										<Calendar size={16} />
 										{durationLabel}
 									</div>
 								</div>
 
-								<p className="text-gray-700 leading-relaxed mb-4">{description}</p>
+								<ul className="mb-5 space-y-2 text-gray-300">
+									{exp.bullets.map((bullet) => (
+										<li key={bullet} className="flex gap-3 leading-relaxed">
+											<span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-green-400" />
+											<span>{bullet}</span>
+										</li>
+									))}
+								</ul>
+
+								{exp.links?.length > 0 && (
+									<div className="mb-4 flex flex-wrap gap-3">
+										{exp.links.map((link) => (
+											<a
+												key={link.href}
+												href={link.href}
+												target="_blank"
+												rel="noreferrer"
+											className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-400 hover:text-green-300"
+											>
+												{link.label} <ExternalLink size={14} />
+											</a>
+										))}
+									</div>
+								)}
 
 								<div className="flex flex-wrap gap-2">
 									{exp.tech?.map((skill) => (
