@@ -22,7 +22,7 @@ import type { Profile } from '@/types/profile';
 export const profile = {
 	basic: {
 		fullName: 'Syed Zain Qalandar',
-		displayName: 'Syed Zain.',
+		displayName: 'Syed Zain',
 		brandName: 'Zain Qalandar',
 		headline: 'Full Stack Developer',
 		shortBio:
