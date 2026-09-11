@@ -130,19 +130,6 @@ export type ContactInfoItem = {
 	icon: LucideIcon;
 };
 
-export type ThemeOption = {
-	id: string;
-	title: string;
-	colors: string[];
-};
-
-export type ThemeSwitcherOption = {
-	id: string;
-	title: string;
-	hint: string;
-	colors: string[];
-};
-
 export type SeoData = {
 	siteTitle: string;
 	siteDescription: string;
@@ -319,16 +306,40 @@ export type Profile = {
 		closeMenuLabel: string;
 		resumeAriaLabel: string;
 		resumeIndicator: string;
-		themeWidget: {
-			label: string;
-			toggleAriaLabel: string;
-			options: ThemeOption[];
-		};
-		themeSwitcher: {
-			label: string;
-			titleSeparator: string;
-			options: ThemeSwitcherOption[];
-		};
+	};
+	design: {
+		monogram: string;
+		skipLink: string;
+		navigationLabel: string;
+		contactCta: string;
+		availability: string;
+		heroTitle: string;
+		heroAccent: string;
+		heroFootnote: string;
+		heroFocus: string;
+		architectureCaption: string;
+		architectureLayers: string[];
+		architectureTech: string[];
+		workLabel: string;
+		workDescription: string;
+		repositoriesLabel: string;
+		projectContribution: string;
+		productSignIn: string;
+		aboutLabel: string;
+		aboutNote: string;
+		resumeLabel: string;
+		expertiseLabel: string;
+		expertiseDescription: string;
+		toolkitLabel: string;
+		experienceLabel: string;
+		faqLabel: string;
+		contactLabel: string;
+		contactAccent: string;
+		contactNote: string;
+		formNote: string;
+		copyEmail: string;
+		copiedEmail: string;
+		copyFailed: string;
 	};
 	seo: SeoData;
 	education: EducationItem[];

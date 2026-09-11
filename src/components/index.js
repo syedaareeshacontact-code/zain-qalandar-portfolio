@@ -1,4 +1,4 @@
-export { Header, Footer, useTheme, ThemeProvider } from './layout';
+export { Header, Footer } from './layout';
 export {
   Hero,
   About,
@@ -17,6 +17,4 @@ export {
   ScrollProgressBar,
   ScrollToTopButton,
   ActiveSectionHighlight,
-  ThemeSwitcher,
-  ThemeWidget,
 } from './ui';

@@ -1,59 +1,23 @@
-'use client';
-import { motion } from 'framer-motion';
 import { profile } from '@/data/profile';
+import Reveal from '@/components/ui/Reveal';
+import SectionHeading from '@/components/ui/SectionHeading';
 
 export default function Services() {
-	const { services } = profile;
-
-	return (
-		<section id="services" className="mt-20">
-			<motion.h2
-				initial={{ opacity: 0, y: 20 }}
-				whileInView={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.5 }}
-				viewport={{ once: true }}
-				style={{ marginBottom: 32 }}
-				className="section-title mb-24 text-center"
-			>
-				{services.title}
-			</motion.h2>
-
-			<motion.div
-				initial="hidden"
-				whileInView="visible"
-				viewport={{ once: true }}
-				variants={{
-					hidden: {},
-					visible: {
-						transition: { staggerChildren: 0.12 },
-					},
-				}}
-				className="grid gap-8 md:grid-cols-2"
-			>
-				{services.items.map((service, idx) => {
-					const Icon = service.icon;
-					return (
-						<motion.div
-							key={idx}
-							variants={{
-								hidden: { opacity: 0, y: 30 },
-								visible: { opacity: 1, y: 0 },
-							}}
-							className="glass-effect rounded-2xl p-8 card-hover group"
-						>
-							<div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg">
-								<Icon className="text-white" size={28} />
-							</div>
-							<h3 className="text-xl font-bold text-gray-100 dark:text-white mb-3">
-								{service.title}
-							</h3>
-							<p className="text-gray-300 dark:text-gray-400 leading-relaxed">
-								{service.description}
-							</p>
-						</motion.div>
-					);
-				})}
-			</motion.div>
-		</section>
-	);
+  return (
+    <section id="services" className="section services-section">
+      <Reveal><SectionHeading number="03" label={profile.design.expertiseLabel} title={profile.services.title} description={profile.design.expertiseDescription} /></Reveal>
+      <div className="services-grid">
+        {profile.services.items.map((service, index) => {
+          const Icon = service.icon;
+          return (
+            <Reveal key={service.title} delay={index * 0.05} className="service-card">
+              <div className="service-top"><Icon size={24} strokeWidth={1.4} /><span className="eyebrow">0{index + 1}</span></div>
+              <h3>{service.title}</h3>
+              <p>{service.description}</p>
+            </Reveal>
+          );
+        })}
+      </div>
+    </section>
+  );
 }

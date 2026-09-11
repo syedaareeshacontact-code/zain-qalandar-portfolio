@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="260" viewBox="0 0 1200 260" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">Read Al Quran</title>
+  <desc id="description">Independent full-stack product. A focused space for reading and reflection, illustrated with an abstract open book.</desc>
+  <defs>
+    <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#A0B78E" fill-opacity=".12"/>
+    </pattern>
+  </defs>
+  <rect x=".5" y=".5" width="1199" height="259" rx="12" fill="#1C2B21" stroke="#3B503D"/>
+  <rect x="772" y="16" width="400" height="228" fill="url(#dots)"/>
+  <path d="M40 37H64" stroke="#D5F2B0" stroke-width="2"/>
+  <text x="76" y="42" fill="#D5F2B0" font-family="monospace" font-size="14" letter-spacing="2">01 / INDEPENDENT PRODUCT</text>
+  <text x="40" y="119" fill="#F2F0E8" font-family="Georgia, 'DejaVu Serif', serif" font-size="55" letter-spacing="-2">Read Al Quran</text>
+  <text x="42" y="162" fill="#B5BFB4" font-family="Arial, Helvetica, sans-serif" font-size="22">A focused space for reading &amp; reflection.</text>
+  <text x="42" y="222" fill="#D5F2B0" font-family="monospace" font-size="14" letter-spacing="1">QURAN / TAFSEER / AUDIO / READING PROGRESS</text>
+  <circle cx="974" cy="133" r="104" stroke="#3B503D"/>
+  <circle cx="974" cy="133" r="82" stroke="#3B503D"/>
+  <g stroke-linejoin="round">
+    <path d="M851 90L963 134V211L851 167Z" fill="#25372A" stroke="#A0B78E"/>
+    <path d="M963 134L1089 81V161L963 211Z" fill="#25372A" stroke="#A0B78E"/>
+    <path d="M855 78C891 76 932 94 969 117V198C932 175 891 157 855 159Z" fill="#344B35" stroke="#A0B78E"/>
+    <path d="M969 117C1006 84 1047 67 1085 65V146C1047 148 1006 165 969 198Z" fill="#344B35" stroke="#A0B78E"/>
+    <path d="M969 117V198" stroke="#D5F2B0" stroke-width="2"/>
+    <path d="M875 100C899 102 923 112 946 124M875 119C899 121 923 131 946 143M875 138C899 140 923 150 936 157M991 120C1016 102 1040 92 1065 88M991 139C1016 121 1040 111 1065 107M991 158C1016 140 1040 130 1051 128" stroke="#9EB98A" stroke-linecap="round"/>
+    <path d="M1028 79V133L1037 123L1046 124V73" fill="#D5F2B0" stroke="#D5F2B0"/>
+  </g>
+  <path d="M1124 38H1144V58M1143 39L1115 67" stroke="#D5F2B0" stroke-width="1.5"/>
+</svg>

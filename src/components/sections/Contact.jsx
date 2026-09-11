@@ -1,336 +1,78 @@
-'use client'
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Send, CheckCircle2, AlertCircle } from 'lucide-react'
-import { profile } from '@/data/profile'
+'use client';
+
+import { useState } from 'react';
+import { ArrowUpRight, Check, Copy } from 'lucide-react';
+import { profile } from '@/data/profile';
+import Reveal from '@/components/ui/Reveal';
 
 export default function Contact() {
-  const { contact, contactSection } = profile
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [subject, setSubject] = useState('')
-  const [msg, setMsg] = useState('')
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState('')
-  const [hoveredField, setHoveredField] = useState(null)
+  const { contact, contactSection, design } = profile;
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState('');
+  const [copyStatus, setCopyStatus] = useState('');
 
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setError('')
-
-    if (!name.trim() || !email.trim() || !subject.trim() || !msg.trim()) {
-      setError(contactSection.form.validation.required)
-      return
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setError('');
+    setStatus('');
+    const data = new FormData(event.currentTarget);
+    const fields = Object.fromEntries(['name', 'email', 'subject', 'message'].map((name) => [name, String(data.get(name) || '').trim()]));
+    if (Object.values(fields).some((value) => !value)) {
+      setError(contactSection.form.validation.required);
+      return;
     }
-
-    if (!validateEmail(email)) {
-      setError(contactSection.form.validation.invalidEmail)
-      return
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
+      setError(contactSection.form.validation.invalidEmail);
+      return;
     }
+    const labels = contactSection.form.emailBody;
+    const body = `${labels.nameLabel}: ${fields.name}\n${labels.emailLabel}: ${fields.email}\n${labels.subjectLabel}: ${fields.subject}\n\n${labels.messageLabel}:\n${fields.message}`;
+    window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent(fields.subject)}&body=${encodeURIComponent(body)}`;
+    setStatus(contactSection.form.successMessage);
+  };
 
-    const body = encodeURIComponent(
-      `${contactSection.form.emailBody.nameLabel}: ${name}\n${contactSection.form.emailBody.emailLabel}: ${email}\n${contactSection.form.emailBody.subjectLabel}: ${subject}\n\n${contactSection.form.emailBody.messageLabel}:\n${msg}`
-    )
-    window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent(
-      subject || contactSection.form.defaultSubject
-    )}&body=${body}`
-    setSent(true)
-    setName('')
-    setEmail('')
-    setSubject('')
-    setMsg('')
-    setTimeout(() => setSent(false), 4000)
-  }
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: 'spring',
-        stiffness: 100,
-        damping: 15,
-      },
-    },
-  }
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(contact.email);
+      setCopyStatus('copied');
+    } catch {
+      setCopyStatus('failed');
+    }
+  };
 
   return (
-    <section id="contact" className="py-20 relative z-10">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        className="max-w-6xl mx-auto px-4"
-      >
-        {/* Section Title */}
-        <motion.div variants={itemVariants} className="mb-16 text-center">
-          <h2 className="section-title text-4xl md:text-5xl font-bold mb-4">
-            {contactSection.title}
-          </h2>
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto font-inter">
-            {contactSection.description}
-          </p>
-        </motion.div>
-
-        {/* Contact Cards Grid */}
-        <motion.div
-          className="grid md:grid-cols-3 gap-6 mb-16"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {contactSection.infoCards.map((info, idx) => {
-            const Icon = info.icon
-            return (
-              <motion.div
-                key={idx}
-                variants={itemVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="group glass-effect rounded-2xl p-8 text-center cursor-pointer hover:border-green-500/50 transition-all duration-300"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.2, rotate: 10 }}
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500/30 to-emerald-500/30 flex items-center justify-center mx-auto mb-4 group-hover:from-green-500/50 group-hover:to-emerald-500/50 transition-all duration-300"
-                >
-                  <Icon className="icon-primary group-hover:text-green-300 transition-colors" size={28} />
-                </motion.div>
-                <h3 className="font-poppins font-semibold text-white mb-2 text-lg">{info.title}</h3>
-                {info.href ? (
-                  <a
-                    href={info.href}
-                    className="text-green-400 hover:text-green-300 transition-colors break-all text-sm font-inter"
-                  >
-                    {info.value}
-                  </a>
-                ) : (
-                  <p className="text-gray-300 text-sm font-inter">{info.value}</p>
-                )}
-              </motion.div>
-            )
-          })}
-        </motion.div>
-
-        {/* Contact Form Section */}
-        <motion.div
-          variants={itemVariants}
-          className="glass-effect rounded-3xl p-8 md:p-12 border border-white/10 hover:border-green-500/30 transition-all duration-300"
-        >
-          <div className="max-w-3xl mx-auto">
-            <h3 className="text-2xl md:text-3xl font-poppins font-bold text-white mb-3">{contactSection.form.title}</h3>
-            <p className="text-gray-300 mb-8 font-inter">
-              {contactSection.form.description}
-            </p>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                {/* Name Field */}
-                <motion.div
-                  variants={itemVariants}
-                  onHoverStart={() => setHoveredField('name')}
-                  onHoverEnd={() => setHoveredField(null)}
-                  className="relative"
-                >
-                  <label className="block text-sm font-poppins font-semibold text-white mb-2">
-                    {contactSection.form.labels.name}{' '}
-                    <span className="text-red-400">{contactSection.form.requiredIndicator}</span>
-                  </label>
-                  <motion.input
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={contactSection.form.placeholders.name}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder:text-gray-400 focus:outline-none focus:border-green-500 focus:bg-white/10 focus:ring-1 focus:ring-green-500/30 transition-all duration-300 font-inter text-base"
-                    whileFocus={{ scale: 1.01 }}
-                  />
-                  {(hoveredField === 'name' || name) && (
-                    <motion.div
-                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500/5 to-emerald-500/5 -z-10"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    />
-                  )}
-                </motion.div>
-
-                {/* Email Field */}
-                <motion.div
-                  variants={itemVariants}
-                  onHoverStart={() => setHoveredField('email')}
-                  onHoverEnd={() => setHoveredField(null)}
-                  className="relative"
-                >
-                  <label className="block text-sm font-poppins font-semibold text-white mb-2">
-                    {contactSection.form.labels.email}{' '}
-                    <span className="text-red-400">{contactSection.form.requiredIndicator}</span>
-                  </label>
-                  <motion.input
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={contactSection.form.placeholders.email}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder:text-gray-400 focus:outline-none focus:border-green-500 focus:bg-white/10 focus:ring-1 focus:ring-green-500/30 transition-all duration-300 font-inter text-base"
-                    whileFocus={{ scale: 1.01 }}
-                  />
-                  {(hoveredField === 'email' || email) && (
-                    <motion.div
-                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500/5 to-emerald-500/5 -z-10"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    />
-                  )}
-                </motion.div>
-              </motion.div>
-
-              {/* Subject Field */}
-              <motion.div
-                variants={itemVariants}
-                onHoverStart={() => setHoveredField('subject')}
-                onHoverEnd={() => setHoveredField(null)}
-                className="relative"
-              >
-                <label className="block text-sm font-poppins font-semibold text-white mb-2">
-                  {contactSection.form.labels.subject}{' '}
-                  <span className="text-red-400">{contactSection.form.requiredIndicator}</span>
-                </label>
-                <motion.input
-                  required
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder={contactSection.form.placeholders.subject}
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder:text-gray-400 focus:outline-none focus:border-green-500 focus:bg-white/10 focus:ring-1 focus:ring-green-500/30 transition-all duration-300 font-inter text-base"
-                  whileFocus={{ scale: 1.01 }}
-                />
-                {(hoveredField === 'subject' || subject) && (
-                  <motion.div
-                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500/5 to-emerald-500/5 -z-10"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  />
-                )}
-              </motion.div>
-
-              {/* Message Field */}
-              <motion.div
-                variants={itemVariants}
-                onHoverStart={() => setHoveredField('message')}
-                onHoverEnd={() => setHoveredField(null)}
-                className="relative"
-              >
-                <label className="block text-sm font-poppins font-semibold text-white mb-2">
-                  {contactSection.form.labels.message}{' '}
-                  <span className="text-red-400">{contactSection.form.requiredIndicator}</span>
-                </label>
-                <motion.textarea
-                  required
-                  value={msg}
-                  onChange={(e) => setMsg(e.target.value)}
-                  placeholder={contactSection.form.placeholders.message}
-                  rows={6}
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder:text-gray-400 focus:outline-none focus:border-green-500 focus:bg-white/10 focus:ring-1 focus:ring-green-500/30 transition-all duration-300 resize-none font-inter text-base"
-                  whileFocus={{ scale: 1.01 }}
-                />
-                {(hoveredField === 'message' || msg) && (
-                  <motion.div
-                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500/5 to-emerald-500/5 -z-10"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  />
-                )}
-              </motion.div>
-
-              {/* Error Message */}
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  className="p-4 rounded-lg bg-red-500/20 border border-red-500/50 text-red-300 text-center font-semibold flex items-center justify-center gap-2"
-                >
-                  <AlertCircle size={18} />
-                  {error}
-                </motion.div>
-              )}
-
-              {/* Submit Button */}
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(34, 197, 94, 0.4)' }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full px-6 py-4 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-poppins font-bold text-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <Send size={20} />
-                {contactSection.form.submitLabel}
-              </motion.button>
-            </form>
-
-            {sent && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                className="mt-6 p-4 rounded-lg bg-green-500/20 border border-green-500/50 text-green-300 text-center font-semibold flex items-center justify-center gap-2"
-              >
-                <CheckCircle2 size={20} />
-                {contactSection.form.successMessage}
-              </motion.div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Social Links */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-16 pt-12 border-t border-white/10 text-center"
-        >
-          <h3 className="text-2xl font-poppins font-bold text-white mb-8">{contactSection.socialTitle}</h3>
-          <motion.div
-            className="flex gap-4 justify-center flex-wrap"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {contactSection.socialLinks.map((social, index) => {
-              const Icon = social.icon
-              return (
-                <motion.a
-                  key={index}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.15, rotate: 10 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`p-4 rounded-xl border border-white/20 text-white transition-all duration-300 ${social.className || ''}`}
-                  aria-label={social.label}
-                >
-                  <Icon size={24} />
-                </motion.a>
-              )
-            })}
-          </motion.div>
-        </motion.div>
-      </motion.div>
+    <section id="contact" className="contact-section">
+      <Reveal className="contact-heading">
+        <p className="eyebrow">06 / {design.contactLabel}</p>
+        <h2>{contactSection.title}<em>{design.contactAccent}</em></h2>
+        <p>{design.contactNote}</p>
+      </Reveal>
+      <div className="contact-grid">
+        <Reveal className="contact-details">
+          <p className="availability"><span className="status-dot" />{design.availability}</p>
+          <div className="contact-email-row"><a href={`mailto:${contact.email}`} className="contact-email">{contact.email}<ArrowUpRight size={22} /></a><button type="button" onClick={copyEmail} className="copy-button" aria-label={copyStatus === 'copied' ? design.copiedEmail : design.copyEmail}>{copyStatus === 'copied' ? <Check size={16} /> : <Copy size={16} />}</button></div>
+          <p className="copy-status" role="status">{copyStatus === 'copied' ? design.copiedEmail : copyStatus === 'failed' ? design.copyFailed : ''}</p>
+          <div className="contact-info">{contactSection.infoCards.filter((item) => item.title !== 'Email').map((item) => {
+            const Icon = item.icon;
+            return <div key={item.title}><Icon size={17} /><div><span className="eyebrow">{item.title}</span>{item.href ? <a href={item.href}>{item.value}</a> : <span>{item.value}</span>}</div></div>;
+          })}</div>
+          <div className="contact-socials">{contactSection.socialLinks.map((social) => <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer">{social.label}<ArrowUpRight size={15} /></a>)}</div>
+        </Reveal>
+        <Reveal className="contact-form-wrap" delay={0.08}>
+          <h3>{contactSection.form.title}</h3>
+          <form onSubmit={handleSubmit} className="contact-form" aria-describedby="form-note">
+            <div className="form-row">
+              {['name', 'email'].map((field) => <div className="form-field" key={field}><label htmlFor={`contact-${field}`}>{contactSection.form.labels[field]} <span>{contactSection.form.requiredIndicator}</span></label><input id={`contact-${field}`} name={field} type={field === 'email' ? 'email' : 'text'} autoComplete={field} placeholder={contactSection.form.placeholders[field]} required maxLength={field === 'email' ? 254 : 120} onChange={() => setStatus('')} /></div>)}
+            </div>
+            <div className="form-field"><label htmlFor="contact-subject">{contactSection.form.labels.subject} <span>{contactSection.form.requiredIndicator}</span></label><input id="contact-subject" name="subject" placeholder={contactSection.form.placeholders.subject} required maxLength={180} onChange={() => setStatus('')} /></div>
+            <div className="form-field"><label htmlFor="contact-message">{contactSection.form.labels.message} <span>{contactSection.form.requiredIndicator}</span></label><textarea id="contact-message" name="message" rows={4} placeholder={contactSection.form.placeholders.message} required maxLength={3000} onChange={() => setStatus('')} /></div>
+            <p id="form-note" className="form-note">{design.formNote}</p>
+            {error && <p className="form-error" role="alert">{error}</p>}
+            {status && <p className="form-status" role="status">{status}</p>}
+            <button type="submit" className="button button-primary">{contactSection.form.submitLabel}<ArrowUpRight size={17} /></button>
+          </form>
+        </Reveal>
+      </div>
     </section>
-  )
+  );
 }

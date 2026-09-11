@@ -7,33 +7,29 @@ import {
 	Skills,
 	Projects,
 	FAQ,
-	CTA,
 	Contact,
 	Header,
 	Footer,
 	ScrollToTopButton,
 	ScrollProgressBar,
-	ActiveSectionHighlight,
 } from '@/components';
 
 export default function Home() {
 	return (
 		<>
 			<ScrollProgressBar />
-			<ActiveSectionHighlight />
 			<ScrollToTopButton />
-			<div className="min-h-screen flex flex-col">
+			<div className="site-shell">
 				<Header />
-				<main className="max-w-6xl mx-auto px-3 py-0 w-full">
+				<main id="main-content" className="page-container">
 					<Hero />
 					<Stats />
+					<Projects />
 					<About />
 					<Services />
-					<Experience />
 					<Skills />
-					<Projects />
+					<Experience />
 					<FAQ />
-					<CTA />
 					<Contact />
 				</main>
 				<Footer />

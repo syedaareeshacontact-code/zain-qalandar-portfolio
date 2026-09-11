@@ -24,7 +24,7 @@ export const profile = {
 		fullName: 'Syed Zain Qalandar',
 		displayName: 'Syed Zain',
 		brandName: 'Zain Qalandar',
-		headline: 'Full Stack Developer',
+		headline: 'Full-Stack Developer',
 		shortBio:
 			'Frontend-focused Full Stack Developer building scalable, SEO-optimized products with Next.js, React, Node.js, and MongoDB.',
 		location: 'Sheikhupura, Pakistan',
@@ -60,21 +60,21 @@ export const profile = {
 		href: '#projects',
 	},
 	sections: [
-		{ id: 'hero', label: 'Hero', href: '#hero', showInNav: false, showInHighlight: true },
-		{ id: 'about', label: 'About', href: '#about', showInNav: true, showInHighlight: true },
-		{ id: 'services', label: 'Services', href: '#services', showInNav: true, showInHighlight: true },
-		{ id: 'experience', label: 'Experience', href: '#experience', showInNav: true, showInHighlight: true },
-		{ id: 'skills', label: 'Skills', href: '#skills', showInNav: true, showInHighlight: true },
-		{ id: 'projects', label: 'Projects', href: '#projects', showInNav: true, showInHighlight: true },
-		{ id: 'faq', label: 'FAQ', href: '#faq', showInNav: false, showInHighlight: true },
-		{ id: 'contact', label: 'Contact', href: '#contact', showInNav: true, showInHighlight: true },
+		{ id: 'hero', label: 'Home', href: '#hero', showInNav: false },
+		{ id: 'projects', label: 'Work', href: '#projects', showInNav: true },
+		{ id: 'about', label: 'About', href: '#about', showInNav: true },
+		{ id: 'services', label: 'Expertise', href: '#services', showInNav: true },
+		{ id: 'skills', label: 'Toolkit', href: '#skills', showInNav: false },
+		{ id: 'experience', label: 'Experience', href: '#experience', showInNav: true },
+		{ id: 'faq', label: 'FAQ', href: '#faq', showInNav: false },
+		{ id: 'contact', label: 'Contact', href: '#contact', showInNav: false },
 	],
 	hero: {
-		welcome: 'Next.js • React.js • Node.js • MongoDB',
-		greetingPrefix: "Hello, my name's",
+		welcome: 'Independent developer. Thoughtful products.',
+		greetingPrefix: "Hi, I’m",
 		subheading:
-			'I build scalable, high-performance web applications with modern rendering, reusable architecture, secure APIs, and user-focused interfaces.',
-		scrollHint: 'Scroll down',
+			'I build web applications from the interface down to the API. Clear interactions, maintainable code, and the details that make a product feel finished.',
+		scrollHint: 'Explore the work',
 		socialLinks: [
 			{
 				label: 'GitHub',
@@ -130,9 +130,9 @@ export const profile = {
 		},
 	],
 	about: {
-		title: 'About Me',
+		title: 'A developer who cares about the whole product.',
 		longBio:
-			'I am a frontend-focused Full Stack Developer experienced in building scalable web applications with Next.js, React.js, and the MERN stack.',
+			'I’m Syed Zain Qalandar, a frontend-focused full-stack developer based in Sheikhupura, Pakistan. I care just as much about how a product feels as how it works underneath.',
 		intro: {
 			prefix: "I'm a passionate ",
 			highlight: 'frontend-focused Full Stack Developer',
@@ -155,7 +155,7 @@ export const profile = {
 		],
 	},
 	services: {
-		title: 'Services & Expertise',
+		title: 'From the first screen to the final detail.',
 		items: [
 			{
 				icon: Code,
@@ -184,7 +184,7 @@ export const profile = {
 		],
 	},
 	experienceSection: {
-		title: 'Professional Experience',
+		title: 'Where I’ve put it into practice.',
 		rangeSeparator: ' - ',
 		locationSeparator: ' · ',
 	},
@@ -228,7 +228,7 @@ export const profile = {
 		}
 	],
 	skills: {
-		title: 'Technical Skills',
+		title: 'The tools behind the work.',
 		categories: [
 			{
 				title: 'Frontend',
@@ -256,7 +256,7 @@ export const profile = {
 		},
 	},
 	projectsSection: {
-		title: 'Selected Projects',
+		title: 'A few things I’ve built.',
 		cardSymbol: '#',
 		primaryActionLabel: 'Visit Live Project',
 		secondaryActionLabel: 'Code',
@@ -265,11 +265,11 @@ export const profile = {
 	projects: [
 		{
 			title: 'Read Al Quran',
-			eyebrow: 'Flagship Full-Stack Project',
+			eyebrow: 'Independent product · Full-stack development',
 			featured: true,
 			description:
 				'A full-stack Islamic learning platform for reading all 114 Surahs with Urdu and English translations, Tafseer, audio recitations, Hadith, bookmarks, favourites, and reading progress.',
-			image: '/images/projects/read-al-quran-preview.png',
+			image: '/images/projects/read-al-quran.svg',
 			logo: '/images/projects/read-al-quran-logo.png',
 			tech: ['Next.js', 'React.js', 'TypeScript', 'MongoDB', 'Redux Toolkit', 'PWA'],
 			highlights: [
@@ -283,7 +283,8 @@ export const profile = {
 		},
 		{
 			title: 'ERPfy',
-			eyebrow: 'Restaurant Management & Analytics SaaS',
+			eyebrow: 'Team contribution · Restaurant operations',
+			image: '/images/projects/erpfy.svg',
 			description:
 				'Contributed to a large-scale platform managing restaurant sales, orders, reservations, inventory, transactions, and staff operations. Built KPI dashboards, reports, analytics, and location/date filters with server-side data fetching.',
 			tech: ['Next.js', 'TypeScript', 'Redux Toolkit', 'Server-side Data', 'Dynamic Imports'],
@@ -293,7 +294,8 @@ export const profile = {
 		},
 		{
 			title: 'Propteq',
-			eyebrow: 'Real Estate CRM & Property Management SaaS',
+			eyebrow: 'Team contribution · Real estate CRM',
+			image: '/images/projects/propteq.svg',
 			description:
 				'Contributed to a real estate platform spanning listings, leads, enquiries, sales, marketing, contacts, and agency management. Built reusable listings, advanced search, filters, pagination, assignments, and API-integrated workflows.',
 			tech: ['Next.js', 'TypeScript', 'SSR', 'Caching', 'REST APIs', 'Dynamic Imports'],
@@ -371,7 +373,7 @@ export const profile = {
 		},
 	],
 	faqSection: {
-		title: 'Frequently Asked Questions',
+		title: 'Before we get started.',
 		intro: 'Find answers to common questions about my services, process, and expertise.',
 		ctaLabel: 'Get In Touch',
 		ctaHref: '#contact',
@@ -426,7 +428,7 @@ export const profile = {
 		note: '💡 Available for freelance & full-time opportunities',
 	},
 	contactSection: {
-		title: 'Get In Touch',
+		title: 'Have something worth building?',
 		description:
 			"Have a question or proposal? I'd love to hear from you. Send me a message and I'll get back to you as soon as possible.",
 		infoCards: [
@@ -442,7 +444,7 @@ export const profile = {
 				icon: MapPin,
 			},
 			{
-				title: 'Response Time',
+				title: 'Phone',
 				value: '0336-4157981',
 				href: 'tel:+923364157981',
 				icon: Phone,
@@ -471,8 +473,8 @@ export const profile = {
 				message: 'Tell me more about your project or inquiry...',
 			},
 			requiredIndicator: '*',
-			submitLabel: 'Send Message',
-			successMessage: "Message sent successfully! I'll get back to you soon.",
+			submitLabel: 'Create email draft',
+			successMessage: "Your email app has been requested. Send the draft there to complete your message, or email me directly. Your details are kept here.",
 			validation: {
 				required: 'Please fill in all fields',
 				invalidEmail: 'Please enter a valid email address',
@@ -536,42 +538,50 @@ export const profile = {
 		],
 		copyrightTemplate:
 			'© {year} Syed Zain Qalandar. All rights reserved.',
-		madeWithPrefix: 'Made with',
-		madeWithSuffix: 'using Next.js & Framer Motion',
+		madeWithPrefix: 'Thoughtfully built in' ,
+		madeWithSuffix: 'Pakistan.',
 		backToTopLabel: 'Back to top',
 	},
 	ui: {
 		scrollToTopLabel: 'Scroll to top',
-		menuAriaLabel: 'menu',
+		menuAriaLabel: 'Open navigation',
 		closeMenuLabel: 'Close menu',
 		resumeAriaLabel: 'Open resume in a new tab',
 		resumeIndicator: '→',
-		themeWidget: {
-			label: 'Theme',
-			toggleAriaLabel: 'Open theme switcher',
-			options: [
-				{
-					id: 'dark',
-					title: 'Dark',
-					colors: ['#0f172a', '#064e3b', '#0d3d2c'],
-				},
-				{
-					id: 'midnight',
-					title: 'Midnight',
-					colors: ['#0b1020', '#071229', '#00121a'],
-				},
-			],
-		},
-		themeSwitcher: {
-			label: 'Theme',
-			titleSeparator: ' — ',
-			options: [
-				{ id: 'dark', title: 'Dark', hint: 'Default', colors: ['#0f172a', '#064e3b', '#0d3d2c'] },
-				{ id: 'light', title: 'Light', hint: 'Bright', colors: ['#f8fafc', '#eef2ff', '#f0f9ff'] },
-				{ id: 'solar', title: 'Solar', hint: 'Warm', colors: ['#fff7ed', '#ffedd5', '#fff1e0'] },
-				{ id: 'midnight', title: 'Midnight', hint: 'Violet', colors: ['#0b1020', '#071229', '#00121a'] },
-			],
-		},
+	},
+	design: {
+		monogram: 'ZQ',
+		skipLink: 'Skip to content',
+		navigationLabel: 'Main navigation',
+		contactCta: 'Let’s talk',
+		availability: 'Open to opportunities',
+		heroTitle: 'Good interfaces.',
+		heroAccent: 'Better foundations.',
+		heroFootnote: 'Design / Build / Refine',
+		heroFocus: 'Web applications · APIs · Dashboards',
+		architectureCaption: 'Thoughtfully built. Layer by layer.',
+		architectureLayers: ['Interface', 'Application', 'Data'],
+		architectureTech: ['React / Next.js', 'Node.js / Express', 'MongoDB / PostgreSQL'],
+		workLabel: 'Selected work',
+		workDescription: 'An independent product, alongside platforms I’ve helped build.',
+		repositoriesLabel: 'More on GitHub',
+		projectContribution: 'Behind the build',
+		productSignIn: 'Open product sign-in',
+		aboutLabel: 'Behind the build',
+		aboutNote: 'Good software is a thousand small decisions, made with care.',
+		resumeLabel: 'A little more about my experience',
+		expertiseLabel: 'What I bring',
+		expertiseDescription: 'A thoughtful interface, a dependable application, and the care to bring them together.',
+		toolkitLabel: 'My everyday toolkit',
+		experienceLabel: 'The journey so far',
+		faqLabel: 'A few useful answers',
+		contactLabel: 'Let’s work together',
+		contactAccent: 'Let’s make it happen.',
+		contactNote: 'For product collaborations, frontend and full-stack opportunities, or a good conversation.',
+		formNote: 'This opens a draft in your email app. Nothing is sent automatically.',
+		copyEmail: 'Copy email address',
+		copiedEmail: 'Email copied',
+		copyFailed: 'Couldn’t copy. You can select the email address above.',
 	},
 	seo: {
 		siteTitle: 'Syed Zain Qalandar — Full Stack Developer | React & Next.js',
