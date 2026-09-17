@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">ProofFolio — social proof portfolio platform</title>
+  <desc id="description">A visual of a public profile card and testimonial cards.</desc>
+  <rect x=".5" y=".5" width="559" height="219" rx="10" fill="#2E2935" stroke="#655777"/>
+  <text x="28" y="37" fill="#D5C4F4" font-family="monospace" font-size="12" letter-spacing="1.5">05 / INDEPENDENT PRODUCT</text>
+  <text x="26" y="108" fill="#F5F1E9" font-family="Georgia, 'DejaVu Serif', serif" font-size="44" letter-spacing="-1.5">ProofFolio</text>
+  <text x="28" y="143" fill="#C2BBCB" font-family="Arial, Helvetica, sans-serif" font-size="17">Case studies backed by client proof</text>
+  <path d="M28 179H278" stroke="#655777"/>
+  <text x="28" y="201" fill="#D5C4F4" font-family="monospace" font-size="11" letter-spacing="1">CREATE / COLLECT / PUBLISH</text>
+  <g stroke-linejoin="round">
+    <rect x="355" y="52" width="110" height="132" rx="7" fill="#3B3347" stroke="#A999C5"/>
+    <circle cx="388" cy="84" r="16" fill="#D5C4F4"/>
+    <path d="M414 76H443M414 86H436M375 120H445M375 130H425" stroke="#C7B8E3" stroke-width="3" stroke-linecap="round"/>
+    <rect x="398" y="145" width="47" height="17" rx="4" fill="#D5C4F4"/>
+    <path d="M480 73L514 88L480 104L446 88Z" fill="#4B3D59" stroke="#C4AFDD"/>
+    <path d="M480 112L514 127L480 143L446 127Z" fill="#4B3D59" stroke="#C4AFDD"/>
+    <path d="M472 88H489M472 127H489" stroke="#D5C4F4" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <path d="M505 26H532V53M531 27L512 46" stroke="#D5C4F4"/>
+</svg>

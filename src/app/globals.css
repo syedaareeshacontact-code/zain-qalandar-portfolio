@@ -252,10 +252,16 @@ h1 em { display: block; color: var(--accent); font-weight: 400; margin-top: 4px;
 .project-card { background: #1b282a; }
 .project-card:nth-child(2) { background: #1a2a30; border-color: #3b5660; }
 .project-card:nth-child(3) { background: #2a2926; border-color: #565049; }
+.project-card:nth-child(4) { background: #24312b; border-color: #526a5b; }
+.project-card:nth-child(5) { background: #2e2935; border-color: #655777; }
 .project-card:nth-child(2) .eyebrow, .project-card:nth-child(2) .text-link, .project-card:nth-child(2) .project-highlights li::before { color: var(--accent-cool); }
 .project-card:nth-child(3) .eyebrow, .project-card:nth-child(3) .text-link, .project-card:nth-child(3) .project-highlights li::before { color: var(--accent-warm); }
+.project-card:nth-child(4) .eyebrow, .project-card:nth-child(4) .text-link, .project-card:nth-child(4) .project-highlights li::before { color: var(--accent); }
+.project-card:nth-child(5) .eyebrow, .project-card:nth-child(5) .text-link, .project-card:nth-child(5) .project-highlights li::before { color: #d5c4f4; }
 .project-card:nth-child(2) .project-art { background: #1b333c; }
 .project-card:nth-child(3) .project-art { background: #3a3029; }
+.project-card:nth-child(4) .project-art { background: #24312b; }
+.project-card:nth-child(5) .project-art { background: #2e2935; }
 .portrait-note { color: var(--accent-warm); }
 .about-portrait { border-color: #665848; }
 .service-card:nth-child(2) .service-top, .service-card:nth-child(4) .service-top { color: var(--accent-cool); }

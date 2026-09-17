@@ -303,6 +303,38 @@ export const profile = {
 				live: 'https://app.propteq.ai/auth/sign-in',
 			},
 		},
+		{
+			title: 'NeighborLend',
+			eyebrow: 'Independent product · Community marketplace',
+			image: '/images/projects/neighborlend.svg',
+			description:
+				'A full-stack community lending marketplace where neighbors can list useful items, discover nearby listings, and manage every stage of a borrowing request.',
+			tech: ['Next.js 16', 'React 19', 'Express', 'MongoDB', 'TypeScript', 'Gemini AI'],
+			highlights: [
+				'JWT authentication with protected item management and owner workflows',
+				'Search, category filters, pagination, and a full request lifecycle from pending to returned',
+				'Gemini-powered item description enhancement for clearer listings',
+			],
+			links: {
+				repo: 'https://github.com/Zainqalandar/NeighborLend',
+			},
+		},
+		{
+			title: 'ProofFolio',
+			eyebrow: 'Independent product · Social proof platform',
+			image: '/images/projects/prooffolio.svg',
+			description:
+				'A full-stack platform that helps freelancers turn completed work into case studies, collect client testimonials, and publish a credible public profile.',
+			tech: ['Next.js 16', 'React 19', 'Express', 'MongoDB', 'Cloudinary', 'Gemini AI'],
+			highlights: [
+				'Case study management with screenshot uploads and Cloudinary image storage',
+				'Shareable client links with testimonial approval and moderation workflows',
+				'AI-assisted project stories and concise testimonial highlights for public profiles',
+			],
+			links: {
+				repo: 'https://github.com/Zainqalandar/ProofFolio',
+			},
+		},
 	],
 	testimonialsSection: {
 		title: 'What People Say',

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">NeighborLend — community lending marketplace</title>
+  <desc id="description">A community marketplace visual with connected neighbors and a shared item.</desc>
+  <rect x=".5" y=".5" width="559" height="219" rx="10" fill="#24312B" stroke="#526A5B"/>
+  <text x="28" y="37" fill="#BDE5A8" font-family="monospace" font-size="12" letter-spacing="1.5">04 / INDEPENDENT PRODUCT</text>
+  <text x="26" y="108" fill="#F5F1E9" font-family="Georgia, 'DejaVu Serif', serif" font-size="42" letter-spacing="-1.5">NeighborLend</text>
+  <text x="28" y="143" fill="#B5C1C0" font-family="Arial, Helvetica, sans-serif" font-size="17">A marketplace for borrowing nearby</text>
+  <path d="M28 179H278" stroke="#526A5B"/>
+  <text x="28" y="201" fill="#BDE5A8" font-family="monospace" font-size="11" letter-spacing="1">LIST / DISCOVER / LEND</text>
+  <g stroke="#8EB99A" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M386 76L454 50L522 76V143L454 170L386 143V76Z" fill="#2F493D"/>
+    <path d="M386 76L454 103L522 76M454 103V170"/>
+    <rect x="423" y="91" width="62" height="35" rx="4" fill="#BDE5A8" stroke="#BDE5A8"/>
+    <path d="M437 105H471M437 113H460" stroke="#24312B" stroke-width="3"/>
+    <circle cx="356" cy="83" r="14" fill="#365C62" stroke="#9DCBD4"/>
+    <circle cx="356" cy="148" r="14" fill="#5C4436" stroke="#F1BD92"/>
+    <path d="M370 83H386M370 148H404M356 97V134" stroke-dasharray="3 5"/>
+  </g>
+  <path d="M505 26H532V53M531 27L512 46" stroke="#BDE5A8"/>
+</svg>
