@@ -2,18 +2,20 @@
 
 :root {
   color-scheme: dark;
-  --background: #111916;
-  --surface: #17211b;
-  --surface-raised: #1c2b21;
-  --text: #f2f0e8;
-  --text-muted: #b5bfb4;
-  --accent: #d5f2b0;
-  --accent-hover: #e2fac5;
-  --on-accent: #172218;
-  --border: #334137;
-  --border-strong: #657b60;
-  --field-background: #121d16;
-  --header-background: rgb(17 25 22 / 94%);
+  --background: #111a1c;
+  --surface: #1a2729;
+  --surface-raised: #223134;
+  --text: #f5f1e9;
+  --text-muted: #b5c1c0;
+  --accent: #bde5a8;
+  --accent-hover: #d4f2c2;
+  --accent-warm: #f1bd92;
+  --accent-cool: #9dcbd4;
+  --on-accent: #17221d;
+  --border: #354649;
+  --border-strong: #71878a;
+  --field-background: #172326;
+  --header-background: rgb(17 26 28 / 94%);
   --error: #f3b3a6;
   --serif: Georgia, 'Times New Roman', serif;
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -232,6 +234,41 @@ h1 em { display: block; color: var(--accent); font-weight: 400; margin-top: 4px;
 .footer-bottom { display: flex; justify-content: space-between; gap: 15px; padding-top: 23px; font-size: 9px; color: var(--text-muted); }
 .scroll-top { position: fixed; bottom: 24px; right: 22px; z-index: 30; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 3px; background: var(--surface); color: var(--accent); box-shadow: 0 3px 10px rgb(0 0 0 / 22%); }
 .scroll-top:hover { background: var(--surface-raised); }
+
+/* A restrained second and third accent add depth to the botanical palette. */
+.site-shell { background: radial-gradient(ellipse 700px 540px at 90% 6%, rgb(71 125 121 / 9%), transparent 72%), var(--background); }
+.scroll-progress { background: linear-gradient(90deg, var(--accent), var(--accent-cool), var(--accent-warm)); }
+.hero-section { position: relative; }
+.hero-section::before { content: ''; position: absolute; width: 380px; height: 380px; right: 6%; top: 10%; border-radius: 50%; background: rgb(157 203 212 / 5%); filter: blur(80px); pointer-events: none; }
+.hero-copy, .architecture { position: relative; }
+.hero-section h1 em { color: var(--accent); }
+.hero-intro strong { color: var(--text); }
+.hero-avatar, .portrait-frame img { filter: grayscale(.8) saturate(.6); }
+.architecture-topline span:last-child, .architecture-caption { color: var(--accent-cool); }
+.hero-bottom > a { color: var(--accent-warm); }
+.stat:nth-child(2) .stat-value > span, .stat:nth-child(2) .stat-value { color: var(--accent-cool); }
+.stat:nth-child(3) .stat-value > span, .stat:nth-child(3) .stat-value { color: var(--accent-warm); }
+.projects-section .section-heading .eyebrow, .about-copy > .eyebrow, .experience-section .section-heading .eyebrow { color: var(--accent-warm); }
+.project-card { background: #1b282a; }
+.project-card:nth-child(2) { background: #1a2a30; border-color: #3b5660; }
+.project-card:nth-child(3) { background: #2a2926; border-color: #565049; }
+.project-card:nth-child(2) .eyebrow, .project-card:nth-child(2) .text-link, .project-card:nth-child(2) .project-highlights li::before { color: var(--accent-cool); }
+.project-card:nth-child(3) .eyebrow, .project-card:nth-child(3) .text-link, .project-card:nth-child(3) .project-highlights li::before { color: var(--accent-warm); }
+.project-card:nth-child(2) .project-art { background: #1b333c; }
+.project-card:nth-child(3) .project-art { background: #3a3029; }
+.portrait-note { color: var(--accent-warm); }
+.about-portrait { border-color: #665848; }
+.service-card:nth-child(2) .service-top, .service-card:nth-child(4) .service-top { color: var(--accent-cool); }
+.service-card:nth-child(3) .service-top { color: var(--accent-warm); }
+.toolkit-category:nth-child(2) h3 .small-cross { color: var(--accent-cool); }
+.toolkit-category:nth-child(3) h3 .small-cross { color: var(--accent-warm); }
+.experience-row:nth-child(2) .experience-company { color: var(--accent-cool); }
+.experience-row:nth-child(3) .experience-company { color: var(--accent-warm); }
+.contact-section { background: radial-gradient(circle at 6% 0%, rgb(241 189 146 / 9%), transparent 42%), linear-gradient(135deg, #263734 0%, #1d3035 100%); border-color: #4c6261; }
+.contact-heading .eyebrow, .contact-heading h2 em { color: var(--accent-warm); }
+.contact-form .button-primary { background: var(--accent-warm); color: #28201a; }
+.contact-form .button-primary:hover { background: #ffd3af; }
+.contact-socials a { color: var(--accent-cool); }
 
 /* Content is visible before hydration and when JavaScript is unavailable. */
 [data-reveal].is-revealed { animation: reveal-in .7s cubic-bezier(.2,.65,.3,1) both; animation-delay: var(--reveal-delay, 0s); }

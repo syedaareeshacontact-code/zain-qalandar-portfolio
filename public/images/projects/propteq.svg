@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220" fill="none" role="img" aria-labelledby="title description">
   <title id="title">Propteq — real estate workspace</title>
   <desc id="description">Team contribution. An abstract architectural drawing of connected property blocks.</desc>
-  <rect x=".5" y=".5" width="559" height="219" rx="10" fill="#20291C" stroke="#414D35"/>
-  <text x="28" y="37" fill="#D5F2B0" font-family="monospace" font-size="12" letter-spacing="1.5">03 / TEAM CONTRIBUTION</text>
+  <rect x=".5" y=".5" width="559" height="219" rx="10" fill="#392F29" stroke="#7A604E"/>
+  <text x="28" y="37" fill="#F1BD92" font-family="monospace" font-size="12" letter-spacing="1.5">03 / TEAM CONTRIBUTION</text>
   <text x="26" y="108" fill="#F2F0E8" font-family="Georgia, 'DejaVu Serif', serif" font-size="49" letter-spacing="-1.5">Propteq</text>
   <text x="28" y="143" fill="#B5BFB4" font-family="Arial, Helvetica, sans-serif" font-size="17">Real estate workspace</text>
-  <path d="M28 179H252" stroke="#414D35"/>
-  <text x="28" y="201" fill="#D5F2B0" font-family="monospace" font-size="11" letter-spacing="1">LISTINGS / CRM / WORKFLOWS</text>
-  <g stroke="#B8D797" stroke-linejoin="round">
-    <path d="M329 149L418 106L525 155L436 199Z" stroke="#566748"/>
-    <path d="M346 115L384 96L422 115V172L384 191L346 172Z" fill="#2A3823"/>
+  <path d="M28 179H252" stroke="#7A604E"/>
+  <text x="28" y="201" fill="#F1BD92" font-family="monospace" font-size="11" letter-spacing="1">LISTINGS / CRM / WORKFLOWS</text>
+  <g stroke="#E4B58E" stroke-linejoin="round">
+    <path d="M329 149L418 106L525 155L436 199Z" stroke="#8E715B"/>
+    <path d="M346 115L384 96L422 115V172L384 191L346 172Z" fill="#554134"/>
     <path d="M346 115L384 134L422 115M384 134V191"/>
-    <path d="M407 69L453 47L499 69V157L453 179L407 157Z" fill="#34462B"/>
+    <path d="M407 69L453 47L499 69V157L453 179L407 157Z" fill="#644C3A"/>
     <path d="M407 69L453 91L499 69M453 91V179"/>
-    <path d="M417 86L443 98M417 108L443 120M417 130L443 142M463 97L489 85M463 119L489 107M463 141L489 129" stroke="#829D6A"/>
-    <path d="M356 135L374 144M356 153L374 162M394 143L411 135M394 161L411 153" stroke="#829D6A"/>
+    <path d="M417 86L443 98M417 108L443 120M417 130L443 142M463 97L489 85M463 119L489 107M463 141L489 129" stroke="#B78C6F"/>
+    <path d="M356 135L374 144M356 153L374 162M394 143L411 135M394 161L411 153" stroke="#B78C6F"/>
   </g>
-  <path d="M505 26H532V53M531 27L512 46" stroke="#D5F2B0"/>
+  <path d="M505 26H532V53M531 27L512 46" stroke="#F1BD92"/>
 </svg>
