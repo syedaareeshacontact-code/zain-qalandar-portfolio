@@ -126,7 +126,11 @@
 
 .bk-timeline { gap: 16px; }
 .bk-timeline::before { top: 43px; bottom: 87px; left: 21px; width: 2px; background: repeating-linear-gradient(to bottom, #c8d1de 0 8px, transparent 8px 15px); }
-.bk-row { grid-template-columns: 150px minmax(0, 1fr) 252px; gap: 16px; min-height: 166px; }
+.bk-row { --bk-current: #1f7a4d; grid-template-columns: 150px minmax(0, 1fr) 252px; gap: 16px; min-height: 166px; }
+.bk-row-dhuhr { --bk-current: #2879ad; }
+.bk-row-asr { --bk-current: #b8761d; }
+.bk-row-maghrib { --bk-current: #7053a0; }
+.bk-row-isha { --bk-current: #365298; }
 .bk-step { grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: 61px 1fr; column-gap: 6px; align-self: stretch; align-items: start; padding-top: 21px; }
 .bk-step-num { grid-column: 1; grid-row: 1; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #1b6259; color: #fff; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-weight: 700; box-shadow: 0 0 0 5px var(--bk-bg); }
 .bk-row-dhuhr .bk-step-num { background: #266da4; }
@@ -142,7 +146,10 @@
 .bk-step-copy strong { color: var(--text); font-family: Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: 700; }
 .bk-step-copy small { margin: 3px 0 0; color: var(--text-muted); font-size: 13px; }
 
-.bk-banner { isolation: isolate; min-height: 166px; border-radius: 14px; background-position: center 61%; background-size: cover; box-shadow: var(--bk-shadow); }
+.bk-banner { isolation: isolate; min-height: 166px; border-radius: 14px; background-position: center 61%; background-size: cover; box-shadow: var(--bk-shadow); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.bk-banner.is-current { border: 2px solid var(--bk-current); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bk-current) 24%, transparent), 0 16px 30px color-mix(in srgb, var(--bk-current) 24%, var(--shadow)); transform: translateX(4px); }
+.bk-row.is-current .bk-step-num { box-shadow: 0 0 0 5px var(--bk-bg), 0 0 0 7px color-mix(in srgb, var(--bk-current) 55%, transparent); }
+.bk-row.is-current .bk-meta { border-color: color-mix(in srgb, var(--bk-current) 62%, var(--border)); box-shadow: 0 8px 22px color-mix(in srgb, var(--bk-current) 16%, var(--shadow)); }
 .bk-banner-fajr { --bk-card-wash: #e3f1e9; background-image: url('/images/barakah/fajr.webp'); }
 .bk-banner-dhuhr { --bk-card-wash: #e6f3fc; background-image: url('/images/barakah/dhuhr.webp'); }
 .bk-banner-asr { --bk-card-wash: #fff0df; background-image: url('/images/barakah/asr.webp'); }
@@ -228,6 +235,11 @@
 .bk-shell.is-dark .bk-banner-asr { --bk-dark-image-tint: #a28765; --bk-dark-wash: #302a18; --bk-dark-icon: #69572b; }
 .bk-shell.is-dark .bk-banner-maghrib { --bk-dark-image-tint: #817990; --bk-dark-wash: #18252b; --bk-dark-icon: #404663; }
 .bk-shell.is-dark .bk-banner-isha { --bk-dark-image-tint: #66848d; --bk-dark-wash: #032b2c; --bk-dark-icon: #164a56; }
+.bk-shell.is-dark .bk-row-fajr { --bk-current: #80dca1; }
+.bk-shell.is-dark .bk-row-dhuhr { --bk-current: #84c9ed; }
+.bk-shell.is-dark .bk-row-asr { --bk-current: #eac075; }
+.bk-shell.is-dark .bk-row-maghrib { --bk-current: #d9bbf4; }
+.bk-shell.is-dark .bk-row-isha { --bk-current: #d2e4fc; }
 .bk-shell.is-dark .bk-banner::before { filter: blur(10px) brightness(.48) saturate(1.25); }
 .bk-shell.is-dark .bk-banner::after {
   background: linear-gradient(90deg, color-mix(in srgb, var(--bk-dark-wash) 96%, transparent), color-mix(in srgb, var(--bk-dark-wash) 82%, transparent) 42%, color-mix(in srgb, var(--bk-dark-wash) 38%, transparent) 73%, color-mix(in srgb, var(--bk-dark-wash) 10%, transparent));
