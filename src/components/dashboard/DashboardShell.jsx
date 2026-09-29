@@ -16,6 +16,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Search,
+  ScrollText,
   Sun,
   Target,
   X,
@@ -24,6 +25,7 @@ import {
 const NAV_ITEMS = [
   { href: '/dashboard/overview', label: 'Dashboard', icon: Home },
   { href: '/dashboard', label: 'Prayer Routine', icon: CalendarDays, aliases: ['/dashboard/prayer-routine'] },
+  { href: '/dashboard/ahd-nama', label: 'Ahd Nama', icon: ScrollText },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/dashboard/calendar', label: 'Calendar', icon: CalendarDays },
   { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen },
@@ -42,7 +44,7 @@ function isActivePath(item, pathname) {
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(null);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
 
   useEffect(() => {
     if (window.matchMedia('(max-width: 780px)').matches) setSidebarOpen(false);

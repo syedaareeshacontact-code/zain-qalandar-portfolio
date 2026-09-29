@@ -544,6 +544,44 @@
 .bk-page-card h2 { margin-top: 10px; font-size: 20px; font-weight: 700; letter-spacing: -.4px; }
 .bk-page-card p { margin-top: 10px; color: #5b6b7c; font-size: 14px; line-height: 1.6; }
 
+.bk-ahd-nama { max-width: 1040px; }
+.bk-ahd-head { display: flex; align-items: center; gap: 16px; }
+.bk-ahd-head-icon, .bk-ahd-commitment > span, .bk-ahd-reminder-icon { display: grid; place-items: center; border-radius: 14px; color: var(--bk-teal); background: color-mix(in srgb, var(--bk-teal) 12%, var(--bk-panel)); }
+.bk-ahd-head-icon { width: 55px; height: 55px; flex: 0 0 auto; }
+.bk-ahd-head p, .bk-ahd-kicker, .bk-ahd-reminder > p { color: var(--bk-teal); font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+.bk-ahd-head h1 { margin: 2px 0 3px; font-size: clamp(32px, 3.4vw, 42px); font-weight: 750; letter-spacing: -1.2px; }
+.bk-ahd-head > div > span { color: var(--bk-muted); font-size: 15px; }
+.bk-ahd-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(230px, .75fr); gap: 18px; margin-top: 30px; }
+.bk-ahd-promise, .bk-ahd-reminder, .bk-ahd-commitment { border: 1px solid var(--bk-line); border-radius: 22px; background: var(--bk-panel); box-shadow: var(--bk-shadow); }
+.bk-ahd-promise { padding: 28px; }
+.bk-ahd-promise h2 { max-width: 660px; margin-top: 10px; color: var(--bk-navy); font-family: Georgia, 'Times New Roman', serif; font-size: clamp(23px, 2.3vw, 31px); font-weight: 700; letter-spacing: -.55px; line-height: 1.2; }
+.bk-ahd-promise > p { max-width: 680px; margin-top: 14px; color: var(--bk-muted); font-size: 15px; line-height: 1.65; }
+.bk-ahd-promise ul { display: grid; gap: 10px; margin-top: 20px; padding: 0; list-style: none; }
+.bk-ahd-promise li { display: flex; align-items: flex-start; gap: 10px; color: var(--bk-text); font-size: 14px; line-height: 1.45; }
+.bk-ahd-promise li svg { flex: 0 0 auto; margin-top: 2px; color: var(--bk-check); }
+.bk-ahd-promise small { display: block; margin-top: 23px; color: var(--bk-muted); font-size: 11px; }
+.bk-ahd-reminder { display: flex; flex-direction: column; justify-content: center; padding: 28px; background: linear-gradient(155deg, color-mix(in srgb, var(--bk-teal) 13%, var(--bk-panel)), var(--bk-panel)); }
+.bk-ahd-reminder-icon { width: 48px; height: 48px; margin-bottom: 18px; }
+.bk-ahd-reminder > p { margin-bottom: 9px; }
+.bk-ahd-reminder strong { color: var(--bk-navy); font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 700; letter-spacing: -.35px; line-height: 1.32; }
+.bk-ahd-commitments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.bk-ahd-commitment { min-height: 185px; padding: 22px; }
+.bk-ahd-commitment > span { width: 42px; height: 42px; }
+.bk-ahd-commitment h2 { margin-top: 15px; color: var(--bk-navy); font-size: 18px; font-weight: 700; letter-spacing: -.35px; }
+.bk-ahd-commitment p { margin-top: 8px; color: var(--bk-muted); font-size: 13px; line-height: 1.55; }
+.bk-shell.is-dark .bk-ahd-promise, .bk-shell.is-dark .bk-ahd-reminder, .bk-shell.is-dark .bk-ahd-commitment { background-color: var(--bk-panel); }
+
+@media (max-width: 820px) {
+  .bk-ahd-layout, .bk-ahd-commitments { grid-template-columns: 1fr; }
+  .bk-ahd-reminder { min-height: 180px; }
+}
+
+@media (max-width: 500px) {
+  .bk-ahd-head { align-items: flex-start; }
+  .bk-ahd-head-icon { width: 47px; height: 47px; }
+  .bk-ahd-promise, .bk-ahd-reminder { padding: 21px; }
+}
+
 @media (max-width: 1180px) {
   .bk-row { grid-template-columns: 150px minmax(0, 1fr) 210px; }
   .bk-banner-copy { max-width: 70%; }
