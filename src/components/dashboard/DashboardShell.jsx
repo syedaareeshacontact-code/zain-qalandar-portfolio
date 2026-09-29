@@ -5,14 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Bell,
-  BookOpen,
   CalendarDays,
   CheckSquare,
   ChevronDown,
   Home,
   Menu,
   Moon,
-  NotebookPen,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
@@ -27,10 +25,7 @@ const NAV_ITEMS = [
   { href: '/dashboard', label: 'Prayer Routine', icon: CalendarDays, aliases: ['/dashboard/prayer-routine'] },
   { href: '/dashboard/ahd-nama', label: 'Ahd Nama', icon: ScrollText },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
-  { href: '/dashboard/calendar', label: 'Calendar', icon: CalendarDays },
-  { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen },
   { href: '/dashboard/goals', label: 'Goals', icon: Target },
-  { href: '/dashboard/library', label: 'Library', icon: BookOpen },
 ];
 
 function isActivePath(item, pathname) {
