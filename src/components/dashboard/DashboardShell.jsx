@@ -10,10 +10,11 @@ import {
   CheckSquare,
   ChevronDown,
   Home,
-  Library,
   Menu,
   Moon,
   NotebookPen,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
   Sun,
   Target,
@@ -40,12 +41,21 @@ function isActivePath(item, pathname) {
 
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(null);
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    setSidebarOpen(false);
+    if (window.matchMedia('(max-width: 780px)').matches) setSidebarOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 781px)');
+    const syncSidebarForViewport = (event) => setSidebarOpen(event.matches);
+
+    syncSidebarForViewport(desktop);
+    desktop.addEventListener('change', syncSidebarForViewport);
+    return () => desktop.removeEventListener('change', syncSidebarForViewport);
+  }, []);
 
   useEffect(() => {
     if (!sidebarOpen) return undefined;
@@ -57,17 +67,24 @@ export default function DashboardShell({ children }) {
   }, [sidebarOpen]);
 
   return (
-    <div className={`bk-shell${dark ? ' is-dark' : ''}${sidebarOpen ? ' is-open' : ''}`}>
+    <div className={`bk-shell${dark ? ' is-dark' : ''}${sidebarOpen === true ? ' is-open' : sidebarOpen === false ? ' is-collapsed' : ''}`}>
       <button className="bk-backdrop" type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />
 
       <aside className="bk-sidebar" aria-label="Barakah navigation">
         <div className="bk-sidebar-head">
           <Link className="bk-brand" href="/dashboard">
             <span className="bk-brand-mark" aria-hidden="true">
-              <Home size={16} strokeWidth={2.2} />
+              <svg viewBox="0 0 34 38" width="33" height="37" fill="none">
+                <path d="M3 35V13L17 2l14 11v22H3Z" fill="currentColor" />
+                <path d="M9 34V16l8-6 8 6v18H9Z" fill="#f6f8f8" />
+                <path d="M12 34V18l5-4 5 4v16H12Z" fill="currentColor" opacity=".22" />
+              </svg>
             </span>
             <span>Barakah</span>
           </Link>
+          <button className="bk-sidebar-desktop-toggle" type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)}>
+            <PanelLeftClose size={19} />
+          </button>
           <button className="bk-close" type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)}>
             <X size={18} />
           </button>
@@ -92,12 +109,12 @@ export default function DashboardShell({ children }) {
 
         <div className="bk-sidebar-foot">
           <p>A more<br />focused day<br />A closer You</p>
-          <MosqueMark />
         </div>
       </aside>
 
       <div className="bk-main">
         <header className="bk-topbar">
+          {sidebarOpen === false && <button className="bk-sidebar-toggle" type="button" aria-label="Open sidebar" aria-expanded={false} onClick={() => setSidebarOpen(true)}><PanelLeftOpen size={19} /></button>}
           <button className="bk-menu" type="button" aria-label="Open sidebar" onClick={() => setSidebarOpen(true)}>
             <Menu size={20} />
           </button>
@@ -136,22 +153,5 @@ export default function DashboardShell({ children }) {
         </main>
       </div>
     </div>
-  );
-}
-
-function MosqueMark() {
-  return (
-    <svg className="bk-mosque" viewBox="0 0 220 160" fill="none" aria-hidden="true">
-      <path d="M110 18c18 0 32 14 32 32v8H78v-8c0-18 14-32 32-32Z" fill="currentColor" opacity=".18" />
-      <circle cx="110" cy="18" r="7" fill="currentColor" opacity=".22" />
-      <path d="M36 86c18-22 36-22 54 0v50H36V86Z" fill="currentColor" opacity=".14" />
-      <path d="M130 86c18-22 36-22 54 0v50h-54V86Z" fill="currentColor" opacity=".14" />
-      <path d="M78 72c16-28 48-28 64 0v64H78V72Z" fill="currentColor" opacity=".2" />
-      <rect x="100" y="104" width="20" height="32" rx="3" fill="currentColor" opacity=".16" />
-      <path d="M20 136h180v8H20z" fill="currentColor" opacity=".12" />
-      <path d="M48 58v18M172 58v18" stroke="currentColor" strokeWidth="4" opacity=".18" />
-      <circle cx="48" cy="54" r="4" fill="currentColor" opacity=".2" />
-      <circle cx="172" cy="54" r="4" fill="currentColor" opacity=".2" />
-    </svg>
   );
 }

@@ -1,4 +1,5 @@
 import './barakah.css';
+import './prayer-routine.css';
 import DashboardShell from '@/components/dashboard/DashboardShell';
 
 export const metadata = {

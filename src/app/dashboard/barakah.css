@@ -15,7 +15,9 @@
   background: var(--bk-bg);
   color: var(--bk-text);
   font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  transition: grid-template-columns .3s cubic-bezier(.2,.8,.2,1), background-color .35s ease;
 }
+.bk-shell.is-collapsed { grid-template-columns: 0 minmax(0, 1fr); }
 
 .bk-shell.is-dark {
   --bk-bg: #121821;
@@ -31,16 +33,22 @@
 .bk-backdrop { display: none; }
 
 .bk-sidebar {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  inset: 0 auto 0 0;
   z-index: 20;
-  min-height: 100dvh;
+  width: 248px;
+  height: 100dvh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   padding: 22px 18px 18px;
+  overflow-y: auto;
   background: linear-gradient(180deg, #fbfcfe 0%, #f3f6fa 100%);
   border-right: 1px solid var(--bk-line);
+  transform: translateX(0);
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), background-color .35s ease;
 }
+.bk-shell.is-collapsed .bk-sidebar { transform: translateX(-105%); }
 
 .bk-shell.is-dark .bk-sidebar {
   background: linear-gradient(180deg, #1a222d 0%, #151c26 100%);
@@ -155,6 +163,19 @@
   background: var(--bk-panel);
   color: var(--bk-muted);
 }
+.bk-sidebar-toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border: 1px solid var(--bk-line);
+  border-radius: 12px;
+  background: var(--bk-panel);
+  color: var(--bk-muted);
+  transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+}
+.bk-sidebar-toggle:hover { border-color: var(--bk-teal); color: var(--bk-teal); }
 
 .bk-search {
   flex: 1;
@@ -537,7 +558,7 @@
 }
 
 @media (max-width: 780px) {
-  .bk-shell, .bk-shell.is-open { grid-template-columns: 1fr; }
+  .bk-shell, .bk-shell.is-open, .bk-shell.is-collapsed { grid-template-columns: 1fr; }
   .bk-sidebar {
     position: fixed;
     left: 0;
@@ -547,6 +568,7 @@
     box-shadow: 18px 0 40px rgb(20 32 48 / 18%);
   }
   .bk-shell.is-open .bk-sidebar { transform: translateX(0); }
+  .bk-shell.is-collapsed .bk-sidebar { transform: translateX(-105%); }
   .bk-shell.is-open .bk-backdrop {
     position: fixed;
     inset: 0;
@@ -555,6 +577,7 @@
     border: 0;
     background: rgb(15 23 34 / 42%);
   }
+  .bk-sidebar-toggle { display: none; }
   .bk-close, .bk-menu { display: grid; }
   .bk-topbar, .bk-content { padding-inline: 16px; }
   .bk-user-copy { display: none; }
