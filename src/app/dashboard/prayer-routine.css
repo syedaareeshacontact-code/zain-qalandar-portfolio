@@ -125,12 +125,19 @@
 .bk-shell.is-dark .bk-quote p, .bk-shell.is-dark .bk-quote cite { color: #e1e8f3; }
 
 .bk-timeline { gap: 16px; }
-.bk-timeline::before { top: 43px; bottom: 87px; left: 21px; width: 2px; background: repeating-linear-gradient(to bottom, #c8d1de 0 8px, transparent 8px 15px); }
-.bk-row { --bk-current: #1f7a4d; grid-template-columns: 150px minmax(0, 1fr) 252px; gap: 16px; min-height: 166px; }
+.bk-timeline::before { display: none; }
+.bk-row { --bk-current: #1f7a4d; position: relative; grid-template-columns: 150px minmax(0, 1fr) 252px; gap: 16px; min-height: 166px; }
 .bk-row-dhuhr { --bk-current: #2879ad; }
 .bk-row-asr { --bk-current: #b8761d; }
 .bk-row-maghrib { --bk-current: #7053a0; }
 .bk-row-isha { --bk-current: #365298; }
+.bk-progress-track { position: absolute; z-index: 0; top: 43px; left: 20px; width: 4px; height: calc(100% + 16px); border-radius: 99px; background: #d2ded8; }
+.bk-progress-fill { position: absolute; top: 0; left: 0; width: 100%; height: var(--bk-progress); border-radius: inherit; background: var(--bk-current); transition: height .45s ease; }
+.bk-row.is-current .bk-progress-fill::after { content: ''; position: absolute; left: 50%; bottom: -5px; width: 12px; height: 12px; border: 3px solid var(--bk-bg); border-radius: 50%; background: var(--bk-current); box-shadow: 0 0 0 2px var(--bk-current); transform: translateX(-50%); }
+.bk-progress-stats { display: grid; gap: 2px; margin-top: 8px; color: var(--text-muted); font-size: 10px; line-height: 1.15; }
+.bk-progress-stats span:first-child { color: var(--bk-current); font-weight: 700; }
+.bk-timeline-end { display: flex; align-items: center; gap: 12px; min-height: 65px; padding-top: 21px; color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.bk-timeline-end .bk-step-num { position: relative; z-index: 1; flex: 0 0 44px; border: 2px solid #55437f; background: var(--bk-bg); color: #55437f; box-shadow: 0 0 0 5px var(--bk-bg); }
 .bk-step { grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: 61px 1fr; column-gap: 6px; align-self: stretch; align-items: start; padding-top: 21px; }
 .bk-step-num { grid-column: 1; grid-row: 1; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #1b6259; color: #fff; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; font-weight: 700; box-shadow: 0 0 0 5px var(--bk-bg); }
 .bk-row-dhuhr .bk-step-num { background: #266da4; }
@@ -214,6 +221,8 @@
 .bk-shell.is-dark .bk-step-copy strong { color: #e8eef6; }
 .bk-shell.is-dark .bk-step-copy small { color: #a9b7c9; }
 .bk-shell.is-dark .bk-step-num { box-shadow: 0 0 0 5px var(--bk-bg); }
+.bk-shell.is-dark .bk-progress-track { background: #293b33; }
+.bk-shell.is-dark .bk-timeline-end .bk-step-num { border-color: #d9bbf4; color: #d9bbf4; }
 
 /* Keep the scenery visible while giving its text side a dark, readable wash. */
 .bk-shell.is-dark .bk-prayer-hero {
@@ -297,11 +306,16 @@
   .bk-quote p { font-size: 12px; }
   .bk-quote cite { font-size: 11px; }
   .bk-timeline::before { display: none; }
+  .bk-progress-track { display: none; }
   .bk-row { grid-template-columns: 1fr; gap: 10px; }
   .bk-step { display: flex; align-items: center; gap: 10px; padding: 0; }
   .bk-step-num { width: 38px; height: 38px; flex: 0 0 auto; font-size: 17px; }
   .bk-step-icon { width: 32px; height: 32px; margin: 0; }
   .bk-step-copy { gap: 0; }
+  .bk-step-copy::after { content: ''; display: block; width: 108px; height: 4px; margin-top: 7px; border-radius: 99px; background: linear-gradient(to right, var(--bk-current) var(--bk-progress), var(--border) var(--bk-progress)); }
+  .bk-progress-stats { display: flex; gap: 9px; margin-top: 5px; }
+  .bk-timeline-end { min-height: 38px; padding-top: 0; }
+  .bk-timeline-end .bk-step-num { flex-basis: 38px; }
   .bk-banner { min-height: 190px; }
   .bk-banner-copy { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 18px; }
   .bk-mini-icon { width: 56px; height: 56px; }

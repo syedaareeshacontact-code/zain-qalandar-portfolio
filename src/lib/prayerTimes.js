@@ -107,6 +107,25 @@ function getPrayerGap(start, end, dateKey) {
   return formatDuration(Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / 60_000)));
 }
 
+export function getPrayerIntervalProgress(timings, dateKey) {
+  const now = Date.now();
+  const intervals = [
+    ['Fajr', 'Dhuhr'],
+    ['Dhuhr', 'Asr'],
+    ['Asr', 'Maghrib'],
+    ['Maghrib', 'Isha'],
+  ];
+
+  return intervals.map(([from, to]) => {
+    const start = parsePrayerTime(timings[from], dateKey)?.getTime();
+    const end = parsePrayerTime(timings[to], dateKey)?.getTime();
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
+
+    const elapsed = Math.max(0, Math.min(100, Math.round(((now - start) / (end - start)) * 100)));
+    return { elapsed, remaining: 100 - elapsed };
+  });
+}
+
 export function getActivePrayerBlockIndex(timings, dateKey) {
   const starts = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib'].map((prayer) => {
     const date = parsePrayerTime(timings[prayer], dateKey);
@@ -175,6 +194,9 @@ export async function getPrayerRoutineData() {
 
     if (durations.some((duration) => !duration)) throw new Error('Prayer API returned incomplete prayer gaps');
 
+    const progress = getPrayerIntervalProgress(todayTimings, today);
+    if (progress.some((segment) => !segment)) throw new Error('Prayer API returned incomplete prayer intervals');
+
     return {
       dateKey: today,
       timings: todayTimings,
@@ -182,6 +204,7 @@ export async function getPrayerRoutineData() {
       heroBlockIndex: getHeroBlockIndex(todayTimings, today),
       overnightReview: isOvernightReview(todayTimings, today),
       durations,
+      progress,
     };
   } catch {
     return null;

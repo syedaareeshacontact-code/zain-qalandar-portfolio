@@ -5,6 +5,7 @@ import { Check, Clock3, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 import {
   getActivePrayerBlockIndex,
   getHeroBlockIndex,
+  getPrayerIntervalProgress,
   getPrayerDateKey,
   getPrayerRoutineData,
   isOvernightReview,
@@ -90,6 +91,7 @@ export default function PrayerRoutine() {
           activeBlockIndex: getActivePrayerBlockIndex(current.timings, current.dateKey),
           heroBlockIndex: getHeroBlockIndex(current.timings, current.dateKey),
           overnightReview: isOvernightReview(current.timings, current.dateKey),
+          progress: getPrayerIntervalProgress(current.timings, current.dateKey),
         };
       });
     };
@@ -127,14 +129,22 @@ export default function PrayerRoutine() {
           const isCurrent = prayerData?.activeBlockIndex === index;
           const isNightReview = index === 3 && prayerData?.overnightReview;
           const focusClass = isCurrent ? ' is-current' : isNightReview ? ' is-night-review' : '';
+          const progress = prayerData?.progress[index];
           return (
-            <li className={`bk-row bk-row-${block.tone}${focusClass}`} key={block.id}>
+            <li className={`bk-row bk-row-${block.tone}${focusClass}`} key={block.id} style={{ '--bk-progress': `${progress?.elapsed ?? 0}%` }}>
+              <span className="bk-progress-track" aria-hidden="true"><span className="bk-progress-fill" /></span>
               <div className="bk-step">
                 <span className="bk-step-num">{block.id}</span>
                 <Icon className="bk-step-icon" size={40} strokeWidth={1.7} aria-hidden="true" />
                 <div className="bk-step-copy">
                   <strong>{block.range}</strong>
                   <small>{block.slot}</small>
+                  {progress && (
+                    <span className="bk-progress-stats" aria-label={`${progress.elapsed}% elapsed, ${progress.remaining}% remaining`}>
+                      <span>{progress.elapsed}% elapsed</span>
+                      <span>{progress.remaining}% left</span>
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -160,6 +170,10 @@ export default function PrayerRoutine() {
             </li>
           );
         })}
+        <li className="bk-timeline-end" aria-label="Isha endpoint">
+          <span className="bk-step-num">05</span>
+          <span>Isha</span>
+        </li>
       </ol>
     </div>
   );
