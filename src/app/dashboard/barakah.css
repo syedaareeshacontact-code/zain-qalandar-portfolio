@@ -263,25 +263,6 @@
 
 .bk-content { padding: 8px 28px 48px; }
 
-.bk-prayer-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 46%);
-  gap: 24px;
-  align-items: start;
-  margin-bottom: 28px;
-}
-.bk-prayer-hero h1 {
-  font-size: clamp(32px, 3.4vw, 42px);
-  font-weight: 750;
-  letter-spacing: -1.2px;
-  line-height: 1.1;
-}
-.bk-prayer-hero > div > p {
-  margin-top: 8px;
-  color: var(--bk-muted);
-  font-size: 16px;
-}
-
 .bk-quote {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 168px;
@@ -544,14 +525,14 @@
 .bk-page-card h2 { margin-top: 10px; font-size: 20px; font-weight: 700; letter-spacing: -.4px; }
 .bk-page-card p { margin-top: 10px; color: #5b6b7c; font-size: 14px; line-height: 1.6; }
 
-.bk-ahd-nama { max-width: 1040px; }
+.bk-ahd-nama { max-width: none; }
 .bk-ahd-head { display: flex; align-items: center; gap: 16px; }
 .bk-ahd-head-icon, .bk-ahd-commitment > span, .bk-ahd-reminder-icon { display: grid; place-items: center; border-radius: 14px; color: var(--bk-teal); background: color-mix(in srgb, var(--bk-teal) 12%, var(--bk-panel)); }
 .bk-ahd-head-icon { width: 55px; height: 55px; flex: 0 0 auto; }
 .bk-ahd-head p, .bk-ahd-kicker, .bk-ahd-reminder > p { color: var(--bk-teal); font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
 .bk-ahd-head h1 { margin: 2px 0 3px; font-size: clamp(32px, 3.4vw, 42px); font-weight: 750; letter-spacing: -1.2px; }
 .bk-ahd-head > div > span { color: var(--bk-muted); font-size: 15px; }
-.bk-ahd-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(230px, .75fr); gap: 18px; margin-top: 30px; }
+.bk-ahd-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(230px, .75fr); gap: 18px; max-width: 1040px; margin-top: 30px; }
 .bk-ahd-promise, .bk-ahd-reminder, .bk-ahd-commitment { border: 1px solid var(--bk-line); border-radius: 22px; background: var(--bk-panel); box-shadow: var(--bk-shadow); }
 .bk-ahd-promise { padding: 28px; }
 .bk-ahd-promise h2 { max-width: 660px; margin-top: 10px; color: var(--bk-navy); font-family: Georgia, 'Times New Roman', serif; font-size: clamp(23px, 2.3vw, 31px); font-weight: 700; letter-spacing: -.55px; line-height: 1.2; }
@@ -564,7 +545,9 @@
 .bk-ahd-reminder-icon { width: 48px; height: 48px; margin-bottom: 18px; }
 .bk-ahd-reminder > p { margin-bottom: 9px; }
 .bk-ahd-reminder strong { color: var(--bk-navy); font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 700; letter-spacing: -.35px; line-height: 1.32; }
-.bk-ahd-commitments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.bk-ahd-commitments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; max-width: 1040px; margin-top: 18px; }
+.bk-page-with-hero { max-width: none; }
+.bk-page-with-hero .bk-page-grid { max-width: 980px; }
 .bk-ahd-commitment { min-height: 185px; padding: 22px; }
 .bk-ahd-commitment > span { width: 42px; height: 42px; }
 .bk-ahd-commitment h2 { margin-top: 15px; color: var(--bk-navy); font-size: 18px; font-weight: 700; letter-spacing: -.35px; }
@@ -588,7 +571,7 @@
 }
 
 @media (max-width: 980px) {
-  .bk-prayer-hero, .bk-page-grid { grid-template-columns: 1fr; }
+  .bk-page-grid { grid-template-columns: 1fr; }
   .bk-row { grid-template-columns: 1fr; }
   .bk-timeline::before { left: 19px; }
   .bk-step { max-width: 240px; }
@@ -627,5 +610,5 @@
 
 @media (max-width: 500px) {
   .bk-search { max-width: none; }
-  .bk-prayer-hero h1, .bk-page-head h1 { font-size: 28px; }
+  .bk-page-head h1 { font-size: 28px; }
 }

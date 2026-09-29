@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Check, Clock3, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
+import DashboardHero from '@/components/dashboard/DashboardHero';
 import {
   getActivePrayerBlockIndex,
   getHeroBlockIndex,
@@ -117,16 +118,11 @@ export default function PrayerRoutine() {
 
   return (
     <div className="bk-prayer">
-      <section className="bk-prayer-hero" style={{ '--bk-hero-image': `url('${heroImage}')` }} aria-labelledby="prayer-routine-title">
-        <div className="bk-prayer-heading">
-          <h1 id="prayer-routine-title">Prayer Routine</h1>
-          <p>Prayer-based daily work structure</p>
-        </div>
-        <blockquote className="bk-quote">
-          <p>“And establish prayer<br />and do not be among the forgetful.”</p>
-          <cite>— &nbsp; Quran 2:43</cite>
-        </blockquote>
-      </section>
+      <DashboardHero
+        title="Prayer Routine"
+        subtitle="Prayer-based daily work structure"
+        image={heroImage}
+      />
 
       <ol className="bk-timeline">
         {blocks.map((block, index) => {

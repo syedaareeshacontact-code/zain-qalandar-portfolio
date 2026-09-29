@@ -1,4 +1,5 @@
-import { BookHeart, Check, HeartHandshake, MoonStar, Sunrise } from 'lucide-react';
+import { Check, HeartHandshake, MoonStar, Sunrise } from 'lucide-react';
+import DashboardHero from '@/components/dashboard/DashboardHero';
 
 export const metadata = {
   title: 'Ahd Nama | Barakah',
@@ -13,14 +14,11 @@ const commitments = [
 export default function AhdNamaPage() {
   return (
     <section className="bk-ahd-nama" aria-labelledby="ahd-nama-title">
-      <header className="bk-ahd-head">
-        <span className="bk-ahd-head-icon" aria-hidden="true"><BookHeart size={26} strokeWidth={1.75} /></span>
-        <div>
-          <p>Daily intention</p>
-          <h1 id="ahd-nama-title">Ahd Nama</h1>
-          <span>A quiet promise to keep faith, character, and work in the right order.</span>
-        </div>
-      </header>
+      <DashboardHero
+        title="Ahd Nama"
+        subtitle="A quiet promise to keep faith, character, and work in the right order."
+        image="/images/barakah/hero/ahd-nama-hero.webp"
+      />
 
       <div className="bk-ahd-layout">
         <article className="bk-ahd-promise">
