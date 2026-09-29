@@ -4,9 +4,19 @@ import { useEffect, useState } from 'react';
 import { Check, Clock3, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 import {
   getActivePrayerBlockIndex,
+  getHeroBlockIndex,
   getPrayerDateKey,
   getPrayerRoutineData,
+  isOvernightReview,
 } from '@/lib/prayerTimes';
+
+const HERO_IMAGES = [
+  '/images/barakah/hero/01-fajr-to-dhuhr.webp',
+  '/images/barakah/hero/02-dhuhr-to-asr.webp',
+  '/images/barakah/hero/03-asr-to-maghrib.webp',
+  '/images/barakah/hero/04-maghrib-to-isha.webp',
+  '/images/barakah/hero/05-isha-to-10pm.webp',
+];
 
 const BLOCKS = [
   {
@@ -78,6 +88,8 @@ export default function PrayerRoutine() {
         return {
           ...current,
           activeBlockIndex: getActivePrayerBlockIndex(current.timings, current.dateKey),
+          heroBlockIndex: getHeroBlockIndex(current.timings, current.dateKey),
+          overnightReview: isOvernightReview(current.timings, current.dateKey),
         };
       });
     };
@@ -94,10 +106,11 @@ export default function PrayerRoutine() {
     ...block,
     time: prayerData?.durations[index] ?? block.time,
   }));
+  const heroImage = HERO_IMAGES[prayerData?.heroBlockIndex >= 0 ? prayerData.heroBlockIndex : 0];
 
   return (
     <div className="bk-prayer">
-      <section className="bk-prayer-hero" aria-labelledby="prayer-routine-title">
+      <section className="bk-prayer-hero" style={{ '--bk-hero-image': `url('${heroImage}')` }} aria-labelledby="prayer-routine-title">
         <div className="bk-prayer-heading">
           <h1 id="prayer-routine-title">Prayer Routine</h1>
           <p>Prayer-based daily work structure</p>
@@ -112,8 +125,10 @@ export default function PrayerRoutine() {
         {blocks.map((block, index) => {
           const Icon = block.icon;
           const isCurrent = prayerData?.activeBlockIndex === index;
+          const isNightReview = index === 3 && prayerData?.overnightReview;
+          const focusClass = isCurrent ? ' is-current' : isNightReview ? ' is-night-review' : '';
           return (
-            <li className={`bk-row bk-row-${block.tone}${isCurrent ? ' is-current' : ''}`} key={block.id}>
+            <li className={`bk-row bk-row-${block.tone}${focusClass}`} key={block.id}>
               <div className="bk-step">
                 <span className="bk-step-num">{block.id}</span>
                 <Icon className="bk-step-icon" size={40} strokeWidth={1.7} aria-hidden="true" />
@@ -123,7 +138,7 @@ export default function PrayerRoutine() {
                 </div>
               </div>
 
-              <article className={`bk-banner bk-banner-${block.tone}${isCurrent ? ' is-current' : ''}`} aria-label={isCurrent ? `Current prayer window: ${block.range}` : undefined}>
+              <article className={`bk-banner bk-banner-${block.tone}${focusClass}`} aria-label={isCurrent || isNightReview ? `Current prayer window: ${block.range}` : undefined}>
                 <div className="bk-banner-copy">
                   <div className="bk-banner-text">
                     <p className="bk-banner-kicker">{block.id} &nbsp;{block.range}</p>

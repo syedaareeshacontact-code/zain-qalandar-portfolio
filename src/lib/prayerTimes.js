@@ -123,6 +123,33 @@ export function getActivePrayerBlockIndex(timings, dateKey) {
   return starts.findIndex((start, index) => now >= start && now < ends[index]);
 }
 
+export function getHeroBlockIndex(timings, dateKey) {
+  const starts = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((prayer) => {
+    const date = parsePrayerTime(timings[prayer], dateKey);
+    return date && !Number.isNaN(date.getTime()) ? getMinutesInLahore(date) : null;
+  });
+  const ends = ['Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((prayer) => {
+    const date = parsePrayerTime(timings[prayer], dateKey);
+    return date && !Number.isNaN(date.getTime()) ? getMinutesInLahore(date) : null;
+  });
+  ends.push(22 * 60);
+
+  if (starts.some((time) => time === null) || ends.some((time) => time === null)) return -1;
+
+  const now = getMinutesInLahore(new Date());
+  if (now < starts[0] || now >= starts[4]) return 4;
+  return starts.findIndex((start, index) => now >= start && now < ends[index]);
+}
+
+export function isOvernightReview(timings, dateKey) {
+  const fajr = parsePrayerTime(timings.Fajr, dateKey);
+  const isha = parsePrayerTime(timings.Isha, dateKey);
+  if (!fajr || !isha || Number.isNaN(fajr.getTime()) || Number.isNaN(isha.getTime())) return false;
+
+  const now = getMinutesInLahore(new Date());
+  return now < getMinutesInLahore(fajr) || now >= getMinutesInLahore(isha);
+}
+
 export async function getPrayerRoutineData() {
   const today = getDateKey();
 
@@ -152,6 +179,8 @@ export async function getPrayerRoutineData() {
       dateKey: today,
       timings: todayTimings,
       activeBlockIndex: getActivePrayerBlockIndex(todayTimings, today),
+      heroBlockIndex: getHeroBlockIndex(todayTimings, today),
+      overnightReview: isOvernightReview(todayTimings, today),
       durations,
     };
   } catch {
