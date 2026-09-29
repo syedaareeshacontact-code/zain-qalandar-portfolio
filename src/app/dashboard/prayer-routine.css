@@ -51,8 +51,8 @@
   border-right: 1px solid var(--border);
 }
 .bk-shell.is-dark .bk-sidebar {
-  background: linear-gradient(180deg, rgb(2 30 21 / 96%) 0%, rgb(2 32 23 / 89%) 60%, rgb(3 49 32 / 40%) 100%), url('/images/barakah/sidebar.webp') center bottom / 100% 100% no-repeat #286547;
-  background-blend-mode: normal, multiply;
+  background: var(--bk-bg);
+  border-right-color: var(--bk-line);
 }
 .bk-sidebar-head { min-height: 45px; padding: 0 14px 0 17px; }
 .bk-brand { gap: 12px; color: var(--bk-text); font-family: Georgia, 'Times New Roman', serif; font-size: 23px; font-weight: 700; letter-spacing: -.5px; }
@@ -68,7 +68,7 @@
 .bk-mosque { display: none; }
 
 .bk-topbar { min-height: 72px; height: 72px; padding: 0 29px 0 38px; gap: 12px; background: var(--header-background); border-bottom: 1px solid var(--border); }
-.bk-shell.is-dark .bk-topbar { background: rgb(9 15 13 / 92%); border-bottom-color: var(--bk-line); }
+.bk-shell.is-dark .bk-topbar { background: var(--bk-bg); border-bottom-color: var(--bk-line); }
 .bk-search { max-width: 390px; height: 39px; padding: 0 13px; border-radius: 10px; background: var(--surface-raised); color: var(--text-muted); }
 .bk-search input { font-size: 13px; }
 .bk-top-actions { gap: 16px; }
@@ -146,7 +146,7 @@
 .bk-step-copy strong { color: var(--text); font-family: Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: 700; }
 .bk-step-copy small { margin: 3px 0 0; color: var(--text-muted); font-size: 13px; }
 
-.bk-banner { isolation: isolate; min-height: 166px; border-radius: 14px; background-position: center 61%; background-size: cover; box-shadow: var(--bk-shadow); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.bk-banner { isolation: isolate; min-height: 166px; border-radius: 14px; background-position: center 61%; background-size: cover; box-shadow: var(--bk-shadow); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease, filter .25s ease; }
 .bk-banner.is-current { border: 2px solid var(--bk-current); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bk-current) 24%, transparent), 0 16px 30px color-mix(in srgb, var(--bk-current) 24%, var(--shadow)); transform: translateX(4px); }
 .bk-row.is-current .bk-step-num { box-shadow: 0 0 0 5px var(--bk-bg), 0 0 0 7px color-mix(in srgb, var(--bk-current) 55%, transparent); }
 .bk-row.is-current .bk-meta { border-color: color-mix(in srgb, var(--bk-current) 62%, var(--border)); box-shadow: 0 8px 22px color-mix(in srgb, var(--bk-current) 16%, var(--shadow)); }
@@ -240,6 +240,8 @@
 .bk-shell.is-dark .bk-row-asr { --bk-current: #eac075; }
 .bk-shell.is-dark .bk-row-maghrib { --bk-current: #d9bbf4; }
 .bk-shell.is-dark .bk-row-isha { --bk-current: #d2e4fc; }
+.bk-shell.is-dark .bk-banner.is-current { filter: brightness(1.16) saturate(1.18); }
+.bk-shell.is-dark .bk-row.is-current .bk-step-num { box-shadow: 0 0 0 5px var(--bk-bg), 0 0 0 7px color-mix(in srgb, var(--bk-current) 65%, transparent); }
 .bk-shell.is-dark .bk-banner::before { filter: blur(10px) brightness(.48) saturate(1.25); }
 .bk-shell.is-dark .bk-banner::after {
   background: linear-gradient(90deg, color-mix(in srgb, var(--bk-dark-wash) 96%, transparent), color-mix(in srgb, var(--bk-dark-wash) 82%, transparent) 42%, color-mix(in srgb, var(--bk-dark-wash) 38%, transparent) 73%, color-mix(in srgb, var(--bk-dark-wash) 10%, transparent));
