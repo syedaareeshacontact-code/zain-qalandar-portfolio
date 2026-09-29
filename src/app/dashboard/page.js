@@ -1,10 +1,10 @@
-import DashboardWorkspace from '@/components/dashboard/DashboardWorkspace';
+import PrayerRoutine from '@/components/dashboard/PrayerRoutine';
 
 export const metadata = {
-  title: 'Prayer Routine | Zain Qalandar',
-  description: 'A personal prayer-based daily work routine.',
+  title: 'Prayer Routine | Barakah',
+  description: 'A prayer-based daily work structure.',
 };
 
 export default function DashboardPage() {
-  return <DashboardWorkspace view="prayer" />;
+  return <PrayerRoutine />;
 }

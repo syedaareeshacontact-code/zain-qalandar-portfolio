@@ -1,5 +1,10 @@
-import { redirect } from 'next/navigation';
+import PrayerRoutine from '@/components/dashboard/PrayerRoutine';
+
+export const metadata = {
+  title: 'Prayer Routine | Barakah',
+  description: 'A prayer-based daily work structure.',
+};
 
 export default function PrayerRoutinePage() {
-  redirect('/dashboard');
+  return <PrayerRoutine />;
 }
