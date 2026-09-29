@@ -1,10 +1,43 @@
-const PRAYER_LOCATION = {
-  city: 'Lahore',
-  country: 'Pakistan',
-  timezone: 'Asia/Karachi',
-  method: '1',
-  school: '1',
-};
+const PRAYER_LOCATIONS = [
+  {
+    label: 'Lahore, Pakistan',
+    city: 'Lahore', country: 'PK', timezone: 'Asia/Karachi',
+    method: '1', school: '1',
+  },
+  {
+    label: 'Makkah, Saudi Arabia',
+    city: 'Makkah', country: 'SA', timezone: 'Asia/Riyadh',
+    method: '4', school: '0',
+  },
+  {
+    label: 'Cairo, Egypt',
+    city: 'Cairo', country: 'EG', timezone: 'Africa/Cairo',
+    method: '5', school: '0',
+  },
+  {
+    label: 'Istanbul, Turkey',
+    city: 'Istanbul', country: 'TR', timezone: 'Europe/Istanbul',
+    method: '13', school: '0',
+  },
+  {
+    label: 'London, UK',
+    city: 'London', country: 'GB', timezone: 'Europe/London',
+    method: '3', school: '0',
+  },
+  {
+    label: 'New York, USA',
+    city: 'New York', country: 'US', timezone: 'America/New_York',
+    method: '2', school: '0',
+  },
+  {
+    label: 'Jakarta, Indonesia',
+    city: 'Jakarta', country: 'ID', timezone: 'Asia/Jakarta',
+    method: '20', school: '0',
+  },
+];
+
+// 0 se 6 tak number badal kar city switch karo:
+const PRAYER_LOCATION = PRAYER_LOCATIONS[0];
 
 function getDatePartsInTimezone() {
   return new Intl.DateTimeFormat('en-US', {
@@ -25,6 +58,12 @@ function getDateKey(dayOffset = 0) {
   const nextMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
   const nextDay = String(date.getUTCDate()).padStart(2, '0');
   return `${nextYear}-${nextMonth}-${nextDay}`;
+}
+
+function shiftDateKey(dateKey, dayOffset) {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day + dayOffset));
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
 }
 
 export function getPrayerDateKey() {
@@ -107,7 +146,14 @@ function getPrayerGap(start, end, dateKey) {
   return formatDuration(Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / 60_000)));
 }
 
-export function getPrayerIntervalProgress(timings, dateKey) {
+function getIntervalProgress(start, end, now) {
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
+
+  const elapsed = Math.max(0, Math.min(100, Math.round(((now - start) / (end - start)) * 100)));
+  return { elapsed, remaining: 100 - elapsed };
+}
+
+export function getPrayerIntervalProgress(timings, dateKey, { previousTimings, nextTimings } = {}) {
   const now = Date.now();
   const intervals = [
     ['Fajr', 'Dhuhr'],
@@ -116,14 +162,23 @@ export function getPrayerIntervalProgress(timings, dateKey) {
     ['Maghrib', 'Isha'],
   ];
 
-  return intervals.map(([from, to]) => {
+  const progress = intervals.map(([from, to]) => {
     const start = parsePrayerTime(timings[from], dateKey)?.getTime();
     const end = parsePrayerTime(timings[to], dateKey)?.getTime();
-    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
-
-    const elapsed = Math.max(0, Math.min(100, Math.round(((now - start) / (end - start)) * 100)));
-    return { elapsed, remaining: 100 - elapsed };
+    return getIntervalProgress(start, end, now);
   });
+
+  const todayFajr = parsePrayerTime(timings.Fajr, dateKey)?.getTime();
+  const beforeFajr = Number.isFinite(todayFajr) && now < todayFajr;
+  const overnightStart = beforeFajr
+    ? parsePrayerTime(previousTimings?.Isha, shiftDateKey(dateKey, -1))?.getTime()
+    : parsePrayerTime(timings.Isha, dateKey)?.getTime();
+  const overnightEnd = beforeFajr
+    ? todayFajr
+    : parsePrayerTime(nextTimings?.Fajr, shiftDateKey(dateKey, 1))?.getTime();
+
+  progress.push(getIntervalProgress(overnightStart, overnightEnd, now));
+  return progress;
 }
 
 export function getActivePrayerBlockIndex(timings, dateKey) {
@@ -173,7 +228,11 @@ export async function getPrayerRoutineData() {
   const today = getDateKey();
 
   try {
-    const todayTimings = await fetchPrayerDay(today);
+    const [todayTimings, previousTimings, nextTimings] = await Promise.all([
+      fetchPrayerDay(today),
+      fetchPrayerDay(getDateKey(-1)),
+      fetchPrayerDay(getDateKey(1)),
+    ]);
 
     const prayerTimes = {
       Fajr: formatTime(todayTimings.Fajr, today),
@@ -194,12 +253,14 @@ export async function getPrayerRoutineData() {
 
     if (durations.some((duration) => !duration)) throw new Error('Prayer API returned incomplete prayer gaps');
 
-    const progress = getPrayerIntervalProgress(todayTimings, today);
+    const progress = getPrayerIntervalProgress(todayTimings, today, { previousTimings, nextTimings });
     if (progress.some((segment) => !segment)) throw new Error('Prayer API returned incomplete prayer intervals');
 
     return {
       dateKey: today,
       timings: todayTimings,
+      previousTimings,
+      nextTimings,
       activeBlockIndex: getActivePrayerBlockIndex(todayTimings, today),
       heroBlockIndex: getHeroBlockIndex(todayTimings, today),
       overnightReview: isOvernightReview(todayTimings, today),

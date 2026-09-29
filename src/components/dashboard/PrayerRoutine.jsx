@@ -91,7 +91,10 @@ export default function PrayerRoutine() {
           activeBlockIndex: getActivePrayerBlockIndex(current.timings, current.dateKey),
           heroBlockIndex: getHeroBlockIndex(current.timings, current.dateKey),
           overnightReview: isOvernightReview(current.timings, current.dateKey),
-          progress: getPrayerIntervalProgress(current.timings, current.dateKey),
+          progress: getPrayerIntervalProgress(current.timings, current.dateKey, {
+            previousTimings: current.previousTimings,
+            nextTimings: current.nextTimings,
+          }),
         };
       });
     };
@@ -109,6 +112,8 @@ export default function PrayerRoutine() {
     time: prayerData?.durations[index] ?? block.time,
   }));
   const heroImage = HERO_IMAGES[prayerData?.heroBlockIndex >= 0 ? prayerData.heroBlockIndex : 0];
+  const overnightProgress = prayerData?.progress[4];
+  const isOvernight = Boolean(prayerData?.overnightReview && overnightProgress);
 
   return (
     <div className="bk-prayer">
@@ -127,8 +132,7 @@ export default function PrayerRoutine() {
         {blocks.map((block, index) => {
           const Icon = block.icon;
           const isCurrent = prayerData?.activeBlockIndex === index;
-          const isNightReview = index === 3 && prayerData?.overnightReview;
-          const focusClass = isCurrent ? ' is-current' : isNightReview ? ' is-night-review' : '';
+          const focusClass = isCurrent ? ' is-current' : '';
           const progress = prayerData?.progress[index];
           return (
             <li className={`bk-row bk-row-${block.tone}${focusClass}`} key={block.id} style={{ '--bk-progress': `${progress?.elapsed ?? 0}%` }}>
@@ -139,7 +143,7 @@ export default function PrayerRoutine() {
                 <div className="bk-step-copy">
                   <strong>{block.range}</strong>
                   <small>{block.slot}</small>
-                  {progress && (
+                  {isCurrent && progress && (
                     <span className="bk-progress-stats" aria-label={`${progress.elapsed}% elapsed, ${progress.remaining}% remaining`}>
                       <span>{progress.elapsed}% elapsed</span>
                       <span>{progress.remaining}% left</span>
@@ -148,7 +152,7 @@ export default function PrayerRoutine() {
                 </div>
               </div>
 
-              <article className={`bk-banner bk-banner-${block.tone}${focusClass}`} aria-label={isCurrent || isNightReview ? `Current prayer window: ${block.range}` : undefined}>
+              <article className={`bk-banner bk-banner-${block.tone}${focusClass}`} aria-label={isCurrent ? `Current prayer window: ${block.range}` : undefined}>
                 <div className="bk-banner-copy">
                   <div className="bk-banner-text">
                     <p className="bk-banner-kicker">{block.id} &nbsp;{block.range}</p>
@@ -170,9 +174,17 @@ export default function PrayerRoutine() {
             </li>
           );
         })}
-        <li className="bk-timeline-end" aria-label="Isha endpoint">
+        <li className={`bk-timeline-end${isOvernight ? ' is-current' : ''}`} style={{ '--bk-progress': `${overnightProgress?.elapsed ?? 0}%` }} aria-label="Isha to Fajr overnight interval">
           <span className="bk-step-num">05</span>
-          <span>Isha</span>
+          <div className="bk-timeline-end-copy">
+            <span>Isha → Fajr</span>
+            {isOvernight && (
+              <span className="bk-progress-stats" aria-label={`${overnightProgress.elapsed}% elapsed, ${overnightProgress.remaining}% remaining`}>
+                <span>{overnightProgress.elapsed}% elapsed</span>
+                <span>{overnightProgress.remaining}% left</span>
+              </span>
+            )}
+          </div>
         </li>
       </ol>
     </div>
