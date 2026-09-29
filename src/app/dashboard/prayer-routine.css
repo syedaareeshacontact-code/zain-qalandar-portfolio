@@ -51,7 +51,8 @@
   border-right: 1px solid var(--border);
 }
 .bk-shell.is-dark .bk-sidebar {
-  background: linear-gradient(rgb(11 25 17 / 90%), rgb(9 15 13 / 92%)), url('/images/barakah/sidebar.webp') center bottom / 100% 100% no-repeat;
+  background: linear-gradient(180deg, rgb(2 30 21 / 96%) 0%, rgb(2 32 23 / 89%) 60%, rgb(3 49 32 / 40%) 100%), url('/images/barakah/sidebar.webp') center bottom / 100% 100% no-repeat #286547;
+  background-blend-mode: normal, multiply;
 }
 .bk-sidebar-head { min-height: 45px; padding: 0 14px 0 17px; }
 .bk-brand { gap: 12px; color: var(--bk-text); font-family: Georgia, 'Times New Roman', serif; font-size: 23px; font-weight: 700; letter-spacing: -.5px; }
@@ -84,6 +85,7 @@
 .bk-prayer { min-width: 0; }
 .bk-prayer-hero {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -92,12 +94,31 @@
   margin: 0 -28px 10px;
   padding: 21px 28px 17px 38px;
   overflow: hidden;
-  background: linear-gradient(90deg, var(--background) 0%, color-mix(in srgb, var(--background) 94%, transparent) 28%, color-mix(in srgb, var(--background) 45%, transparent) 56%, transparent 100%), url('/images/barakah/hero.webp') right bottom / auto 230px no-repeat;
+  background: url('/images/barakah/hero.webp') center 65% / cover no-repeat;
 }
-.bk-prayer-heading { position: relative; z-index: 1; flex: 1 1 auto; }
+.bk-prayer-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url('/images/barakah/hero.webp') right bottom / auto 230px no-repeat;
+  mask-image: linear-gradient(90deg, transparent 25%, #000 58%);
+  pointer-events: none;
+}
+.bk-prayer-hero::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  z-index: 1;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--background) 83%, transparent), color-mix(in srgb, var(--background) 58%, transparent) 45%, transparent 75%), url('/images/barakah/hero.webp') right 65% / 125% auto no-repeat;
+  filter: blur(9px);
+  mask-image: linear-gradient(90deg, #000 0%, #000 35%, transparent 72%);
+  pointer-events: none;
+}
+.bk-prayer-heading { position: relative; z-index: 2; flex: 1 1 auto; }
 .bk-prayer-hero h1 { margin: 0; color: var(--text); font-family: Georgia, 'Times New Roman', serif; font-size: clamp(35px, 3.5vw, 46px); font-weight: 700; letter-spacing: -.9px; line-height: 1.13; }
 .bk-prayer-hero .bk-prayer-heading p { margin-top: 1px; color: var(--text-muted); font-size: clamp(16px, 1.7vw, 23px); line-height: 1.35; }
-.bk-quote { position: relative; z-index: 1; display: block; flex: 0 0 315px; width: 315px; min-height: 96px; margin: 2px 30% 0 0; padding: 14px 21px 12px; border-radius: 13px; background: color-mix(in srgb, var(--surface-raised) 82%, transparent); box-shadow: none; }
+.bk-quote { position: relative; z-index: 2; display: block; flex: 0 0 315px; width: 315px; min-height: 96px; margin: 2px 30% 0 0; padding: 14px 21px 12px; border-radius: 13px; background: color-mix(in srgb, var(--surface-raised) 82%, transparent); box-shadow: none; }
 .bk-shell.is-dark .bk-quote { background: color-mix(in srgb, var(--surface-raised) 82%, transparent); }
 .bk-quote p { color: var(--text-muted); font-size: 15px; font-style: normal; line-height: 1.45; }
 .bk-quote cite { margin-top: 5px; color: var(--text-muted); font-size: 13px; }
@@ -121,14 +142,33 @@
 .bk-step-copy strong { color: var(--text); font-family: Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: 700; }
 .bk-step-copy small { margin: 3px 0 0; color: var(--text-muted); font-size: 13px; }
 
-.bk-banner { min-height: 166px; border-radius: 14px; background-position: center 61%; background-size: cover; box-shadow: var(--bk-shadow); }
-.bk-banner-fajr { background-image: url('/images/barakah/fajr.webp'); }
-.bk-banner-dhuhr { background-image: url('/images/barakah/dhuhr.webp'); }
-.bk-banner-asr { background-image: url('/images/barakah/asr.webp'); }
-.bk-banner-maghrib { background-image: url('/images/barakah/maghrib.webp'); }
-.bk-banner-isha { background-image: url('/images/barakah/isha.webp'); }
-.bk-banner-maghrib::before, .bk-banner-isha::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgb(255 255 255 / 52%), rgb(255 255 255 / 20%) 51%, transparent 78%); pointer-events: none; }
-.bk-banner-copy { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 27px; width: 100%; max-width: none; padding: 21px 26px; }
+.bk-banner { isolation: isolate; min-height: 166px; border-radius: 14px; background-position: center 61%; background-size: cover; box-shadow: var(--bk-shadow); }
+.bk-banner-fajr { --bk-card-wash: #e3f1e9; background-image: url('/images/barakah/fajr.webp'); }
+.bk-banner-dhuhr { --bk-card-wash: #e6f3fc; background-image: url('/images/barakah/dhuhr.webp'); }
+.bk-banner-asr { --bk-card-wash: #fff0df; background-image: url('/images/barakah/asr.webp'); }
+.bk-banner-maghrib { --bk-card-wash: #eee9f7; background-image: url('/images/barakah/maghrib.webp'); }
+.bk-banner-isha { --bk-card-wash: #e3e9fa; background-image: url('/images/barakah/isha.webp'); }
+.bk-banner::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  z-index: 0;
+  background-image: inherit;
+  background-position: right 61%;
+  background-size: 145% auto;
+  filter: blur(10px);
+  mask-image: linear-gradient(90deg, #000 0%, #000 37%, transparent 70%);
+  pointer-events: none;
+}
+.bk-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bk-card-wash) 74%, transparent), color-mix(in srgb, var(--bk-card-wash) 48%, transparent) 44%, transparent 77%);
+  pointer-events: none;
+}
+.bk-banner-copy { position: relative; z-index: 1; display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 27px; width: 100%; max-width: none; padding: 21px 26px; }
 .bk-mini-icon { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: rgb(255 255 255 / 55%); color: #155f58; }
 .bk-mini-icon svg { width: 39px; height: 39px; }
 .bk-banner-dhuhr .bk-mini-icon, .bk-banner-dhuhr .bk-banner-kicker { color: #236ea4; }
@@ -164,6 +204,51 @@
 .bk-shell.is-dark .bk-step-copy strong { color: #e8eef6; }
 .bk-shell.is-dark .bk-step-copy small { color: #a9b7c9; }
 .bk-shell.is-dark .bk-step-num { box-shadow: 0 0 0 5px var(--bk-bg); }
+
+/* Keep the scenery visible while giving its text side a dark, readable wash. */
+.bk-shell.is-dark .bk-prayer-hero {
+  background: radial-gradient(ellipse 65% 105% at 27% -5%, #053527 0%, rgb(3 35 26 / 65%) 42%, transparent 95%), var(--bk-bg);
+}
+.bk-shell.is-dark .bk-prayer-hero::before {
+  background-position: right 65%;
+  background-size: cover;
+  filter: brightness(.8) saturate(1.35) contrast(1.08);
+  mask-image: linear-gradient(90deg, transparent 0%, transparent 43%, rgb(0 0 0 / 35%) 58%, #000 79%);
+}
+.bk-shell.is-dark .bk-prayer-hero::after { display: none; }
+.bk-shell.is-dark .bk-quote { border: 1px solid rgb(142 203 165 / 19%); background: rgb(4 34 26 / 76%); }
+
+.bk-shell.is-dark .bk-banner {
+  background-color: var(--bk-dark-image-tint);
+  background-blend-mode: multiply;
+  border: 1px solid rgb(157 206 176 / 23%);
+}
+.bk-shell.is-dark .bk-banner-fajr { --bk-dark-image-tint: #708c75; --bk-dark-wash: #043326; --bk-dark-icon: #175d43; }
+.bk-shell.is-dark .bk-banner-dhuhr { --bk-dark-image-tint: #6e9994; --bk-dark-wash: #043129; --bk-dark-icon: #185d47; }
+.bk-shell.is-dark .bk-banner-asr { --bk-dark-image-tint: #a28765; --bk-dark-wash: #302a18; --bk-dark-icon: #69572b; }
+.bk-shell.is-dark .bk-banner-maghrib { --bk-dark-image-tint: #817990; --bk-dark-wash: #18252b; --bk-dark-icon: #404663; }
+.bk-shell.is-dark .bk-banner-isha { --bk-dark-image-tint: #66848d; --bk-dark-wash: #032b2c; --bk-dark-icon: #164a56; }
+.bk-shell.is-dark .bk-banner::before { filter: blur(10px) brightness(.48) saturate(1.25); }
+.bk-shell.is-dark .bk-banner::after {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bk-dark-wash) 96%, transparent), color-mix(in srgb, var(--bk-dark-wash) 82%, transparent) 42%, color-mix(in srgb, var(--bk-dark-wash) 38%, transparent) 73%, color-mix(in srgb, var(--bk-dark-wash) 10%, transparent));
+}
+.bk-shell.is-dark .bk-banner .bk-banner-kicker,
+.bk-shell.is-dark .bk-banner h2 { color: #f5f8ee; }
+.bk-shell.is-dark .bk-banner .bk-banner-text > p:last-child { color: #dbe8df; }
+.bk-shell.is-dark .bk-banner-asr .bk-banner-kicker { color: #f7dfaa; }
+.bk-shell.is-dark .bk-banner .bk-mini-icon {
+  background: color-mix(in srgb, var(--bk-dark-icon) 80%, transparent);
+  border: 1px solid rgb(221 251 228 / 13%);
+  color: #e6f9e8;
+}
+.bk-shell.is-dark .bk-banner-asr .bk-mini-icon { color: #ffe4a6; }
+.bk-shell.is-dark .bk-banner-maghrib .bk-mini-icon { color: #e9dbff; }
+.bk-shell.is-dark .bk-banner-badge { background: #073d2d; border: 1px solid rgb(153 224 174 / 25%); }
+.bk-shell.is-dark .bk-row-fajr .bk-step-icon,
+.bk-shell.is-dark .bk-row-dhuhr .bk-step-icon { color: #80dca1; }
+.bk-shell.is-dark .bk-row-asr .bk-step-icon { color: #eac075; }
+.bk-shell.is-dark .bk-row-maghrib .bk-step-icon { color: #d9bbf4; }
+.bk-shell.is-dark .bk-row-isha .bk-step-icon { color: #d2e4fc; }
 
 @media (max-width: 1250px) {
   .bk-row { grid-template-columns: 137px minmax(0, 1fr) 226px; gap: 12px; }
