@@ -107,9 +107,6 @@ export default function DashboardShell({ children }) {
           })}
         </nav>
 
-        <div className="bk-sidebar-foot">
-          <p>A more<br />focused day<br />A closer You</p>
-        </div>
       </aside>
 
       <div className="bk-main">

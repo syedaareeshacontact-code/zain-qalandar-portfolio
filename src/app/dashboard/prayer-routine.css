@@ -175,7 +175,7 @@
   background: linear-gradient(90deg, color-mix(in srgb, var(--bk-card-wash) 74%, transparent), color-mix(in srgb, var(--bk-card-wash) 48%, transparent) 44%, transparent 77%);
   pointer-events: none;
 }
-.bk-banner-copy { position: relative; z-index: 1; display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 27px; width: 100%; max-width: none; padding: 21px 26px; }
+.bk-banner-copy { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 0; width: 100%; max-width: none; padding: 21px 26px; }
 .bk-mini-icon { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: rgb(255 255 255 / 55%); color: #155f58; }
 .bk-mini-icon svg { width: 39px; height: 39px; }
 .bk-banner-dhuhr .bk-mini-icon, .bk-banner-dhuhr .bk-banner-kicker { color: #236ea4; }
@@ -296,7 +296,7 @@
   .bk-step-icon { width: 32px; height: 32px; margin: 0; }
   .bk-step-copy { gap: 0; }
   .bk-banner { min-height: 190px; }
-  .bk-banner-copy { grid-template-columns: 56px minmax(0, 1fr); gap: 13px; padding: 18px; }
+  .bk-banner-copy { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 18px; }
   .bk-mini-icon { width: 56px; height: 56px; }
   .bk-mini-icon svg { width: 29px; height: 29px; }
   .bk-banner .bk-banner-kicker { font-size: 15px; }
@@ -310,7 +310,7 @@
 @media (max-width: 480px) {
   .bk-prayer-hero h1 { font-size: 32px; }
   .bk-banner { min-height: 180px; background-position: 62% center; }
-  .bk-banner-copy { grid-template-columns: 44px minmax(0, 1fr); gap: 9px; padding: 13px; }
+  .bk-banner-copy { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 13px; }
   .bk-mini-icon { width: 44px; height: 44px; }
   .bk-mini-icon svg { width: 25px; height: 25px; }
   .bk-banner h2 { font-size: 21px; }

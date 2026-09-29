@@ -125,7 +125,6 @@ export default function PrayerRoutine() {
 
               <article className={`bk-banner bk-banner-${block.tone}${isCurrent ? ' is-current' : ''}`} aria-label={isCurrent ? `Current prayer window: ${block.range}` : undefined}>
                 <div className="bk-banner-copy">
-                  <span className="bk-mini-icon"><Icon size={39} strokeWidth={1.7} aria-hidden="true" /></span>
                   <div className="bk-banner-text">
                     <p className="bk-banner-kicker">{block.id} &nbsp;{block.range}</p>
                     <h2>{block.title}</h2>
