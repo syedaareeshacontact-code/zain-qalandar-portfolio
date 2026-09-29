@@ -12,6 +12,7 @@ import {
 	Footer,
 	ScrollToTopButton,
 	ScrollProgressBar,
+	ThemeToggle,
 } from '@/components';
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
 		<>
 			<ScrollProgressBar />
 			<ScrollToTopButton />
+			<ThemeToggle />
 			<div className="site-shell">
 				<Header />
 				<main id="main-content" className="page-container">

@@ -17,4 +17,5 @@ export {
   ScrollProgressBar,
   ScrollToTopButton,
   ActiveSectionHighlight,
+  ThemeToggle,
 } from './ui';

@@ -1,4 +1,5 @@
 import './globals.css';
+import Script from 'next/script';
 import MotionProvider from '@/components/layout/MotionProvider';
 import { profile } from '@/data/profile';
 import { validateProfile } from '@/lib/validateProfile';
@@ -20,12 +21,29 @@ export const metadata = {
 	},
 };
 
-export const viewport = { themeColor: '#111916', colorScheme: 'dark' };
+export const viewport = { themeColor: '#f2f7f0', colorScheme: 'light dark' };
+
+const themeInitializer = `
+  try {
+    const savedTheme = localStorage.getItem('portfolio-theme');
+    const theme = savedTheme === 'green' || savedTheme === 'dark'
+      ? savedTheme
+      : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'green');
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
+  } catch (_) {
+    document.documentElement.dataset.theme = 'green';
+    document.documentElement.style.colorScheme = 'light';
+  }
+`;
 
 export default function RootLayout({ children }) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<body>
+				<Script id="theme-initializer" strategy="beforeInteractive">
+					{themeInitializer}
+				</Script>
 				<a className="skip-link" href="#main-content">{profile.design.skipLink}</a>
 				<MotionProvider>
 					{children}
