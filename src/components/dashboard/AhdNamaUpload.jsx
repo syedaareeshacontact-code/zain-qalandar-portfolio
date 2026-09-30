@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import {
+  AlertTriangle,
   CalendarDays,
   ExternalLink,
   FileCheck2,
   FileText,
   LoaderCircle,
   RefreshCw,
+  Trash2,
   Upload,
   X,
 } from 'lucide-react';
+import { CloudinaryUsageCard, useCloudinaryUsage } from './CloudinaryUsage';
 
 const MAX_PDF_SIZE = 20 * 1024 * 1024;
 
@@ -35,12 +38,16 @@ function formatDate(dateValue) {
 }
 
 export default function AhdNamaUpload() {
+  const { refresh: refreshCloudinaryUsage } = useCloudinaryUsage();
   const [uploads, setUploads] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingList, setIsLoadingList] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [error, setError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
   const [listError, setListError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -69,15 +76,17 @@ export default function AhdNamaUpload() {
   }, []);
 
   useEffect(() => {
-    if (!isModalOpen) return undefined;
+    if (!isModalOpen && !deleteTarget) return undefined;
 
     const closeOnEscape = (event) => {
-      if (event.key === 'Escape' && !isUploading) setIsModalOpen(false);
+      if (event.key !== 'Escape' || isUploading || isDeleting) return;
+      setIsModalOpen(false);
+      setDeleteTarget(null);
     };
 
     document.addEventListener('keydown', closeOnEscape);
     return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [isModalOpen, isUploading]);
+  }, [deleteTarget, isDeleting, isModalOpen, isUploading]);
 
   const closeModal = () => {
     if (isUploading) return;
@@ -90,6 +99,42 @@ export default function AhdNamaUpload() {
     setSuccessMessage('');
     setError('');
     setIsModalOpen(true);
+  };
+
+  const requestDelete = (upload) => {
+    setDeleteError('');
+    setDeleteTarget(upload);
+  };
+
+  const closeDeleteModal = () => {
+    if (isDeleting) return;
+    setDeleteTarget(null);
+    setDeleteError('');
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget || isDeleting) return;
+
+    setIsDeleting(true);
+    setDeleteError('');
+
+    try {
+      const response = await fetch(`/api/uploads?id=${encodeURIComponent(deleteTarget.id)}`, { method: 'DELETE' });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.message || 'Could not delete this PDF.');
+      }
+
+      setUploads((currentUploads) => currentUploads.filter((upload) => upload.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      setSuccessMessage('The PDF was removed from your archive.');
+      void refreshCloudinaryUsage();
+    } catch (deleteUploadError) {
+      setDeleteError(deleteUploadError instanceof Error ? deleteUploadError.message : 'Could not delete this PDF.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const chooseFile = (file) => {
@@ -134,6 +179,7 @@ export default function AhdNamaUpload() {
       setSuccessMessage('Your PDF has been added to the archive.');
       setIsModalOpen(false);
       setSelectedFile(null);
+      void refreshCloudinaryUsage();
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : 'Upload failed.');
     } finally {
@@ -152,6 +198,8 @@ export default function AhdNamaUpload() {
       </header>
 
       {successMessage && <p className="bk-ahd-success-message" role="status"><FileCheck2 size={16} />{successMessage}</p>}
+
+      <CloudinaryUsageCard />
 
       <section className="bk-ahd-documents" aria-labelledby="uploaded-pdfs-title">
         <div className="bk-ahd-documents-head">
@@ -187,6 +235,9 @@ export default function AhdNamaUpload() {
                 <a href={upload.secureUrl} target="_blank" rel="noreferrer">
                   Open <ExternalLink size={15} />
                 </a>
+                <button className="bk-ahd-delete-trigger" type="button" onClick={() => requestDelete(upload)} aria-label={`Delete ${upload.originalName}`} title="Delete PDF">
+                  <Trash2 size={16} />
+                </button>
               </li>
             ))}
           </ul>
@@ -222,6 +273,27 @@ export default function AhdNamaUpload() {
               <button className="bk-ahd-upload-button" type="button" onClick={handleUpload} disabled={!selectedFile || isUploading}>
                 {isUploading ? <LoaderCircle size={17} className="bk-spin" /> : <Upload size={17} />}
                 {isUploading ? 'Uploading…' : 'Upload PDF'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="bk-ahd-modal-layer" role="presentation" onMouseDown={closeDeleteModal}>
+          <section className="bk-ahd-modal bk-ahd-delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-pdf-title" aria-describedby="delete-pdf-description" onMouseDown={(event) => event.stopPropagation()}>
+            <span className="bk-ahd-delete-icon"><AlertTriangle size={22} /></span>
+            <p className="bk-ahd-kicker">Remove from archive</p>
+            <h2 id="delete-pdf-title">Delete this PDF?</h2>
+            <p id="delete-pdf-description" className="bk-ahd-modal-copy">“{deleteTarget.originalName}” will be permanently removed from your Ahd Nama archive.</p>
+
+            {deleteError && <p className="bk-ahd-upload-error" role="alert">{deleteError}</p>}
+
+            <div className="bk-ahd-modal-actions">
+              <button className="bk-ahd-cancel-button" type="button" onClick={closeDeleteModal} disabled={isDeleting}>Keep PDF</button>
+              <button className="bk-ahd-delete-button" type="button" onClick={() => void handleDelete()} disabled={isDeleting}>
+                {isDeleting ? <LoaderCircle size={17} className="bk-spin" /> : <Trash2 size={17} />}
+                {isDeleting ? 'Deleting…' : 'Delete PDF'}
               </button>
             </div>
           </section>

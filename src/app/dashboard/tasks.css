@@ -920,16 +920,31 @@
 }
 
 .bk-task-add-subtask > button:last-child {
+  min-width: 48px;
+  min-height: 30px;
   width: auto !important;
   padding: 0 9px !important;
-  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border)) !important;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface)) !important;
   color: var(--accent) !important;
   font-size: 10px;
   font-weight: 800;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+}
+
+.bk-task-add-subtask > button:hover:not(:disabled) {
+  border-color: var(--accent) !important;
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  transform: translateY(-1px);
 }
 
 .bk-task-add-subtask > button:disabled {
-  opacity: .4;
+  border-color: var(--border) !important;
+  background: color-mix(in srgb, var(--surface-raised) 55%, var(--surface)) !important;
+  color: var(--text-muted) !important;
+  opacity: 1;
   cursor: not-allowed;
 }
 

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import cloudinary from '@/lib/cloudinary';
 import { getDatabase } from '@/lib/mongodb';
 
@@ -202,5 +203,37 @@ export async function POST(request) {
 
     console.error('Upload route error:', error);
     return jsonError('The file could not be uploaded right now. Please try again.', 500);
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id || !ObjectId.isValid(id)) {
+      return jsonError('A valid PDF id is required.');
+    }
+
+    const database = await getDatabase();
+    const uploads = database.collection('uploads');
+    const filter = { _id: new ObjectId(id), category: 'ahd-nama', kind: 'pdf' };
+    const upload = await uploads.findOne(filter);
+
+    if (!upload) {
+      return jsonError('That PDF could not be found.', 404);
+    }
+
+    await cloudinary.uploader.destroy(upload.publicId, {
+      resource_type: upload.resourceType || 'raw',
+      invalidate: true,
+    });
+
+    await uploads.deleteOne(filter);
+
+    return NextResponse.json({ message: 'PDF deleted successfully.' });
+  } catch (error) {
+    console.error('Upload delete route error:', error);
+    return jsonError('The PDF could not be deleted right now. Please try again.', 500);
   }
 }
