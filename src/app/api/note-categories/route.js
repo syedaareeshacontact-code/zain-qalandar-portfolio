@@ -25,20 +25,29 @@ function validText(value, maxLength) {
   return typeof value === 'string' && value.trim().length > 0 && value.trim().length <= maxLength;
 }
 
-async function ensureDefaults(collection) {
+async function ensureDefaults(collection, database) {
+  const config = database.collection('noteCategoryConfig');
+  const initialized = await config.findOne({ key: 'initialized' });
   const count = await collection.countDocuments();
-  if (count > 0) return collection.find().sort({ order: 1, createdAt: 1 }).toArray();
 
-  const createdAt = new Date();
-  await collection.insertMany(DEFAULT_NOTE_CATEGORIES.map((category) => ({ ...category, createdAt })));
+  if (count === 0 && !initialized) {
+    const createdAt = new Date();
+    await collection.insertMany(DEFAULT_NOTE_CATEGORIES.map((category) => ({ ...category, createdAt })));
+  }
+
+  if (!initialized) await config.insertOne({ key: 'initialized', createdAt: new Date() });
   return collection.find().sort({ order: 1, createdAt: 1 }).toArray();
+}
+
+function uniqueCategories(categories) {
+  return categories.filter((category, index, list) => list.findIndex((item) => item.slug === category.slug) === index);
 }
 
 export async function GET() {
   try {
     const database = await getDatabase();
-    const categories = await ensureDefaults(database.collection('noteCategories'));
-    return NextResponse.json({ data: categories.map(serializeNoteCategory) });
+    const categories = await ensureDefaults(database.collection('noteCategories'), database);
+    return NextResponse.json({ data: uniqueCategories(categories).map(serializeNoteCategory) });
   } catch (error) {
     console.error('Note categories list route error:', error);
     return jsonError('Categories could not be loaded right now.', 500);
@@ -124,11 +133,19 @@ export async function DELETE(request) {
     const categories = database.collection('noteCategories');
     const category = await categories.findOne({ _id: new ObjectId(id) });
     if (!category) return jsonError('That category could not be found.', 404);
-    if (category.isDefault) return jsonError('Built-in categories cannot be deleted.');
+
+    const fallbackCategory = category.slug === 'other'
+      ? null
+      : await categories.findOne({ slug: 'other', _id: { $ne: category._id } });
 
     await database.collection('uploads').updateMany(
       { category: 'notes', documentCategory: category.slug },
-      { $set: { documentCategory: 'other' } },
+      { $set: { documentCategory: fallbackCategory?.slug || '' } },
+    );
+    await database.collection('noteCategoryConfig').updateOne(
+      { key: 'initialized' },
+      { $setOnInsert: { key: 'initialized', createdAt: new Date() } },
+      { upsert: true },
     );
     await categories.deleteOne({ _id: category._id });
     return NextResponse.json({ data: { id } });

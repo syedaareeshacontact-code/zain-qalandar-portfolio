@@ -7,7 +7,7 @@ import {
   ExternalLink, FileCheck2, FileCode2, FileText, Folder, FolderCode, Github, Globe2,
   Blocks, Boxes, BrainCircuit, Bot, GitBranch, GitMerge, Library, Lightbulb, Laptop2,
   LoaderCircle, LockKeyhole, MonitorCog, MoonStar, MoreHorizontal, Network, NotebookTabs,
-  Package, PanelsTopLeft, Pencil, Plus, Puzzle, RefreshCw, Rocket, Search, Server,
+  Package, PanelsTopLeft, PencilLine, Plus, Puzzle, RefreshCw, Rocket, Search, Server,
   Settings2, ShieldCheck, Terminal, TestTube2, Trash2, Upload, UserRound, Workflow,
   Wrench, X,
 } from 'lucide-react';
@@ -79,6 +79,7 @@ export default function PdfLibrary({
   const isDeleting = deleteStatus === 'loading';
   const listError = listStatus === 'failed' ? uploadError : '';
   const hasCategories = categories.length > 0;
+  const showCategoryManager = hasCategories || editableCategories;
   const defaultDocumentCategory = categories[0]?.value || '';
   const [activeCategory, setActiveCategory] = useState('all');
   const [documentCategory, setDocumentCategory] = useState(defaultDocumentCategory);
@@ -282,7 +283,7 @@ export default function PdfLibrary({
       {successMessage && <p className="bk-ahd-success-message" role="status"><FileCheck2 size={16} />{successMessage}</p>}
       {showUsage && <CloudinaryUsageCard />}
 
-      {hasCategories && (
+      {showCategoryManager && (
         <section className="bk-notes-categories" aria-labelledby="notes-categories-title">
           <div className="bk-notes-section-heading">
             <div><p className="bk-ahd-kicker">Browse your library</p><h2 id="notes-categories-title">Categories</h2></div>
@@ -298,15 +299,15 @@ export default function PdfLibrary({
               </button>
             </article>
             {categories.map((item) => {
-              const Icon = CATEGORY_ICONS[item.value] || Folder;
+              const Icon = CATEGORY_ICONS[item.icon] || CATEGORY_ICONS[item.value] || Folder;
               return (
                 <article className={`bk-notes-category-card${activeCategory === item.value ? ' is-active' : ''}`} key={item.value}>
                   <button className="bk-notes-category-main" type="button" onClick={() => setActiveCategory(item.value)} aria-pressed={activeCategory === item.value}>
                     <span className="bk-notes-category-icon"><Icon size={19} /></span><span><strong>{item.label}</strong><small>{item.description}</small></span><b>{categoryCounts[item.value] || 0}</b>
                   </button>
                   {editableCategories && <div className="bk-notes-category-actions">
-                    <button type="button" onClick={() => openEditCategory(item)} aria-label={`Change icon for ${item.label}`} title="Change icon"><Pencil size={14} /></button>
-                    {!item.isDefault && <button className="is-danger" type="button" onClick={() => { setCategoryError(''); setCategoryDeleteTarget(item); }} aria-label={`Delete ${item.label}`} title="Delete category"><Trash2 size={14} /></button>}
+                    <button type="button" onClick={() => openEditCategory(item)} aria-label={`Change icon for ${item.label}`} title="Change icon"><PencilLine size={14} strokeWidth={2.1} /></button>
+                    <button className="is-danger" type="button" onClick={() => { setCategoryError(''); setCategoryDeleteTarget(item); }} aria-label={`Delete ${item.label}`} title="Delete category"><Trash2 size={14} /></button>
                   </div>}
                 </article>
               );

@@ -143,7 +143,7 @@ export async function POST(request) {
     if (category === 'notes' && typeof requestedDocumentCategory === 'string') {
       const database = await getDatabase();
       const categoryRecord = await database.collection('noteCategories').findOne({ slug: requestedDocumentCategory });
-      documentCategory = categoryRecord?.slug || 'other';
+      documentCategory = categoryRecord?.slug || '';
     }
     const kind = getFileKind(file);
 
