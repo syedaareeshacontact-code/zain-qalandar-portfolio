@@ -98,6 +98,7 @@
 }
 
 .bk-nav-item {
+  position: relative;
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -110,6 +111,10 @@
 }
 
 .bk-nav-item:hover { background: rgb(45 62 82 / 6%); color: var(--bk-text); }
+.bk-nav-shortcut { margin-left: auto; padding: 3px 5px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 5px; color: currentColor; font-family: inherit; font-size: 9px; font-weight: 700; line-height: 1; opacity: 0; transform: translateX(4px); transition: opacity .18s ease, transform .18s ease, background-color .18s ease; white-space: nowrap; }
+.bk-nav-item:hover .bk-nav-shortcut, .bk-nav-item:focus-visible .bk-nav-shortcut { opacity: .9; transform: translateX(0); }
+.bk-nav-item.is-active .bk-nav-shortcut { border-color: rgb(255 255 255 / 24%); }
+.bk-nav-shortcut:hover { background: rgb(255 255 255 / 9%); }
 .bk-nav-item.is-icon-only { width: 56px; justify-content: center; gap: 0; padding-inline: 0; }
 .bk-nav-item.is-icon-only.is-active { background: transparent; box-shadow: none; }
 .bk-nav-premium-icon { width: 32px; height: 32px; display: grid; place-items: center; flex: 0 0 32px; overflow: visible; }

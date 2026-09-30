@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Bell,
   CalendarDays,
@@ -23,9 +23,9 @@ import {
 import MongoDBUsageSidebar from './MongoDBUsageSidebar';
 
 const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Dashboard', icon: CalendarDays, aliases: ['/dashboard/prayer-routine'] },
-  { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
-  { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen },
+  { href: '/dashboard', label: 'Dashboard', icon: CalendarDays, shortcut: 'Alt ⇧ D', aliases: ['/dashboard/prayer-routine'] },
+  { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare, shortcut: 'Alt ⇧ T' },
+  { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen, shortcut: 'Alt ⇧ N' },
   { href: '/dashboard/goals', label: 'Goals', icon: Target },
   { href: '/dashboard/manage', label: 'Manage', icon: SlidersHorizontal },
   { href: '/dashboard/ahd-nama', label: 'Ahd Nama', iconOnly: true, premium: true, premiumIcon: '/images/barakah/perimum icon/ahd_nama_icon.png' },
@@ -41,6 +41,7 @@ function isActivePath(item, pathname) {
 
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(null);
   const [dark, setDark] = useState(true);
 
@@ -56,6 +57,23 @@ export default function DashboardShell({ children }) {
     desktop.addEventListener('change', syncSidebarForViewport);
     return () => desktop.removeEventListener('change', syncSidebarForViewport);
   }, []);
+
+  useEffect(() => {
+    const navigateWithShortcut = (event) => {
+      if (event.ctrlKey || event.metaKey || !event.altKey || !event.shiftKey || event.repeat) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target?.tagName) || event.target?.isContentEditable) return;
+
+      const shortcutRoutes = { d: '/dashboard', t: '/dashboard/tasks', n: '/dashboard/notes' };
+      const route = shortcutRoutes[event.key.toLowerCase()];
+      if (!route) return;
+
+      event.preventDefault();
+      router.push(route);
+    };
+
+    document.addEventListener('keydown', navigateWithShortcut);
+    return () => document.removeEventListener('keydown', navigateWithShortcut);
+  }, [router]);
 
   useEffect(() => {
     if (!sidebarOpen) return undefined;
@@ -120,6 +138,7 @@ export default function DashboardShell({ children }) {
                   </span>
                 ) : <Icon size={18} strokeWidth={1.85} />}
                 {!item.iconOnly && <span>{item.label}</span>}
+                {item.shortcut && <kbd className="bk-nav-shortcut" aria-label={`Keyboard shortcut ${item.shortcut}`}>{item.shortcut}</kbd>}
               </Link>
             );
           })}
