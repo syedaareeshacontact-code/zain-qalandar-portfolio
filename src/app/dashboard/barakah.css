@@ -111,6 +111,7 @@
 
 .bk-nav-item:hover { background: rgb(45 62 82 / 6%); color: var(--bk-text); }
 .bk-nav-item.is-icon-only { width: 56px; justify-content: center; gap: 0; padding-inline: 0; }
+.bk-nav-item.is-icon-only.is-active { background: transparent; box-shadow: none; }
 .bk-nav-premium-icon { width: 32px; height: 32px; display: grid; place-items: center; flex: 0 0 32px; overflow: visible; }
 .bk-nav-premium-icon img { width: 52px; height: 52px; max-width: none; object-fit: contain; filter: drop-shadow(0 3px 5px rgb(0 0 0 / 24%)); }
 .bk-nav-item.is-active {
@@ -120,6 +121,7 @@
   box-shadow: 0 8px 18px rgb(43 58 77 / 18%);
 }
 .bk-shell.is-dark .bk-nav-item.is-active { background: #3b4c63; color: #fff; }
+.bk-shell.is-dark .bk-nav-item.is-icon-only.is-active { background: transparent; color: inherit; box-shadow: none; }
 
 .bk-mongodb-sidebar-card { margin-top: auto; padding: 11px 11px 10px; border: 1px solid color-mix(in srgb, var(--bk-teal) 28%, var(--bk-line)); border-radius: 11px; background: linear-gradient(145deg, color-mix(in srgb, var(--bk-teal) 10%, var(--bk-panel)), var(--bk-panel)); }
 .bk-mongodb-sidebar-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--bk-navy); font-size: 10px; font-weight: 750; }

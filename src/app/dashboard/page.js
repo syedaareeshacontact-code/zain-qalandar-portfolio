@@ -1,7 +1,7 @@
 import PrayerRoutine from '@/components/dashboard/PrayerRoutine';
 
 export const metadata = {
-  title: 'Prayer Routine | Barakah',
+  title: 'Dashboard | Barakah',
   description: 'A prayer-based daily work structure.',
 };
 

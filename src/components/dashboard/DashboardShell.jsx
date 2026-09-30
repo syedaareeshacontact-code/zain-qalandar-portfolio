@@ -9,7 +9,6 @@ import {
   CalendarDays,
   CheckSquare,
   ChevronDown,
-  Home,
   Menu,
   Moon,
   PanelLeftClose,
@@ -24,8 +23,7 @@ import {
 import MongoDBUsageSidebar from './MongoDBUsageSidebar';
 
 const NAV_ITEMS = [
-  { href: '/dashboard/overview', label: 'Dashboard', icon: Home },
-  { href: '/dashboard', label: 'Prayer Routine', icon: CalendarDays, aliases: ['/dashboard/prayer-routine'] },
+  { href: '/dashboard', label: 'Dashboard', icon: CalendarDays, aliases: ['/dashboard/prayer-routine'] },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen },
   { href: '/dashboard/goals', label: 'Goals', icon: Target },
