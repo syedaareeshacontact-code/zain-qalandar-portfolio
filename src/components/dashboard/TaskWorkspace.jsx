@@ -429,7 +429,7 @@ export default function TaskWorkspace() {
               <p>{activeList ? activeList.name : 'All lists'}</p>
               <h2>{selectedView.label}</h2>
             </div>
-            <button className="bk-task-new-button" type="button" onClick={openNewTask} disabled={!lists.length}>
+            <button className="bk-task-new-button" type="button" aria-label="New task" onClick={openNewTask} disabled={!lists.length}>
               <Plus size={18} /> <span>New task</span>
             </button>
           </header>
