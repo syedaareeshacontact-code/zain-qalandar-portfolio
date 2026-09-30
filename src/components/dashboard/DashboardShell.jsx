@@ -16,6 +16,8 @@ import {
   Search,
   ScrollText,
   Sun,
+  NotebookPen,
+  SlidersHorizontal,
   Target,
   X,
 } from 'lucide-react';
@@ -27,6 +29,8 @@ const NAV_ITEMS = [
   { href: '/dashboard/ahd-nama', label: 'Ahd Nama', icon: ScrollText },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/dashboard/goals', label: 'Goals', icon: Target },
+  { href: '/dashboard/manage', label: 'Manage', icon: SlidersHorizontal },
+  { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen },
 ];
 
 function isActivePath(item, pathname) {
