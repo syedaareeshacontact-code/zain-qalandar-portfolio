@@ -1,9 +1,10 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Database, HardDrive, LoaderCircle, RefreshCw } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchCloudinaryUsage } from '@/store/features/cloudinaryUsage/cloudinaryUsageSlice';
 
-const CloudinaryUsageContext = createContext(null);
 const MEBIBYTE = 1024 * 1024;
 const GIBIBYTE = 1024 * MEBIBYTE;
 
@@ -35,44 +36,16 @@ function formatUpdated(value) {
   }).format(date)}`;
 }
 
-export function CloudinaryUsageProvider({ children }) {
-  const [usage, setUsage] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const refresh = useCallback(async () => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/cloudinary/usage', { cache: 'no-store' });
-      const payload = await response.json();
-
-      if (!response.ok) throw new Error(payload.message || 'Cloudinary usage could not be loaded.');
-      setUsage(payload.data);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'Cloudinary usage could not be loaded.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+export function useCloudinaryUsage() {
+  const dispatch = useAppDispatch();
+  const { data: usage, status, error } = useAppSelector((state) => state.cloudinaryUsage);
+  const refresh = useCallback(() => dispatch(fetchCloudinaryUsage()), [dispatch]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    if (status === 'idle') void refresh();
+  }, [refresh, status]);
 
-  const value = useMemo(() => ({ usage, isLoading, error, refresh }), [error, isLoading, refresh, usage]);
-  return <CloudinaryUsageContext.Provider value={value}>{children}</CloudinaryUsageContext.Provider>;
-}
-
-export function useCloudinaryUsage() {
-  const context = useContext(CloudinaryUsageContext);
-
-  if (!context) {
-    throw new Error('useCloudinaryUsage must be used inside CloudinaryUsageProvider.');
-  }
-
-  return context;
+  return { usage, isLoading: status === 'idle' || status === 'loading', error, refresh };
 }
 
 export function CloudinaryUsageCard() {

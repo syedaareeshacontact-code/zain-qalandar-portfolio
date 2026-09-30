@@ -1,7 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Database, LoaderCircle, RefreshCw } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchMongoDBUsage } from '@/store/features/mongodbUsage/mongodbUsageSlice';
 
 const MEBIBYTE = 1024 * 1024;
 
@@ -17,29 +19,14 @@ function getPercentage(used, limit) {
 }
 
 export default function MongoDBUsageSidebar() {
-  const [usage, setUsage] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const refresh = useCallback(async () => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/mongodb/usage', { cache: 'no-store' });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.message || 'MongoDB usage could not be loaded.');
-      setUsage(payload.data);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'MongoDB usage could not be loaded.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const dispatch = useAppDispatch();
+  const { data: usage, status, error } = useAppSelector((state) => state.mongodbUsage);
+  const isLoading = status === 'idle' || status === 'loading';
+  const refresh = useCallback(() => dispatch(fetchMongoDBUsage()), [dispatch]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    if (status === 'idle') void refresh();
+  }, [refresh, status]);
 
   const usedPercent = getPercentage(usage?.usedBytes, usage?.limitBytes);
 

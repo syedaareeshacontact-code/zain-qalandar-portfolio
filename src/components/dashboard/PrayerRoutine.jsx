@@ -1,16 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Check, Clock3, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 import DashboardHero from '@/components/dashboard/DashboardHero';
-import {
-  getActivePrayerBlockIndex,
-  getHeroBlockIndex,
-  getPrayerIntervalProgress,
-  getPrayerDateKey,
-  getPrayerRoutineData,
-  isOvernightReview,
-} from '@/lib/prayerTimes';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchPrayerRoutine, refreshPrayerProgress } from '@/store/features/prayerRoutine/prayerRoutineSlice';
+import { getPrayerDateKey } from '@/lib/prayerTimes';
 
 const HERO_IMAGES = [
   '/images/barakah/hero/01-fajr-to-dhuhr.webp',
@@ -72,41 +67,29 @@ const BLOCKS = [
 ];
 
 export default function PrayerRoutine() {
-  const [prayerData, setPrayerData] = useState(null);
+  const dispatch = useAppDispatch();
+  const { data: prayerData, status } = useAppSelector((state) => state.prayerRoutine);
 
   useEffect(() => {
-    let isMounted = true;
-    const loadPrayerData = async () => {
-      const data = await getPrayerRoutineData();
-      if (isMounted && data) setPrayerData(data);
-    };
+    if (status === 'idle') void dispatch(fetchPrayerRoutine());
+  }, [dispatch, status]);
+
+  useEffect(() => {
+    if (status !== 'succeeded' || !prayerData?.dateKey) return undefined;
+
     const updateCurrentBlock = () => {
-      setPrayerData((current) => {
-        if (!current) return current;
-        if (current.dateKey !== getPrayerDateKey()) {
-          loadPrayerData();
-          return current;
-        }
-        return {
-          ...current,
-          activeBlockIndex: getActivePrayerBlockIndex(current.timings, current.dateKey),
-          heroBlockIndex: getHeroBlockIndex(current.timings, current.dateKey),
-          overnightReview: isOvernightReview(current.timings, current.dateKey),
-          progress: getPrayerIntervalProgress(current.timings, current.dateKey, {
-            previousTimings: current.previousTimings,
-            nextTimings: current.nextTimings,
-          }),
-        };
-      });
+      if (prayerData.dateKey !== getPrayerDateKey()) {
+        void dispatch(fetchPrayerRoutine());
+        return;
+      }
+      dispatch(refreshPrayerProgress());
     };
 
-    loadPrayerData();
     const timer = window.setInterval(updateCurrentBlock, 60_000);
     return () => {
-      isMounted = false;
       window.clearInterval(timer);
     };
-  }, []);
+  }, [dispatch, prayerData?.dateKey, status]);
 
   const blocks = BLOCKS.map((block, index) => ({
     ...block,

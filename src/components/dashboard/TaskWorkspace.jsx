@@ -19,6 +19,19 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import {
+  createTask,
+  createTaskList,
+  deleteTask,
+  deleteTaskList,
+  fetchTaskWorkspace,
+  optimisticallyUpdateTask,
+  replaceTasks,
+  reorderTasks as persistTaskOrder,
+  updateTask,
+  updateTaskList,
+} from '@/store/features/tasks/tasksSlice';
 
 const SMART_VIEWS = [
   { id: 'all', label: 'My tasks', icon: ListTodo },
@@ -72,21 +85,13 @@ function repeatLabel(value) {
   }[value] || '';
 }
 
-async function apiRequest(url, options) {
-  const response = await fetch(url, options);
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.message || 'Something went wrong.');
-  return payload.data;
-}
-
 export default function TaskWorkspace() {
-  const [tasks, setTasks] = useState([]);
-  const [lists, setLists] = useState([]);
+  const dispatch = useAppDispatch();
+  const { tasks, lists, status, error: workspaceError } = useAppSelector((state) => state.tasks);
   const [view, setView] = useState('all');
   const [activeListId, setActiveListId] = useState('all');
   const [search, setSearch] = useState('');
   const [quickTitle, setQuickTitle] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isQuickSaving, setIsQuickSaving] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [busyTaskId, setBusyTaskId] = useState('');
@@ -102,31 +107,17 @@ export default function TaskWorkspace() {
   const [listColor, setListColor] = useState(LIST_COLORS[0]);
   const [confirmDeleteList, setConfirmDeleteList] = useState(false);
   const [draggedTaskId, setDraggedTaskId] = useState('');
+  const isLoading = status === 'idle' || status === 'loading';
 
   useEffect(() => {
-    let cancelled = false;
+    void dispatch(fetchTaskWorkspace()).unwrap().catch((loadError) => {
+      setError(loadError instanceof Error ? loadError.message : 'Tasks could not be loaded.');
+    });
+  }, [dispatch]);
 
-    const loadWorkspace = async () => {
-      try {
-        const [taskData, listData] = await Promise.all([
-          apiRequest('/api/tasks', { cache: 'no-store' }),
-          apiRequest('/api/task-lists', { cache: 'no-store' }),
-        ]);
-
-        if (!cancelled) {
-          setTasks(taskData);
-          setLists(listData);
-        }
-      } catch (loadError) {
-        if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Tasks could not be loaded.');
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    };
-
-    void loadWorkspace();
-    return () => { cancelled = true; };
-  }, []);
+  useEffect(() => {
+    if (workspaceError) setError(workspaceError);
+  }, [workspaceError]);
 
   useEffect(() => {
     if (!isEditorOpen && !isListEditorOpen) return undefined;
@@ -216,12 +207,7 @@ export default function TaskWorkspace() {
     setError('');
 
     try {
-      const data = await apiRequest('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, listId, dueDate: view === 'today' ? today : null, starred: view === 'starred' }),
-      });
-      setTasks((current) => [...current, data.task]);
+      await dispatch(createTask({ title, listId, dueDate: view === 'today' ? today : null, starred: view === 'starred' })).unwrap();
       setQuickTitle('');
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Task could not be created.');
@@ -238,20 +224,17 @@ export default function TaskWorkspace() {
     setError('');
 
     try {
-      const data = await apiRequest('/api/tasks', {
-        method: editingTaskId ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...(editingTaskId ? { id: editingTaskId } : {}),
-          ...taskForm,
-          dueDate: taskForm.dueDate || null,
-          dueTime: taskForm.dueTime || null,
-        }),
-      });
+      const updates = {
+        ...taskForm,
+        dueDate: taskForm.dueDate || null,
+        dueTime: taskForm.dueTime || null,
+      };
 
-      setTasks((current) => editingTaskId
-        ? current.map((task) => (task.id === editingTaskId ? data.task : task))
-        : [...current, data.task]);
+      if (editingTaskId) {
+        await dispatch(updateTask({ id: editingTaskId, updates })).unwrap();
+      } else {
+        await dispatch(createTask(updates)).unwrap();
+      }
       setIsEditorOpen(false);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Task could not be saved.');
@@ -264,28 +247,19 @@ export default function TaskWorkspace() {
     const previousTasks = tasks;
     setBusyTaskId(task.id);
     setError('');
-    setTasks((current) => current.map((item) => (item.id === task.id ? { ...item, ...updates } : item)));
+    dispatch(optimisticallyUpdateTask({ id: task.id, updates }));
 
     try {
-      const data = await apiRequest('/api/tasks', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: task.id, ...updates }),
-      });
-
-      setTasks((current) => {
-        const updated = current.map((item) => (item.id === task.id ? data.task : item));
-        return data.recurringTask ? [...updated, data.recurringTask] : updated;
-      });
+      await dispatch(updateTask({ id: task.id, updates })).unwrap();
     } catch (updateError) {
-      setTasks(previousTasks);
+      dispatch(replaceTasks(previousTasks));
       setError(updateError instanceof Error ? updateError.message : 'Task could not be updated.');
     } finally {
       setBusyTaskId('');
     }
   };
 
-  const deleteTask = async () => {
+  const handleDeleteTask = async () => {
     if (!editingTaskId || isSaving) return;
     if (!confirmDeleteTask) {
       setConfirmDeleteTask(true);
@@ -294,8 +268,7 @@ export default function TaskWorkspace() {
 
     setIsSaving(true);
     try {
-      await apiRequest(`/api/tasks?id=${editingTaskId}`, { method: 'DELETE' });
-      setTasks((current) => current.filter((task) => task.id !== editingTaskId));
+      await dispatch(deleteTask(editingTaskId)).unwrap();
       setIsEditorOpen(false);
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : 'Task could not be deleted.');
@@ -337,16 +310,11 @@ export default function TaskWorkspace() {
     setError('');
 
     try {
-      const data = await apiRequest('/api/task-lists', {
-        method: editingListId ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...(editingListId ? { id: editingListId } : {}), name: listName, color: listColor }),
-      });
-
-      setLists((current) => editingListId
-        ? current.map((list) => (list.id === editingListId ? data : list))
-        : [...current, data]);
-      if (!editingListId) setActiveListId(data.id);
+      const updates = { name: listName, color: listColor };
+      const savedList = editingListId
+        ? await dispatch(updateTaskList({ id: editingListId, updates })).unwrap()
+        : await dispatch(createTaskList(updates)).unwrap();
+      if (!editingListId) setActiveListId(savedList.id);
       setIsListEditorOpen(false);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Task list could not be saved.');
@@ -364,11 +332,7 @@ export default function TaskWorkspace() {
 
     setIsSaving(true);
     try {
-      const data = await apiRequest(`/api/task-lists?id=${editingListId}`, { method: 'DELETE' });
-      setLists((current) => current.filter((list) => list.id !== editingListId));
-      setTasks((current) => current.map((task) => (
-        task.listId === editingListId ? { ...task, listId: data.fallbackListId } : task
-      )));
+      const data = await dispatch(deleteTaskList(editingListId)).unwrap();
       if (activeListId === editingListId) setActiveListId(data.fallbackListId);
       setIsListEditorOpen(false);
     } catch (deleteError) {
@@ -388,18 +352,17 @@ export default function TaskWorkspace() {
     const [moved] = reordered.splice(fromIndex, 1);
     reordered.splice(targetIndex, 0, moved);
     const orderMap = new Map(reordered.map((task, index) => [task.id, (index + 1) * 1000]));
-    setTasks((current) => current.map((task) => (
+    const previousTasks = tasks;
+    const orderedTasks = reordered.map((task, index) => ({ id: task.id, order: (index + 1) * 1000 }));
+    dispatch(replaceTasks(tasks.map((task) => (
       orderMap.has(task.id) ? { ...task, order: orderMap.get(task.id) } : task
-    )));
+    ))));
     setDraggedTaskId('');
 
     try {
-      await Promise.all(reordered.map((task, index) => apiRequest('/api/tasks', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: task.id, order: (index + 1) * 1000 }),
-      })));
+      await dispatch(persistTaskOrder(orderedTasks)).unwrap();
     } catch (reorderError) {
+      dispatch(replaceTasks(previousTasks));
       setError(reorderError instanceof Error ? reorderError.message : 'Task order could not be saved.');
     }
   };
@@ -584,7 +547,7 @@ export default function TaskWorkspace() {
             </div>
 
             <div className="bk-task-editor-actions">
-              {editingTaskId && <button className={`bk-task-delete-button${confirmDeleteTask ? ' is-confirming' : ''}`} type="button" onClick={() => void deleteTask()} disabled={isSaving}><Trash2 size={15} />{confirmDeleteTask ? 'Confirm delete' : 'Delete'}</button>}
+              {editingTaskId && <button className={`bk-task-delete-button${confirmDeleteTask ? ' is-confirming' : ''}`} type="button" onClick={() => void handleDeleteTask()} disabled={isSaving}><Trash2 size={15} />{confirmDeleteTask ? 'Confirm delete' : 'Delete'}</button>}
               <button className="bk-task-cancel-button" type="button" onClick={() => setIsEditorOpen(false)} disabled={isSaving}>Cancel</button>
               <button className="bk-task-save-button" type="submit" disabled={!taskForm.title.trim() || !taskForm.listId || isSaving}>{isSaving && <LoaderCircle size={15} className="bk-spin" />}{editingTaskId ? 'Save changes' : 'Create task'}</button>
             </div>

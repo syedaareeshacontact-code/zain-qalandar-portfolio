@@ -13,7 +13,10 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { CloudinaryUsageCard, useCloudinaryUsage } from './CloudinaryUsage';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchCloudinaryUsage } from '@/store/features/cloudinaryUsage/cloudinaryUsageSlice';
+import { deleteUpload, fetchUploads, uploadPdf } from '@/store/features/uploads/uploadsSlice';
+import { CloudinaryUsageCard } from './CloudinaryUsage';
 
 const MAX_PDF_SIZE = 20 * 1024 * 1024;
 
@@ -38,42 +41,22 @@ function formatDate(dateValue) {
 }
 
 export default function AhdNamaUpload() {
-  const { refresh: refreshCloudinaryUsage } = useCloudinaryUsage();
-  const [uploads, setUploads] = useState([]);
+  const dispatch = useAppDispatch();
+  const { items: uploads, listStatus, uploadStatus, deleteStatus, error: uploadError } = useAppSelector((state) => state.uploads);
+  const isLoadingList = listStatus === 'idle' || listStatus === 'loading';
+  const isUploading = uploadStatus === 'loading';
+  const isDeleting = deleteStatus === 'loading';
+  const listError = listStatus === 'failed' ? uploadError : '';
   const [selectedFile, setSelectedFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoadingList, setIsLoadingList] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [error, setError] = useState('');
   const [deleteError, setDeleteError] = useState('');
-  const [listError, setListError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const loadUploads = async () => {
-    setIsLoadingList(true);
-    setListError('');
-
-    try {
-      const response = await fetch('/api/uploads?category=ahd-nama&kind=pdf', { cache: 'no-store' });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.message || 'Could not load PDFs.');
-      }
-
-      setUploads(payload.data);
-    } catch (loadError) {
-      setListError(loadError instanceof Error ? loadError.message : 'Could not load PDFs.');
-    } finally {
-      setIsLoadingList(false);
-    }
-  };
-
   useEffect(() => {
-    void loadUploads();
-  }, []);
+    void dispatch(fetchUploads({ category: 'ahd-nama', kind: 'pdf' }));
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isModalOpen && !deleteTarget) return undefined;
@@ -115,25 +98,15 @@ export default function AhdNamaUpload() {
   const handleDelete = async () => {
     if (!deleteTarget || isDeleting) return;
 
-    setIsDeleting(true);
     setDeleteError('');
 
     try {
-      const response = await fetch(`/api/uploads?id=${encodeURIComponent(deleteTarget.id)}`, { method: 'DELETE' });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.message || 'Could not delete this PDF.');
-      }
-
-      setUploads((currentUploads) => currentUploads.filter((upload) => upload.id !== deleteTarget.id));
+      await dispatch(deleteUpload(deleteTarget.id)).unwrap();
       setDeleteTarget(null);
       setSuccessMessage('The PDF was removed from your archive.');
-      void refreshCloudinaryUsage();
+      void dispatch(fetchCloudinaryUsage());
     } catch (deleteUploadError) {
       setDeleteError(deleteUploadError instanceof Error ? deleteUploadError.message : 'Could not delete this PDF.');
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -157,33 +130,16 @@ export default function AhdNamaUpload() {
   const handleUpload = async () => {
     if (!selectedFile || isUploading) return;
 
-    setIsUploading(true);
     setError('');
 
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('category', 'ahd-nama');
-
-      const response = await fetch('/api/uploads', {
-        method: 'POST',
-        body: formData,
-      });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.message || 'Upload failed.');
-      }
-
-      setUploads((currentUploads) => [payload.data, ...currentUploads]);
+      await dispatch(uploadPdf({ file: selectedFile, category: 'ahd-nama' })).unwrap();
       setSuccessMessage('Your PDF has been added to the archive.');
       setIsModalOpen(false);
       setSelectedFile(null);
-      void refreshCloudinaryUsage();
+      void dispatch(fetchCloudinaryUsage());
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : 'Upload failed.');
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -215,7 +171,7 @@ export default function AhdNamaUpload() {
         ) : listError ? (
           <div className="bk-ahd-list-error">
             <span>{listError}</span>
-            <button type="button" onClick={() => void loadUploads()}><RefreshCw size={15} /> Try again</button>
+            <button type="button" onClick={() => void dispatch(fetchUploads({ category: 'ahd-nama', kind: 'pdf' }))}><RefreshCw size={15} /> Try again</button>
           </div>
         ) : uploads.length === 0 ? (
           <div className="bk-ahd-empty">

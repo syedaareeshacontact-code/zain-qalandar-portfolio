@@ -2,6 +2,7 @@ import './barakah.css';
 import './prayer-routine.css';
 import './tasks.css';
 import DashboardShell from '@/components/dashboard/DashboardShell';
+import StoreProvider from '@/store/provider';
 
 export const metadata = {
   title: 'Barakah | Prayer Routine',
@@ -9,5 +10,9 @@ export const metadata = {
 };
 
 export default function DashboardLayout({ children }) {
-  return <DashboardShell>{children}</DashboardShell>;
+  return (
+    <StoreProvider>
+      <DashboardShell>{children}</DashboardShell>
+    </StoreProvider>
+  );
 }

@@ -19,7 +19,6 @@ import {
   Target,
   X,
 } from 'lucide-react';
-import { CloudinaryUsageProvider } from './CloudinaryUsage';
 import MongoDBUsageSidebar from './MongoDBUsageSidebar';
 
 const NAV_ITEMS = [
@@ -66,8 +65,7 @@ export default function DashboardShell({ children }) {
   }, [sidebarOpen]);
 
   return (
-    <CloudinaryUsageProvider>
-      <div className={`bk-shell${dark ? ' is-dark' : ''}${sidebarOpen === true ? ' is-open' : sidebarOpen === false ? ' is-collapsed' : ''}`}>
+    <div className={`bk-shell${dark ? ' is-dark' : ''}${sidebarOpen === true ? ' is-open' : sidebarOpen === false ? ' is-collapsed' : ''}`}>
       <button className="bk-backdrop" type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />
 
       <aside className="bk-sidebar" aria-label="Barakah navigation">
@@ -151,7 +149,6 @@ export default function DashboardShell({ children }) {
           {children}
         </main>
       </div>
-      </div>
-    </CloudinaryUsageProvider>
+    </div>
   );
 }
