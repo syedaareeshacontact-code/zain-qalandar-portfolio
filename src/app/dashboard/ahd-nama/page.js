@@ -1,5 +1,6 @@
 import { Check, HeartHandshake, MoonStar, Sunrise } from 'lucide-react';
 import DashboardHero from '@/components/dashboard/DashboardHero';
+import AhdNamaUpload from '@/components/dashboard/AhdNamaUpload';
 
 export const metadata = {
   title: 'Ahd Nama | Barakah',
@@ -49,6 +50,8 @@ export default function AhdNamaPage() {
           </article>
         ))}
       </div>
+
+      <AhdNamaUpload />
     </section>
   );
 }

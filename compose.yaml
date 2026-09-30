@@ -2,7 +2,7 @@ services:
     web:
         image: node:20-alpine
         working_dir: /app
-        command: npm start
+        command: npm start -- -p 8080
         ports:
             - '8080:8080'
         build: .

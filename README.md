@@ -45,7 +45,7 @@ ERPfy and Propteq links open their product sign-in pages.
 
 | Area | Technology |
 | --- | --- |
-| Framework | Next.js 16 with the App Router and static export |
+| Framework | Next.js 16 with the App Router and Route Handlers |
 | Interface | React 19, JavaScript/JSX |
 | Profile data | TypeScript types and required-field validation |
 | Styling | CSS custom properties, responsive CSS, Tailwind CSS 4 |
@@ -62,7 +62,16 @@ npm ci
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000). No backend, API keys, or environment variables are needed for the current site.
+Open [localhost:3000](http://localhost:3000). The Ahd Nama upload feature uses the server-side environment variables below:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
+
+Uploads are sent to `POST /api/uploads` as `multipart/form-data` using the `file` field. The API validates file type and size, stores the asset in Cloudinary, and records its metadata in MongoDB.
 
 ## Customize
 
@@ -125,24 +134,14 @@ The status explains the draft action and keeps entered text in the form. A direc
 
 ## Build and deployment
 
-Run the code checks and create the production export:
+Run the code checks and create the production build:
 
 ```bash
 npm run lint
 npm run build
 ```
 
-[`next.config.mjs`](./next.config.mjs) sets `output: "export"`. The generated **`out/`** directory contains the deployable site.
-
-To preview that export locally:
-
-```bash
-npx serve out --listen 3000
-```
-
-For static hosting, use `npm ci` to install dependencies, `npm run build` as the build command, and `out` as the publish directory. Assets are configured for deployment at the domain root.
-
-The existing `npm start` script runs `next start`, which is incompatible with this static-export configuration. The existing Docker files also use that command; serve the contents of `out/` when deploying this version.
+The application runs as a Next.js server because the upload Route Handler needs a Node.js runtime. Configure the four environment variables above in your deployment platform before running `npm start`.
 
 ---
 
