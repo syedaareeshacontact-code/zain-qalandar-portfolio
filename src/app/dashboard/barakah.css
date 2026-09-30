@@ -548,6 +548,7 @@
 .bk-page-with-hero .bk-page-grid { max-width: 980px; }
 .bk-ahd-nama { max-width: none; }
 .bk-ahd-library { max-width: 940px; padding: 23px 8px 48px; }
+.bk-shell.is-collapsed .bk-ahd-library { margin-inline: auto; }
 .bk-ahd-library-actionbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--bk-line); }
 .bk-ahd-kicker { color: var(--bk-teal); font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
 .bk-ahd-documents h2, .bk-ahd-modal h2 { color: var(--bk-navy); font-family: Georgia, 'Times New Roman', serif; font-weight: 700; letter-spacing: -.8px; }

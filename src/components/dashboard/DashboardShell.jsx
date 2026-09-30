@@ -26,11 +26,11 @@ import MongoDBUsageSidebar from './MongoDBUsageSidebar';
 const NAV_ITEMS = [
   { href: '/dashboard/overview', label: 'Dashboard', icon: Home },
   { href: '/dashboard', label: 'Prayer Routine', icon: CalendarDays, aliases: ['/dashboard/prayer-routine'] },
-  { href: '/dashboard/ahd-nama', label: 'Ahd Nama', icon: ScrollText },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
-  { href: '/dashboard/goals', label: 'Goals', icon: Target },
-  { href: '/dashboard/manage', label: 'Manage', icon: SlidersHorizontal },
   { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen },
+  { href: '/dashboard/goals', label: 'Goals', icon: Target },
+  { href: '/dashboard/ahd-nama', label: 'Ahd Nama', icon: ScrollText, premium: true },
+  { href: '/dashboard/manage', label: 'Manage', icon: SlidersHorizontal },
 ];
 
 function isActivePath(item, pathname) {
@@ -68,6 +68,18 @@ export default function DashboardShell({ children }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [sidebarOpen]);
 
+  useEffect(() => {
+    const toggleSidebarWithShortcut = (event) => {
+      if (!event.ctrlKey || event.metaKey || event.altKey || event.key.toLowerCase() !== 'b') return;
+
+      event.preventDefault();
+      setSidebarOpen((current) => (current === null ? window.matchMedia('(min-width: 781px)').matches : !current));
+    };
+
+    document.addEventListener('keydown', toggleSidebarWithShortcut);
+    return () => document.removeEventListener('keydown', toggleSidebarWithShortcut);
+  }, []);
+
   return (
     <div className={`bk-shell${dark ? ' is-dark' : ''}${sidebarOpen === true ? ' is-open' : sidebarOpen === false ? ' is-collapsed' : ''}`}>
       <button className="bk-backdrop" type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />
@@ -100,7 +112,7 @@ export default function DashboardShell({ children }) {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`bk-nav-item${active ? ' is-active' : ''}`}
+                className={`bk-nav-item${active ? ' is-active' : ''}${item.premium ? ' is-premium' : ''}`}
               >
                 <Icon size={18} strokeWidth={1.85} />
                 <span>{item.label}</span>
