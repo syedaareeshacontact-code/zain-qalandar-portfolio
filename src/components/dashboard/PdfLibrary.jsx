@@ -12,6 +12,7 @@ import {
   Wrench, X,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useNotification } from '@/context/notification-context';
 import { fetchCloudinaryUsage } from '@/store/features/cloudinaryUsage/cloudinaryUsageSlice';
 import { deleteUpload, fetchUploads, getUploadScopeKey, isUploadScopeStale, uploadPdf } from '@/store/features/uploads/uploadsSlice';
 import { CloudinaryUsageCard } from './CloudinaryUsage';
@@ -80,6 +81,7 @@ export default function PdfLibrary({
   onCategoriesChanged,
 }) {
   const dispatch = useAppDispatch();
+  const { success: notifySuccess, error: notifyError, warning: notifyWarning } = useNotification();
   const inputId = useId();
   const uploadScope = useAppSelector((state) => state.uploads.scopes?.[getUploadScopeKey(category, 'pdf')]);
   const { uploadStatus, deleteStatus } = useAppSelector((state) => state.uploads);
@@ -114,6 +116,10 @@ export default function PdfLibrary({
     if (uploadScope?.status === 'loading' || uploadScope?.status === 'failed') return;
     if (isUploadScopeStale(uploadScope)) void dispatch(fetchUploads({ category, kind: 'pdf' }));
   }, [category, dispatch, uploadScope]);
+
+  useEffect(() => {
+    if (listError) notifyError(listError);
+  }, [listError, notifyError]);
 
   useEffect(() => {
     if (!isModalOpen && !deleteTarget && !categoryDialog && !categoryDeleteTarget) return undefined;
@@ -177,16 +183,29 @@ export default function PdfLibrary({
       await dispatch(deleteUpload(deleteTarget.id)).unwrap();
       setDeleteTarget(null);
       setSuccessMessage('The PDF was removed from your archive.');
+      notifySuccess('PDF removed from your archive.');
       void dispatch(fetchCloudinaryUsage());
     } catch (deleteUploadError) {
-      setDeleteError(deleteUploadError instanceof Error ? deleteUploadError.message : 'Could not delete this PDF.');
+      const message = deleteUploadError instanceof Error ? deleteUploadError.message : 'Could not delete this PDF.';
+      setDeleteError(message);
+      notifyError(message);
     }
   };
 
   const chooseFile = (file) => {
     if (!file) return;
-    if (!isPdf(file)) { setError('Please select a PDF file.'); return; }
-    if (file.size === 0 || file.size > MAX_PDF_SIZE) { setError('Your PDF must be smaller than 20 MB.'); return; }
+    if (!isPdf(file)) {
+      const message = 'Please select a PDF file.';
+      setError(message);
+      notifyWarning(message);
+      return;
+    }
+    if (file.size === 0 || file.size > MAX_PDF_SIZE) {
+      const message = 'Your PDF must be smaller than 20 MB.';
+      setError(message);
+      notifyWarning(message);
+      return;
+    }
     setError('');
     setSelectedFile(file);
   };
@@ -199,9 +218,12 @@ export default function PdfLibrary({
       setSuccessMessage('Your PDF has been added to the archive.');
       setIsModalOpen(false);
       setSelectedFile(null);
+      notifySuccess('PDF added to your archive.');
       void dispatch(fetchCloudinaryUsage());
     } catch (uploadRequestError) {
-      setError(uploadRequestError instanceof Error ? uploadRequestError.message : 'Upload failed.');
+      const message = uploadRequestError instanceof Error ? uploadRequestError.message : 'Upload failed.';
+      setError(message);
+      notifyError(message);
     }
   };
 
@@ -257,8 +279,11 @@ export default function PdfLibrary({
       setCategoryDialog(null);
       setCategoryStatus('idle');
       setSuccessMessage(isEditing ? 'Category updated.' : 'Category created.');
+      notifySuccess(isEditing ? 'Category updated.' : 'Category created.');
     } catch (saveError) {
-      setCategoryError(saveError instanceof Error ? saveError.message : 'The category could not be saved.');
+      const message = saveError instanceof Error ? saveError.message : 'The category could not be saved.';
+      setCategoryError(message);
+      notifyError(message);
       setCategoryStatus('idle');
     }
   };
@@ -278,8 +303,11 @@ export default function PdfLibrary({
       setCategoryStatus('idle');
       setActiveCategory('all');
       setSuccessMessage('Category deleted. Its PDFs were moved to Other.');
+      notifySuccess('Category deleted. Its PDFs were moved to Other.');
     } catch (deleteErrorMessage) {
-      setCategoryError(deleteErrorMessage instanceof Error ? deleteErrorMessage.message : 'The category could not be deleted.');
+      const message = deleteErrorMessage instanceof Error ? deleteErrorMessage.message : 'The category could not be deleted.';
+      setCategoryError(message);
+      notifyError(message);
       setCategoryStatus('idle');
     }
   };

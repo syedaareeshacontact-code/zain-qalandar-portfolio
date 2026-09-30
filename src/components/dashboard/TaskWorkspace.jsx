@@ -20,6 +20,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useNotification } from '@/context/notification-context';
 import {
   createTask,
   createTaskList,
@@ -96,7 +97,8 @@ function TaskListSkeleton() {
 
 export default function TaskWorkspace() {
   const dispatch = useAppDispatch();
-  const { tasks, lists, status, lastFetchedAt, error: workspaceError } = useAppSelector((state) => state.tasks);
+  const { success: notifySuccess, error: notifyError } = useNotification();
+  const { tasks, lists, status, lastFetchedAt } = useAppSelector((state) => state.tasks);
   const [view, setView] = useState('all');
   const [activeListId, setActiveListId] = useState('all');
   const [search, setSearch] = useState('');
@@ -104,7 +106,6 @@ export default function TaskWorkspace() {
   const [isQuickSaving, setIsQuickSaving] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [busyTaskId, setBusyTaskId] = useState('');
-  const [error, setError] = useState('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState('');
   const [taskForm, setTaskForm] = useState(EMPTY_FORM);
@@ -122,13 +123,9 @@ export default function TaskWorkspace() {
   useEffect(() => {
     if (!isTaskWorkspaceStale({ status, lastFetchedAt })) return;
     void dispatch(fetchTaskWorkspace()).unwrap().catch((loadError) => {
-      setError(loadError instanceof Error ? loadError.message : 'Tasks could not be loaded.');
+      notifyError(loadError instanceof Error ? loadError.message : 'Tasks could not be loaded.');
     });
-  }, [dispatch, lastFetchedAt, status]);
-
-  useEffect(() => {
-    if (workspaceError) setError(workspaceError);
-  }, [workspaceError]);
+  }, [dispatch, lastFetchedAt, notifyError, status]);
 
   useEffect(() => {
     if (!isEditorOpen && !isListEditorOpen) return undefined;
@@ -215,13 +212,13 @@ export default function TaskWorkspace() {
     if (!title || !listId || isQuickSaving) return;
 
     setIsQuickSaving(true);
-    setError('');
 
     try {
       await dispatch(createTask({ title, listId, dueDate: view === 'today' ? today : null, starred: view === 'starred' })).unwrap();
       setQuickTitle('');
+      notifySuccess('Task added to your list.');
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Task could not be created.');
+      notifyError(saveError instanceof Error ? saveError.message : 'Task could not be created.');
     } finally {
       setIsQuickSaving(false);
     }
@@ -232,7 +229,6 @@ export default function TaskWorkspace() {
     if (!taskForm.title.trim() || !taskForm.listId || isSaving) return;
 
     setIsSaving(true);
-    setError('');
 
     try {
       const updates = {
@@ -247,8 +243,9 @@ export default function TaskWorkspace() {
         await dispatch(createTask(updates)).unwrap();
       }
       setIsEditorOpen(false);
+      notifySuccess(editingTaskId ? 'Task updated.' : 'Task created.');
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Task could not be saved.');
+      notifyError(saveError instanceof Error ? saveError.message : 'Task could not be saved.');
     } finally {
       setIsSaving(false);
     }
@@ -257,14 +254,22 @@ export default function TaskWorkspace() {
   const patchTask = async (task, updates) => {
     const previousTasks = tasks;
     setBusyTaskId(task.id);
-    setError('');
     dispatch(optimisticallyUpdateTask({ id: task.id, updates }));
 
     try {
       await dispatch(updateTask({ id: task.id, updates })).unwrap();
+      if (Object.prototype.hasOwnProperty.call(updates, 'completed')) {
+        notifySuccess(updates.completed ? 'Task completed.' : 'Task reopened.');
+      } else if (Object.prototype.hasOwnProperty.call(updates, 'starred')) {
+        notifySuccess(updates.starred ? 'Task added to Starred.' : 'Task removed from Starred.');
+      } else if (Object.prototype.hasOwnProperty.call(updates, 'subtasks')) {
+        notifySuccess('Subtask updated.');
+      } else {
+        notifySuccess('Task updated.');
+      }
     } catch (updateError) {
       dispatch(replaceTasks(previousTasks));
-      setError(updateError instanceof Error ? updateError.message : 'Task could not be updated.');
+      notifyError(updateError instanceof Error ? updateError.message : 'Task could not be updated.');
     } finally {
       setBusyTaskId('');
     }
@@ -281,8 +286,9 @@ export default function TaskWorkspace() {
     try {
       await dispatch(deleteTask(editingTaskId)).unwrap();
       setIsEditorOpen(false);
+      notifySuccess('Task deleted.');
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : 'Task could not be deleted.');
+      notifyError(deleteError instanceof Error ? deleteError.message : 'Task could not be deleted.');
     } finally {
       setIsSaving(false);
     }
@@ -318,7 +324,6 @@ export default function TaskWorkspace() {
     if (!listName.trim() || isSaving) return;
 
     setIsSaving(true);
-    setError('');
 
     try {
       const updates = { name: listName, color: listColor };
@@ -327,8 +332,9 @@ export default function TaskWorkspace() {
         : await dispatch(createTaskList(updates)).unwrap();
       if (!editingListId) setActiveListId(savedList.id);
       setIsListEditorOpen(false);
+      notifySuccess(editingListId ? 'Task list updated.' : 'Task list created.');
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Task list could not be saved.');
+      notifyError(saveError instanceof Error ? saveError.message : 'Task list could not be saved.');
     } finally {
       setIsSaving(false);
     }
@@ -346,8 +352,9 @@ export default function TaskWorkspace() {
       const data = await dispatch(deleteTaskList(editingListId)).unwrap();
       if (activeListId === editingListId) setActiveListId(data.fallbackListId);
       setIsListEditorOpen(false);
+      notifySuccess('Task list deleted. Its tasks were kept safe.');
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : 'Task list could not be deleted.');
+      notifyError(deleteError instanceof Error ? deleteError.message : 'Task list could not be deleted.');
     } finally {
       setIsSaving(false);
     }
@@ -372,16 +379,15 @@ export default function TaskWorkspace() {
 
     try {
       await dispatch(persistTaskOrder(orderedTasks)).unwrap();
+      notifySuccess('Task order saved.');
     } catch (reorderError) {
       dispatch(replaceTasks(previousTasks));
-      setError(reorderError instanceof Error ? reorderError.message : 'Task order could not be saved.');
+      notifyError(reorderError instanceof Error ? reorderError.message : 'Task order could not be saved.');
     }
   };
 
   return (
     <section className="bk-task-app" aria-label="Task manager">
-      {error && <div className="bk-task-toast" role="alert"><span>{error}</span><button type="button" onClick={() => setError('')}><X size={15} /></button></div>}
-
       <div className="bk-task-layout">
         <aside className="bk-task-rail" aria-label="Task filters and lists">
           <p className="bk-task-rail-label">Overview</p>

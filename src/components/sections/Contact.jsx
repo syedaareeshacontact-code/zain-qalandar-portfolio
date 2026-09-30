@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { ArrowUpRight, Check, Copy } from 'lucide-react';
 import { profile } from '@/data/profile';
 import Reveal from '@/components/ui/Reveal';
+import { useNotification } from '@/context/notification-context';
 
 export default function Contact() {
   const { contact, contactSection, design } = profile;
+  const { success: notifySuccess, error: notifyError } = useNotification();
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [copyStatus, setCopyStatus] = useState('');
@@ -19,24 +21,29 @@ export default function Contact() {
     const fields = Object.fromEntries(['name', 'email', 'subject', 'message'].map((name) => [name, String(data.get(name) || '').trim()]));
     if (Object.values(fields).some((value) => !value)) {
       setError(contactSection.form.validation.required);
+      notifyError(contactSection.form.validation.required);
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
       setError(contactSection.form.validation.invalidEmail);
+      notifyError(contactSection.form.validation.invalidEmail);
       return;
     }
     const labels = contactSection.form.emailBody;
     const body = `${labels.nameLabel}: ${fields.name}\n${labels.emailLabel}: ${fields.email}\n${labels.subjectLabel}: ${fields.subject}\n\n${labels.messageLabel}:\n${fields.message}`;
     window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent(fields.subject)}&body=${encodeURIComponent(body)}`;
     setStatus(contactSection.form.successMessage);
+    notifySuccess(contactSection.form.successMessage);
   };
 
   const copyEmail = async () => {
     try {
       await navigator.clipboard.writeText(contact.email);
       setCopyStatus('copied');
+      notifySuccess(design.copiedEmail);
     } catch {
       setCopyStatus('failed');
+      notifyError(design.copyFailed);
     }
   };
 

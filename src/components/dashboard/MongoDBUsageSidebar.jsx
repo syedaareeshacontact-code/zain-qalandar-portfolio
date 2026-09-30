@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from 'react';
 import { Database, LoaderCircle, RefreshCw } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useNotification } from '@/context/notification-context';
 import { fetchMongoDBUsage } from '@/store/features/mongodbUsage/mongodbUsageSlice';
 
 const MEBIBYTE = 1024 * 1024;
@@ -20,9 +21,19 @@ function getPercentage(used, limit) {
 
 export default function MongoDBUsageSidebar() {
   const dispatch = useAppDispatch();
+  const { success: notifySuccess, error: notifyError } = useNotification();
   const { data: usage, status, error } = useAppSelector((state) => state.mongodbUsage);
   const isLoading = status === 'idle' || status === 'loading';
   const refresh = useCallback(() => dispatch(fetchMongoDBUsage()), [dispatch]);
+
+  const handleRefresh = async () => {
+    try {
+      await refresh().unwrap();
+      notifySuccess('MongoDB usage refreshed.');
+    } catch (refreshError) {
+      notifyError(refreshError instanceof Error ? refreshError.message : 'MongoDB usage could not be refreshed.');
+    }
+  };
 
   useEffect(() => {
     if (status === 'idle') void refresh();
@@ -34,7 +45,7 @@ export default function MongoDBUsageSidebar() {
     <section className="bk-mongodb-sidebar-card" aria-label="MongoDB database usage">
       <div className="bk-mongodb-sidebar-head">
         <span><Database size={14} /> MongoDB space</span>
-        <button type="button" onClick={() => void refresh()} disabled={isLoading} aria-label="Refresh MongoDB usage" title="Refresh MongoDB usage">
+        <button type="button" onClick={() => void handleRefresh()} disabled={isLoading} aria-label="Refresh MongoDB usage" title="Refresh MongoDB usage">
           <RefreshCw size={13} className={isLoading ? 'bk-spin' : ''} />
         </button>
       </div>

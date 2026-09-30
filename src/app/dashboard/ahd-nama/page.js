@@ -1,11 +1,17 @@
 import AhdNamaUpload from '@/components/dashboard/AhdNamaUpload';
+import AhdNamaLockScreen from '@/components/dashboard/AhdNamaLockScreen';
 import DashboardHero from '@/components/dashboard/DashboardHero';
+import { isAhdNamaUnlocked } from '@/lib/ahdNamaLock';
 
 export const metadata = {
   title: 'Ahd Nama | Barakah',
 };
 
-export default function AhdNamaPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function AhdNamaPage() {
+  const isUnlocked = await isAhdNamaUnlocked();
+
   return (
     <section className="bk-ahd-nama" aria-labelledby="ahd-nama-title">
       <DashboardHero
@@ -13,7 +19,7 @@ export default function AhdNamaPage() {
         subtitle="A quiet promise to keep faith, character, and work in the right order."
         image="/images/barakah/hero/ahd-nama-hero.webp"
       />
-      <AhdNamaUpload />
+      {isUnlocked ? <AhdNamaUpload /> : <AhdNamaLockScreen />}
     </section>
   );
 }

@@ -1,6 +1,8 @@
 import './globals.css';
 import Script from 'next/script';
 import MotionProvider from '@/components/layout/MotionProvider';
+import NotificationContainer from '@/components/ui/NotificationContainer';
+import { NotificationProvider } from '@/context/notification-context';
 import { profile } from '@/data/profile';
 import { validateProfile } from '@/lib/validateProfile';
 
@@ -45,9 +47,10 @@ export default function RootLayout({ children }) {
 					{themeInitializer}
 				</Script>
 				<a className="skip-link" href="#main-content">{profile.design.skipLink}</a>
-				<MotionProvider>
-					{children}
-				</MotionProvider>
+				<NotificationProvider>
+					<NotificationContainer />
+					<MotionProvider>{children}</MotionProvider>
+				</NotificationProvider>
 			</body>
 		</html>
 	);

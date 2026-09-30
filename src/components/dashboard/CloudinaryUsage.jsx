@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from 'react';
 import { Database, HardDrive, LoaderCircle, RefreshCw } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useNotification } from '@/context/notification-context';
 import { fetchCloudinaryUsage } from '@/store/features/cloudinaryUsage/cloudinaryUsageSlice';
 
 const MEBIBYTE = 1024 * 1024;
@@ -50,6 +51,7 @@ export function useCloudinaryUsage() {
 
 export function CloudinaryUsageCard() {
   const { usage, isLoading, error, refresh } = useCloudinaryUsage();
+  const { success: notifySuccess, error: notifyError } = useNotification();
   const storage = usage?.storage;
   const credits = usage?.credits;
   const storageUsed = storage?.usage;
@@ -62,6 +64,15 @@ export function CloudinaryUsageCard() {
   const creditRemaining = Number.isFinite(creditUsed) && Number.isFinite(creditLimit) ? Math.max(creditLimit - creditUsed, 0) : null;
   const hasStorageLimit = Number.isFinite(storageTotal);
 
+  const handleRefresh = async () => {
+    try {
+      await refresh().unwrap();
+      notifySuccess('Cloudinary usage refreshed.');
+    } catch (refreshError) {
+      notifyError(refreshError instanceof Error ? refreshError.message : 'Cloudinary usage could not be refreshed.');
+    }
+  };
+
   return (
     <section className="bk-ahd-usage" aria-labelledby="cloudinary-usage-title">
       <div className="bk-ahd-usage-head">
@@ -69,7 +80,7 @@ export function CloudinaryUsageCard() {
           <p className="bk-ahd-kicker">Live account data</p>
           <h2 id="cloudinary-usage-title"><HardDrive size={19} /> Cloudinary space</h2>
         </div>
-        <button type="button" onClick={() => void refresh()} disabled={isLoading}>
+        <button type="button" onClick={() => void handleRefresh()} disabled={isLoading}>
           <RefreshCw size={15} className={isLoading ? 'bk-spin' : ''} /> Refresh
         </button>
       </div>

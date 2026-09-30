@@ -129,6 +129,118 @@ h1, h2 { font-family: var(--serif); font-weight: 400; }
 h2 { font-size: clamp(34px, 3.8vw, 47px); letter-spacing: -1.7px; line-height: 1.14; text-wrap: balance; }
 h3 { font-weight: 550; letter-spacing: -.5px; line-height: 1.35; }
 ul { margin: 0; padding: 0; list-style: none; }
+
+.portfolio-notification-viewport {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 120;
+  width: min(390px, calc(100vw - 36px));
+  display: grid;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.portfolio-notification {
+  --notification-color: var(--accent);
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 28px;
+  align-items: start;
+  gap: 11px;
+  overflow: hidden;
+  min-height: 64px;
+  padding: 13px 11px 14px 13px;
+  border: 1px solid color-mix(in srgb, var(--notification-color) 38%, var(--border));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--notification-color) 8%, var(--surface));
+  color: var(--text);
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--shadow) 88%, transparent);
+  backdrop-filter: blur(18px);
+  pointer-events: auto;
+  animation: portfolio-notification-in .3s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.portfolio-notification.is-error { --notification-color: var(--error); }
+.portfolio-notification.is-warning { --notification-color: var(--accent-warm); }
+.portfolio-notification.is-info { --notification-color: var(--accent-cool); }
+
+.portfolio-notification::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+  left: 12px;
+  height: 2px;
+  transform-origin: left;
+  border-radius: 99px;
+  background: var(--notification-color);
+  opacity: .45;
+  animation: portfolio-notification-progress var(--notification-duration) linear both;
+}
+
+.portfolio-notification-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--notification-color) 16%, transparent);
+  color: var(--notification-color);
+}
+
+.portfolio-notification p {
+  min-width: 0;
+  margin: 4px 0 2px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.portfolio-notification button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease;
+}
+
+.portfolio-notification button:hover {
+  background: color-mix(in srgb, var(--notification-color) 14%, transparent);
+  color: var(--text);
+}
+
+@keyframes portfolio-notification-in {
+  from { opacity: 0; transform: translate3d(24px, -8px, 0) scale(.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes portfolio-notification-progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@media (max-width: 600px) {
+  .portfolio-notification-viewport {
+    top: 12px;
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-notification,
+  .portfolio-notification::after {
+    animation-duration: .01ms !important;
+  }
+}
 .page-container { width: min(1120px, calc(100% - 96px)); margin-inline: auto; }
 .section { padding-block: 100px; border-bottom: 1px solid var(--border); }
 .eyebrow { font-family: var(--mono); font-size: 10px; font-weight: 400; line-height: 1.6; letter-spacing: 1.65px; text-transform: uppercase; color: var(--accent); }

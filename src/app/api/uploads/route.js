@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import cloudinary from '@/lib/cloudinary';
+import { isAhdNamaUnlocked } from '@/lib/ahdNamaLock';
 import { getDatabase } from '@/lib/mongodb';
 
 export const runtime = 'nodejs';
@@ -80,6 +81,11 @@ function getCategory(value) {
   return typeof value === 'string' && FOLDERS[value] ? value : 'portfolio';
 }
 
+async function requireAhdNamaUnlock(category) {
+  if (category !== 'ahd-nama' || await isAhdNamaUnlocked()) return null;
+  return jsonError('Ahd Nama is locked. Unlock the archive before accessing its files.', 423);
+}
+
 function serializeUpload(upload) {
   return {
     id: upload._id.toString(),
@@ -97,6 +103,8 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = getCategory(searchParams.get('category'));
+    const lockedResponse = await requireAhdNamaUnlock(category);
+    if (lockedResponse) return lockedResponse;
     const kind = searchParams.get('kind');
     const filter = { category };
 
@@ -139,6 +147,8 @@ export async function POST(request) {
     }
 
     const category = getCategory(categoryValue);
+    const lockedResponse = await requireAhdNamaUnlock(category);
+    if (lockedResponse) return lockedResponse;
     let documentCategory = '';
     if (category === 'notes' && typeof requestedDocumentCategory === 'string') {
       const database = await getDatabase();
@@ -233,6 +243,9 @@ export async function DELETE(request) {
     if (!upload) {
       return jsonError('That PDF could not be found.', 404);
     }
+
+    const lockedResponse = await requireAhdNamaUnlock(upload.category);
+    if (lockedResponse) return lockedResponse;
 
     await cloudinary.uploader.destroy(upload.publicId, {
       resource_type: upload.resourceType || 'raw',
