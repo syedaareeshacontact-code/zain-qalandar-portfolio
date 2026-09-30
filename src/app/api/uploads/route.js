@@ -74,6 +74,48 @@ function jsonError(message, status = 400) {
   return NextResponse.json({ message }, { status });
 }
 
+function getCategory(value) {
+  return typeof value === 'string' && FOLDERS[value] ? value : 'portfolio';
+}
+
+function serializeUpload(upload) {
+  return {
+    id: upload._id.toString(),
+    originalName: upload.originalName,
+    category: upload.category,
+    kind: upload.kind,
+    secureUrl: upload.secureUrl,
+    bytes: upload.bytes,
+    createdAt: upload.createdAt,
+  };
+}
+
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const category = getCategory(searchParams.get('category'));
+    const kind = searchParams.get('kind');
+    const filter = { category };
+
+    if (kind === 'pdf' || kind === 'image') {
+      filter.kind = kind;
+    }
+
+    const database = await getDatabase();
+    const uploads = await database
+      .collection('uploads')
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .toArray();
+
+    return NextResponse.json({ data: uploads.map(serializeUpload) });
+  } catch (error) {
+    console.error('Upload list route error:', error);
+    return jsonError('The uploaded files could not be loaded right now.', 500);
+  }
+}
+
 export async function POST(request) {
   let uploadedAsset;
   let resourceType;
@@ -92,7 +134,7 @@ export async function POST(request) {
       return jsonError('Please select a file to upload.');
     }
 
-    const category = FOLDERS[categoryValue] ? categoryValue : 'portfolio';
+    const category = getCategory(categoryValue);
     const kind = getFileKind(file);
 
     if (!kind) {

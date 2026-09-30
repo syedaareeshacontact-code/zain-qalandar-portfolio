@@ -2,24 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import {
-  CheckCircle2,
+  CalendarDays,
   ExternalLink,
+  FileCheck2,
   FileText,
-  ImagePlus,
   LoaderCircle,
-  UploadCloud,
+  RefreshCw,
+  Upload,
   X,
 } from 'lucide-react';
 
 const MAX_PDF_SIZE = 20 * 1024 * 1024;
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const ACCEPTED_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
-const ACCEPTED_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'webp']);
-
-function isSupportedFile(file) {
-  const extension = file.name.split('.').pop()?.toLowerCase();
-  return ACCEPTED_TYPES.has(file.type) || ACCEPTED_EXTENSIONS.has(extension);
-}
 
 function isPdf(file) {
   return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
@@ -30,48 +23,90 @@ function formatBytes(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function AhdNamaUpload() {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [error, setError] = useState('');
+function formatDate(dateValue) {
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return 'Recently uploaded';
 
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
+  return new Intl.DateTimeFormat('en', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+export default function AhdNamaUpload() {
+  const [uploads, setUploads] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoadingList, setIsLoadingList] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState('');
+  const [listError, setListError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const loadUploads = async () => {
+    setIsLoadingList(true);
+    setListError('');
+
+    try {
+      const response = await fetch('/api/uploads?category=ahd-nama&kind=pdf', { cache: 'no-store' });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.message || 'Could not load PDFs.');
+      }
+
+      setUploads(payload.data);
+    } catch (loadError) {
+      setListError(loadError instanceof Error ? loadError.message : 'Could not load PDFs.');
+    } finally {
+      setIsLoadingList(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadUploads();
+  }, []);
+
+  useEffect(() => {
+    if (!isModalOpen) return undefined;
+
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape' && !isUploading) setIsModalOpen(false);
+    };
+
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [isModalOpen, isUploading]);
+
+  const closeModal = () => {
+    if (isUploading) return;
+    setIsModalOpen(false);
+    setSelectedFile(null);
+    setError('');
+  };
+
+  const openModal = () => {
+    setSuccessMessage('');
+    setError('');
+    setIsModalOpen(true);
+  };
 
   const chooseFile = (file) => {
     if (!file) return;
 
-    const maxSize = isPdf(file) ? MAX_PDF_SIZE : MAX_IMAGE_SIZE;
-    if (!isSupportedFile(file)) {
-      setError('PDF, JPG, PNG یا WEBP file select کریں۔');
+    if (!isPdf(file)) {
+      setError('Please select a PDF file.');
       return;
     }
 
-    if (file.size > maxSize) {
-      setError(isPdf(file) ? 'PDF 20 MB سے چھوٹی ہونی چاہیے۔' : 'Image 10 MB سے چھوٹی ہونی چاہیے۔');
+    if (file.size === 0 || file.size > MAX_PDF_SIZE) {
+      setError('Your PDF must be smaller than 20 MB.');
       return;
     }
 
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setError('');
-    setUploadedFile(null);
     setSelectedFile(file);
-    setPreviewUrl(isPdf(file) ? '' : URL.createObjectURL(file));
-  };
-
-  const handleInputChange = (event) => {
-    chooseFile(event.target.files?.[0]);
-    event.target.value = '';
-  };
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-    setIsDragging(false);
-    chooseFile(event.dataTransfer.files?.[0]);
   };
 
   const handleUpload = async () => {
@@ -95,9 +130,9 @@ export default function AhdNamaUpload() {
         throw new Error(payload.message || 'Upload failed.');
       }
 
-      setUploadedFile(payload.data);
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      setPreviewUrl('');
+      setUploads((currentUploads) => [payload.data, ...currentUploads]);
+      setSuccessMessage('Your PDF has been added to the archive.');
+      setIsModalOpen(false);
       setSelectedFile(null);
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : 'Upload failed.');
@@ -107,84 +142,89 @@ export default function AhdNamaUpload() {
   };
 
   return (
-    <section className="bk-ahd-upload" aria-labelledby="ahd-upload-title">
-      <div className="bk-ahd-upload-heading">
-        <div>
-          <p className="bk-ahd-kicker">Keep your promise close</p>
-          <h2 id="ahd-upload-title">Upload your Ahd Nama</h2>
-          <p>Add a personal PDF or image of your written covenant. It will be stored securely in Cloudinary.</p>
-        </div>
-        <span className="bk-ahd-upload-badge"><UploadCloud size={15} /> Cloud upload</span>
-      </div>
+    <section className="bk-ahd-library" aria-labelledby="uploaded-pdfs-title">
+      <header className="bk-ahd-library-actionbar">
+        <p className="bk-ahd-kicker">Personal archive</p>
+        <button className="bk-ahd-upload-trigger" type="button" onClick={openModal} aria-label="Upload a PDF" title="Upload a PDF">
+          <Upload size={21} strokeWidth={2.1} />
+          <span>Upload PDF</span>
+        </button>
+      </header>
 
-      <div className="bk-ahd-upload-grid">
-        <label
-          className={`bk-ahd-dropzone${isDragging ? ' is-dragging' : ''}${selectedFile ? ' has-file' : ''}`}
-          htmlFor="ahd-nama-file"
-          onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={handleDrop}
-        >
-          <input
-            id="ahd-nama-file"
-            type="file"
-            accept="application/pdf,image/jpeg,image/png,image/webp"
-            onChange={handleInputChange}
-            disabled={isUploading}
-          />
-          {selectedFile ? (
-            <>
-              {previewUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img className="bk-ahd-file-preview" src={previewUrl} alt="Selected Ahd Nama preview" />
-              ) : (
-                <span className="bk-ahd-file-icon"><FileText size={30} /></span>
-              )}
-              <strong>{selectedFile.name}</strong>
-              <small>{formatBytes(selectedFile.size)} · Ready to upload</small>
-              <span className="bk-ahd-change-file">Choose a different file</span>
-            </>
-          ) : (
-            <>
-              <span className="bk-ahd-dropzone-icon"><ImagePlus size={23} /></span>
-              <strong>Drop your file here</strong>
-              <span>or click to browse from your device</span>
-              <small>PDF up to 20 MB · JPG, PNG, WEBP up to 10 MB</small>
-            </>
-          )}
-        </label>
+      {successMessage && <p className="bk-ahd-success-message" role="status"><FileCheck2 size={16} />{successMessage}</p>}
 
-        <div className="bk-ahd-upload-side">
-          <div className="bk-ahd-upload-note">
-            <FileText size={19} aria-hidden="true" />
-            <div>
-              <strong>Designed for reflection</strong>
-              <p>Upload a clean scan, a signed document, or a meaningful visual reminder.</p>
-            </div>
-          </div>
-
-          {error && <p className="bk-ahd-upload-error" role="alert">{error}</p>}
-
-          {selectedFile && (
-            <button className="bk-ahd-upload-button" type="button" onClick={handleUpload} disabled={isUploading}>
-              {isUploading ? <LoaderCircle size={17} className="bk-spin" /> : <UploadCloud size={17} />}
-              {isUploading ? 'Uploading…' : 'Upload Ahd Nama'}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {uploadedFile && (
-        <div className="bk-ahd-upload-success" role="status">
-          <span className="bk-ahd-success-icon"><CheckCircle2 size={18} /></span>
+      <section className="bk-ahd-documents" aria-labelledby="uploaded-pdfs-title">
+        <div className="bk-ahd-documents-head">
           <div>
-            <strong>Uploaded successfully</strong>
-            <span>{uploadedFile.originalName}</span>
+            <p className="bk-ahd-kicker">Your collection</p>
+            <h2 id="uploaded-pdfs-title">Uploaded PDFs</h2>
           </div>
-          <a href={uploadedFile.secureUrl} target="_blank" rel="noreferrer">
-            Open file <ExternalLink size={14} />
-          </a>
-          <button type="button" aria-label="Dismiss upload confirmation" onClick={() => setUploadedFile(null)}><X size={16} /></button>
+          <span>{uploads.length} {uploads.length === 1 ? 'document' : 'documents'}</span>
+        </div>
+
+        {isLoadingList ? (
+          <div className="bk-ahd-loading"><LoaderCircle size={18} className="bk-spin" /> Loading your archive…</div>
+        ) : listError ? (
+          <div className="bk-ahd-list-error">
+            <span>{listError}</span>
+            <button type="button" onClick={() => void loadUploads()}><RefreshCw size={15} /> Try again</button>
+          </div>
+        ) : uploads.length === 0 ? (
+          <div className="bk-ahd-empty">
+            <span><FileText size={24} /></span>
+            <strong>No PDFs yet</strong>
+            <p>Use the upload button above to add your first Ahd Nama.</p>
+          </div>
+        ) : (
+          <ul className="bk-ahd-document-list">
+            {uploads.map((upload) => (
+              <li className="bk-ahd-document" key={upload.id}>
+                <span className="bk-ahd-document-icon"><FileText size={20} /></span>
+                <div className="bk-ahd-document-copy">
+                  <strong title={upload.originalName}>{upload.originalName}</strong>
+                  <span><CalendarDays size={13} /> {formatDate(upload.createdAt)} <i /> {formatBytes(upload.bytes)}</span>
+                </div>
+                <a href={upload.secureUrl} target="_blank" rel="noreferrer">
+                  Open <ExternalLink size={15} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {isModalOpen && (
+        <div className="bk-ahd-modal-layer" role="presentation" onMouseDown={closeModal}>
+          <section className="bk-ahd-modal" role="dialog" aria-modal="true" aria-labelledby="upload-pdf-title" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="bk-ahd-modal-close" type="button" aria-label="Close upload dialog" onClick={closeModal} disabled={isUploading}><X size={19} /></button>
+            <span className="bk-ahd-modal-icon"><Upload size={22} /></span>
+            <p className="bk-ahd-kicker">Ahd Nama archive</p>
+            <h2 id="upload-pdf-title">Upload a PDF</h2>
+            <p className="bk-ahd-modal-copy">Choose a written covenant, note, or reflection to add to your personal archive.</p>
+
+            <label className={`bk-ahd-file-picker${selectedFile ? ' has-file' : ''}`} htmlFor="ahd-nama-file">
+              <input
+                id="ahd-nama-file"
+                type="file"
+                accept="application/pdf,.pdf"
+                onChange={(event) => { chooseFile(event.target.files?.[0]); event.target.value = ''; }}
+                disabled={isUploading}
+              />
+              <FileText size={20} />
+              <span>{selectedFile ? selectedFile.name : 'Choose a PDF from your device'}</span>
+              <small>{selectedFile ? formatBytes(selectedFile.size) : 'Maximum file size: 20 MB'}</small>
+            </label>
+
+            {error && <p className="bk-ahd-upload-error" role="alert">{error}</p>}
+
+            <div className="bk-ahd-modal-actions">
+              <button className="bk-ahd-cancel-button" type="button" onClick={closeModal} disabled={isUploading}>Cancel</button>
+              <button className="bk-ahd-upload-button" type="button" onClick={handleUpload} disabled={!selectedFile || isUploading}>
+                {isUploading ? <LoaderCircle size={17} className="bk-spin" /> : <Upload size={17} />}
+                {isUploading ? 'Uploading…' : 'Upload PDF'}
+              </button>
+            </div>
+          </section>
         </div>
       )}
     </section>
