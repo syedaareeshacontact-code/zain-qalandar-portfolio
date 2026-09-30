@@ -14,8 +14,13 @@ import {
 	ScrollProgressBar,
 	ThemeToggle,
 } from '@/components';
+import { getLatestCv } from '@/lib/cv';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+	const latestCv = await getLatestCv();
+
 	return (
 		<>
 			<ScrollProgressBar />
@@ -24,7 +29,7 @@ export default function Home() {
 			<div className="site-shell">
 				<Header />
 				<main id="main-content" className="page-container">
-					<Hero />
+					<Hero latestCv={latestCv} />
 					<Stats />
 					<Projects />
 					<About />

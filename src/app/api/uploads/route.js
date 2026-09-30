@@ -25,6 +25,7 @@ const FILE_RULES = {
 
 const FOLDERS = {
   'ahd-nama': 'portfolio/ahd-nama',
+  cv: 'portfolio/cv',
   notes: 'portfolio/notes',
   portfolio: 'portfolio/assets',
 };
@@ -237,7 +238,7 @@ export async function DELETE(request) {
 
     const database = await getDatabase();
     const uploads = database.collection('uploads');
-    const filter = { _id: new ObjectId(id), category: { $in: ['ahd-nama', 'notes'] }, kind: 'pdf' };
+    const filter = { _id: new ObjectId(id), category: { $in: ['ahd-nama', 'cv', 'notes'] }, kind: 'pdf' };
     const upload = await uploads.findOne(filter);
 
     if (!upload) {

@@ -1,5 +1,6 @@
 import BarakahPage from '@/components/dashboard/BarakahPage';
 import { CloudinaryUsageCard } from '@/components/dashboard/CloudinaryUsage';
+import CvLibrary from '@/components/dashboard/CvLibrary';
 
 export const metadata = { title: 'Manage | Barakah' };
 
@@ -16,6 +17,7 @@ export default function ManagePage() {
           { kicker: 'Clarity', title: 'Choose what stays', body: 'Remove distractions and keep only the systems that help you move with purpose.' },
         ]}
       />
+      <CvLibrary />
       <div className="bk-manage-usage"><CloudinaryUsageCard /></div>
     </section>
   );

@@ -44,7 +44,10 @@ function Architecture() {
   );
 }
 
-export default function Hero() {
+export default function Hero({ latestCv = null }) {
+  const cvHref = latestCv ? '/api/cv/download' : profile.primaryCta.href;
+  const cvDownloadName = latestCv?.fileName || profile.primaryCta.download;
+
   return (
     <section id="hero" className="hero-section">
       <div className="hero-grid">
@@ -58,7 +61,7 @@ export default function Hero() {
           <p className="hero-description">{profile.hero.subheading}</p>
           <div className="hero-actions">
             <a className="button button-primary" href={profile.secondaryCta.href}>{profile.secondaryCta.label}<ArrowUpRight size={18} /></a>
-            <a className="button button-text" href={profile.primaryCta.href} download={profile.primaryCta.download}>{profile.primaryCta.label}<Download size={16} /></a>
+            <a className="button button-text" href={cvHref} download={cvDownloadName}>{profile.primaryCta.label}<Download size={16} /></a>
           </div>
           <p className="availability"><span className="status-dot" />{profile.design.availability}<span className="availability-separator">/</span>{profile.basic.location}</p>
         </div>

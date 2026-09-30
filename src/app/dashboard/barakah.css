@@ -559,6 +559,12 @@
 
 .bk-page-with-hero { max-width: none; }
 .bk-page-with-hero .bk-page-grid { max-width: 980px; }
+.bk-cv-manager { margin-top: 28px; border: 1px solid var(--bk-line); border-radius: 18px; background: var(--bk-panel); box-shadow: var(--bk-shadow); }
+.bk-cv-manager-intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; padding: 22px 24px 0; }
+.bk-cv-manager-intro h2 { margin-top: 6px; color: var(--bk-navy); font-size: 21px; letter-spacing: -.4px; }
+.bk-cv-manager-intro p:last-child { max-width: 620px; margin-top: 8px; color: var(--bk-muted); font-size: 12px; line-height: 1.6; }
+.bk-cv-manager-badge { display: inline-flex; align-items: center; min-height: 28px; flex: 0 0 auto; padding: 0 10px; border: 1px solid color-mix(in srgb, var(--bk-teal) 30%, var(--bk-line)); border-radius: 999px; background: color-mix(in srgb, var(--bk-teal) 8%, var(--bk-panel)); color: var(--bk-teal); font-size: 10px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+.bk-cv-manager .bk-ahd-library { padding-top: 18px; }
 .bk-ahd-nama { max-width: none; }
 .bk-ahd-library { max-width: 940px; padding: 23px 8px 48px; }
 .bk-shell.is-collapsed .bk-ahd-library { margin-inline: auto; }
@@ -669,6 +675,8 @@
 }
 
 @media (max-width: 500px) {
+  .bk-cv-manager-intro { flex-direction: column; gap: 13px; padding: 18px 16px 0; }
+  .bk-cv-manager-badge { align-self: flex-start; }
   .bk-ahd-library { padding-top: 22px; }
   .bk-ahd-vault-toolbar { align-items: flex-start; flex-direction: column; padding: 14px; }
   .bk-ahd-lock-button { width: 100%; }
