@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -14,7 +15,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Search,
-  ScrollText,
   Sun,
   NotebookPen,
   SlidersHorizontal,
@@ -29,8 +29,8 @@ const NAV_ITEMS = [
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen },
   { href: '/dashboard/goals', label: 'Goals', icon: Target },
-  { href: '/dashboard/ahd-nama', label: 'Ahd Nama', icon: ScrollText, premium: true },
   { href: '/dashboard/manage', label: 'Manage', icon: SlidersHorizontal },
+  { href: '/dashboard/ahd-nama', label: 'Ahd Nama', iconOnly: true, premium: true, premiumIcon: '/images/barakah/perimum icon/ahd_nama_icon.png' },
 ];
 
 function isActivePath(item, pathname) {
@@ -112,10 +112,16 @@ export default function DashboardShell({ children }) {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`bk-nav-item${active ? ' is-active' : ''}${item.premium ? ' is-premium' : ''}`}
+                className={`bk-nav-item${active ? ' is-active' : ''}${item.premium ? ' is-premium' : ''}${item.iconOnly ? ' is-icon-only' : ''}`}
+                aria-label={item.label}
+                title={item.iconOnly ? item.label : undefined}
               >
-                <Icon size={18} strokeWidth={1.85} />
-                <span>{item.label}</span>
+                {item.premiumIcon ? (
+                  <span className="bk-nav-premium-icon" aria-hidden="true">
+                    <Image src={item.premiumIcon} alt="" width={30} height={30} />
+                  </span>
+                ) : <Icon size={18} strokeWidth={1.85} />}
+                {!item.iconOnly && <span>{item.label}</span>}
               </Link>
             );
           })}
