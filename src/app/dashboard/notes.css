@@ -1,5 +1,6 @@
 .bk-notes-page { max-width: none; }
-.bk-manage-page { max-width: 980px; }
+.bk-manage-page { min-width: 0; max-width: none; }
+.bk-manage-body { width: min(100%, 1080px); margin-inline: auto; }
 .bk-manage-usage { margin-top: 24px; }
 .bk-notes-library { width: min(100%, 1080px); max-width: 1080px; }
 .bk-notes-action-copy { margin-top: 6px; color: var(--bk-muted); font-size: 12px; line-height: 1.5; }
