@@ -1,4 +1,5 @@
 import './barakah.css';
+import './notes.css';
 import './prayer-routine.css';
 import './tasks.css';
 import DashboardShell from '@/components/dashboard/DashboardShell';

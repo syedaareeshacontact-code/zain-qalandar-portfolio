@@ -11,10 +11,11 @@ export const fetchUploads = createAsyncThunk(
 
 export const uploadPdf = createAsyncThunk(
   'uploads/uploadPdf',
-  async ({ file, category = 'ahd-nama' }) => {
+  async ({ file, category = 'ahd-nama', documentCategory = '' }) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('category', category);
+    if (documentCategory) formData.append('documentCategory', documentCategory);
     return apiRequest('/api/uploads', { method: 'POST', body: formData });
   },
 );

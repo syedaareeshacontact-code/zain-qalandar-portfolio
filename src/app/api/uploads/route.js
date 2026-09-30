@@ -24,6 +24,7 @@ const FILE_RULES = {
 
 const FOLDERS = {
   'ahd-nama': 'portfolio/ahd-nama',
+  notes: 'portfolio/notes',
   portfolio: 'portfolio/assets',
 };
 
@@ -84,6 +85,7 @@ function serializeUpload(upload) {
     id: upload._id.toString(),
     originalName: upload.originalName,
     category: upload.category,
+    documentCategory: upload.documentCategory || '',
     kind: upload.kind,
     secureUrl: upload.secureUrl,
     bytes: upload.bytes,
@@ -130,12 +132,19 @@ export async function POST(request) {
     const formData = await request.formData();
     const file = formData.get('file');
     const categoryValue = formData.get('category');
+    const requestedDocumentCategory = formData.get('documentCategory');
 
     if (!(file instanceof File)) {
       return jsonError('Please select a file to upload.');
     }
 
     const category = getCategory(categoryValue);
+    let documentCategory = '';
+    if (category === 'notes' && typeof requestedDocumentCategory === 'string') {
+      const database = await getDatabase();
+      const categoryRecord = await database.collection('noteCategories').findOne({ slug: requestedDocumentCategory });
+      documentCategory = categoryRecord?.slug || 'other';
+    }
     const kind = getFileKind(file);
 
     if (!kind) {
@@ -171,6 +180,7 @@ export async function POST(request) {
     const uploadRecord = {
       originalName: file.name,
       category,
+      documentCategory,
       kind,
       publicId: uploadedAsset.public_id,
       secureUrl: uploadedAsset.secure_url,
@@ -217,7 +227,7 @@ export async function DELETE(request) {
 
     const database = await getDatabase();
     const uploads = database.collection('uploads');
-    const filter = { _id: new ObjectId(id), category: 'ahd-nama', kind: 'pdf' };
+    const filter = { _id: new ObjectId(id), category: { $in: ['ahd-nama', 'notes'] }, kind: 'pdf' };
     const upload = await uploads.findOne(filter);
 
     if (!upload) {
