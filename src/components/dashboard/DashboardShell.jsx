@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import MongoDBUsageSidebar from './MongoDBUsageSidebar';
 
+const SIDEBAR_STORAGE_KEY = 'barakah.sidebar.open';
+
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: CalendarDays, shortcut: 'Alt ⇧ D', aliases: ['/dashboard/prayer-routine'] },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare, shortcut: 'Alt ⇧ T' },
@@ -46,17 +48,45 @@ export default function DashboardShell({ children }) {
   const [dark, setDark] = useState(true);
 
   useEffect(() => {
-    if (window.matchMedia('(max-width: 780px)').matches) setSidebarOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     const desktop = window.matchMedia('(min-width: 781px)');
-    const syncSidebarForViewport = (event) => setSidebarOpen(event.matches);
+    let storedPreference = null;
+    try {
+      storedPreference = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    } catch {
+      storedPreference = null;
+    }
 
-    syncSidebarForViewport(desktop);
+    setSidebarOpen(desktop.matches ? storedPreference !== 'closed' : false);
+
+    const syncSidebarForViewport = (event) => {
+      if (!event.matches) {
+        setSidebarOpen(false);
+        return;
+      }
+
+      try {
+        setSidebarOpen(window.localStorage.getItem(SIDEBAR_STORAGE_KEY) !== 'closed');
+      } catch {
+        setSidebarOpen(true);
+      }
+    };
+
     desktop.addEventListener('change', syncSidebarForViewport);
     return () => desktop.removeEventListener('change', syncSidebarForViewport);
   }, []);
+
+  useEffect(() => {
+    if (sidebarOpen === null || !window.matchMedia('(min-width: 781px)').matches) return;
+    try {
+      window.localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarOpen ? 'open' : 'closed');
+    } catch {
+      // Keep the sidebar usable if storage is unavailable in private browsing.
+    }
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 780px)').matches) setSidebarOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const navigateWithShortcut = (event) => {
