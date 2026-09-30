@@ -155,10 +155,12 @@ export default function DashboardShell({ children }) {
               <Bell size={18} strokeWidth={1.8} />
             </button>
             <button className="bk-user" type="button">
-              <span className="bk-avatar" aria-hidden="true">ZQ</span>
+              <span className="bk-avatar">
+                <Image src="/images/barakah/zain-avatar.png" alt="Zain Qalandar" width={34} height={34} />
+              </span>
               <span className="bk-user-copy">
-                <strong>Keep Going</strong>
-                <small>For His Sake</small>
+                <strong>Zain Qalandar</strong>
+                <small dir="rtl">نَاهِي النَّفْسِ عَنِ الْهَوَىٰ</small>
               </span>
               <ChevronDown size={16} strokeWidth={1.8} />
             </button>

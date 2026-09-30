@@ -270,19 +270,22 @@
   color: var(--bk-text);
 }
 .bk-avatar {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
+  padding: 2px;
+  overflow: hidden;
   border-radius: 50%;
   background: linear-gradient(135deg, #3d5a73, #1f3346);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
 }
+.bk-avatar img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
 .bk-user-copy { display: grid; text-align: left; line-height: 1.15; }
 .bk-user-copy strong { font-size: 13px; font-weight: 700; }
-.bk-user-copy small { color: var(--bk-muted); font-size: 11px; }
+.bk-user-copy small { color: var(--bk-muted); font-size: 11px; white-space: nowrap; }
 .bk-user svg { color: var(--bk-muted); }
 
 .bk-content { padding: 8px 28px 48px; }
