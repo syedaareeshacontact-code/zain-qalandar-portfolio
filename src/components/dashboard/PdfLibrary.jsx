@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCloudinaryUsage } from '@/store/features/cloudinaryUsage/cloudinaryUsageSlice';
-import { deleteUpload, fetchUploads, uploadPdf } from '@/store/features/uploads/uploadsSlice';
+import { deleteUpload, fetchUploads, getUploadScopeKey, isUploadScopeStale, uploadPdf } from '@/store/features/uploads/uploadsSlice';
 import { CloudinaryUsageCard } from './CloudinaryUsage';
 
 const MAX_PDF_SIZE = 20 * 1024 * 1024;
@@ -56,6 +56,14 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
 }
 
+function DocumentListSkeleton() {
+  return (
+    <ul className="bk-ahd-document-list bk-ahd-document-skeleton" aria-label="Loading documents">
+      {[0, 1, 2].map((item) => <li className="bk-ahd-document" key={item}><span /><div><i /><i /></div><span /></li>)}
+    </ul>
+  );
+}
+
 export default function PdfLibrary({
   category,
   categories = [],
@@ -68,18 +76,21 @@ export default function PdfLibrary({
   deleteCopy = 'your archive',
   showUsage = true,
   editableCategories = false,
+  categoriesLoading = false,
   onCategoriesChanged,
 }) {
   const dispatch = useAppDispatch();
   const inputId = useId();
-  const { items, listStatus, uploadStatus, deleteStatus, error: uploadError } = useAppSelector((state) => state.uploads);
-  const uploads = useMemo(() => items.filter((item) => item.category === category), [category, items]);
-  const isLoadingList = listStatus === 'idle' || listStatus === 'loading';
+  const uploadScope = useAppSelector((state) => state.uploads.scopes?.[getUploadScopeKey(category, 'pdf')]);
+  const { uploadStatus, deleteStatus } = useAppSelector((state) => state.uploads);
+  const uploads = uploadScope?.items || [];
+  const isLoadingList = !uploadScope?.hasLoaded && (uploadScope?.status === 'idle' || uploadScope?.status === 'loading' || !uploadScope);
+  const isRefreshingList = Boolean(uploadScope?.hasLoaded && uploadScope.status === 'loading');
   const isUploading = uploadStatus === 'loading';
   const isDeleting = deleteStatus === 'loading';
-  const listError = listStatus === 'failed' ? uploadError : '';
+  const listError = uploadScope?.status === 'failed' ? uploadScope.error : '';
   const hasCategories = categories.length > 0;
-  const showCategoryManager = hasCategories || editableCategories;
+  const showCategoryManager = hasCategories || editableCategories || categoriesLoading;
   const defaultDocumentCategory = categories[0]?.value || '';
   const [activeCategory, setActiveCategory] = useState('all');
   const [documentCategory, setDocumentCategory] = useState(defaultDocumentCategory);
@@ -99,7 +110,10 @@ export default function PdfLibrary({
   const [categoryError, setCategoryError] = useState('');
   const [categoryStatus, setCategoryStatus] = useState('idle');
 
-  useEffect(() => { void dispatch(fetchUploads({ category, kind: 'pdf' })); }, [category, dispatch]);
+  useEffect(() => {
+    if (uploadScope?.status === 'loading' || uploadScope?.status === 'failed') return;
+    if (isUploadScopeStale(uploadScope)) void dispatch(fetchUploads({ category, kind: 'pdf' }));
+  }, [category, dispatch, uploadScope]);
 
   useEffect(() => {
     if (!isModalOpen && !deleteTarget && !categoryDialog && !categoryDeleteTarget) return undefined;
@@ -312,18 +326,19 @@ export default function PdfLibrary({
                 </article>
               );
             })}
+            {categoriesLoading && Array.from({ length: 5 }, (_, index) => <div className="bk-notes-category-skeleton" key={`category-loading-${index}`} aria-hidden="true" />)}
           </div>
         </section>
       )}
 
       <section className="bk-ahd-documents" aria-labelledby="uploaded-pdfs-title">
-        <div className="bk-ahd-documents-head"><div><p className="bk-ahd-kicker">{collectionKicker}</p><h2 id="uploaded-pdfs-title">{activeCategory === 'all' ? collectionTitle : getCategoryLabel(activeCategory)}</h2></div><span>{visibleUploads.length} {visibleUploads.length === 1 ? 'document' : 'documents'}</span></div>
+        <div className="bk-ahd-documents-head"><div><p className="bk-ahd-kicker">{collectionKicker}</p><h2 id="uploaded-pdfs-title">{activeCategory === 'all' ? collectionTitle : getCategoryLabel(activeCategory)}</h2></div><span>{isRefreshingList ? 'Refreshing…' : `${visibleUploads.length} ${visibleUploads.length === 1 ? 'document' : 'documents'}`}</span></div>
         {hasCategories && <label className="bk-notes-search"><Search size={16} /><span className="sr-only">Search PDFs</span><input value={query} onChange={(event) => setQuery(event.target.value)} type="search" placeholder="Search PDFs by file name..." /></label>}
 
         {isLoadingList ? (
-          <div className="bk-ahd-loading"><LoaderCircle size={18} className="bk-spin" /> Loading your archive…</div>
+          <DocumentListSkeleton />
         ) : listError ? (
-          <div className="bk-ahd-list-error"><span>{listError}</span><button type="button" onClick={() => void dispatch(fetchUploads({ category, kind: 'pdf' }))}><RefreshCw size={15} /> Try again</button></div>
+          <div className="bk-ahd-list-error"><span>{listError}</span><button type="button" onClick={() => void dispatch(fetchUploads({ category, kind: 'pdf', force: true }))}><RefreshCw size={15} /> Try again</button></div>
         ) : visibleUploads.length === 0 ? (
           <div className="bk-ahd-empty"><span><FileText size={24} /></span><strong>{uploads.length ? 'No matching PDFs' : 'No PDFs yet'}</strong><p>{uploads.length ? 'Try another category or search term.' : emptyCopy}</p></div>
         ) : (

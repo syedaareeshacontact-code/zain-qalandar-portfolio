@@ -400,6 +400,14 @@
   padding: 0;
   list-style: none;
 }
+.bk-task-items-skeleton { min-height: 270px; }
+.bk-task-items-skeleton .bk-task-item { pointer-events: none; }
+.bk-task-items-skeleton .bk-task-item > span, .bk-task-items-skeleton .bk-task-item div i { display: block; border-radius: 8px; background: linear-gradient(100deg, color-mix(in srgb, var(--surface) 88%, var(--border)) 30%, color-mix(in srgb, var(--surface) 58%, var(--border)) 50%, color-mix(in srgb, var(--surface) 88%, var(--border)) 70%); background-size: 220% 100%; animation: bk-loading-shimmer 1.3s linear infinite; }
+.bk-task-items-skeleton .bk-task-item > span:first-child { width: 17px; height: 28px; }
+.bk-task-items-skeleton .bk-task-item > span:nth-child(2) { width: 24px; height: 24px; border-radius: 50%; }
+.bk-task-items-skeleton .bk-task-item div { display: grid; gap: 9px; }
+.bk-task-items-skeleton .bk-task-item div i { width: min(280px, 72%); height: 12px; }
+.bk-task-items-skeleton .bk-task-item div i:last-child { width: min(170px, 42%); height: 9px; }
 
 .bk-task-item {
   position: relative;

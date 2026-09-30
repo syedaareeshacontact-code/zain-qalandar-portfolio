@@ -1,6 +1,12 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { apiRequest } from '@/store/apiClient';
 
+export const TASK_CACHE_TTL = 2 * 60 * 1000;
+
+export function isTaskWorkspaceStale({ status, lastFetchedAt = 0 }) {
+  return status === 'idle' || (status === 'succeeded' && (Date.now() - lastFetchedAt) > TASK_CACHE_TTL);
+}
+
 export const fetchTaskWorkspace = createAsyncThunk(
   'tasks/fetchWorkspace',
   async () => {
@@ -10,6 +16,9 @@ export const fetchTaskWorkspace = createAsyncThunk(
     ]);
 
     return { tasks, lists };
+  },
+  {
+    condition: (_, { getState }) => getState().tasks.status !== 'loading',
   },
 );
 
@@ -83,6 +92,7 @@ const initialState = {
   tasks: [],
   lists: [],
   status: 'idle',
+  lastFetchedAt: 0,
   error: '',
   mutationStatus: 'idle',
   mutationError: '',
@@ -114,6 +124,7 @@ const tasksSlice = createSlice({
         state.status = 'succeeded';
         state.tasks = action.payload.tasks;
         state.lists = action.payload.lists;
+        state.lastFetchedAt = Date.now();
       })
       .addCase(fetchTaskWorkspace.rejected, (state, action) => {
         state.status = 'failed';

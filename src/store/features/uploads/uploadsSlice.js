@@ -1,12 +1,32 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { apiRequest } from '@/store/apiClient';
 
+export const UPLOAD_CACHE_TTL = 2 * 60 * 1000;
+
+export function getUploadScopeKey(category = 'ahd-nama', kind = 'pdf') {
+  return `${category}:${kind}`;
+}
+
+export function isUploadScopeStale(scope) {
+  return !scope?.hasLoaded || (Date.now() - (scope.lastFetchedAt || 0)) > UPLOAD_CACHE_TTL;
+}
+
 export const fetchUploads = createAsyncThunk(
   'uploads/fetch',
-  ({ category = 'ahd-nama', kind = 'pdf' } = {}) => apiRequest(
-    `/api/uploads?category=${encodeURIComponent(category)}&kind=${encodeURIComponent(kind)}`,
-    { cache: 'no-store' },
-  ),
+  async ({ category = 'ahd-nama', kind = 'pdf' } = {}) => ({
+    scopeKey: getUploadScopeKey(category, kind),
+    items: await apiRequest(
+      `/api/uploads?category=${encodeURIComponent(category)}&kind=${encodeURIComponent(kind)}`,
+      { cache: 'no-store' },
+    ),
+  }),
+  {
+    condition: ({ category = 'ahd-nama', kind = 'pdf', force = false } = {}, { getState }) => {
+      if (force) return true;
+      const scope = getState().uploads.scopes?.[getUploadScopeKey(category, kind)];
+      return scope?.status !== 'loading';
+    },
+  },
 );
 
 export const uploadPdf = createAsyncThunk(
@@ -29,13 +49,26 @@ export const deleteUpload = createAsyncThunk(
 );
 
 const initialState = {
-  items: [],
-  listStatus: 'idle',
+  scopes: {},
   uploadStatus: 'idle',
   deleteStatus: 'idle',
   deletingId: '',
   error: '',
 };
+
+function ensureScope(state, scopeKey) {
+  if (!state.scopes) state.scopes = {};
+  if (!state.scopes[scopeKey]) {
+    state.scopes[scopeKey] = {
+      items: [],
+      status: 'idle',
+      error: '',
+      hasLoaded: false,
+      lastFetchedAt: 0,
+    };
+  }
+  return state.scopes[scopeKey];
+}
 
 const uploadsSlice = createSlice({
   name: 'uploads',
@@ -47,17 +80,28 @@ const uploadsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchUploads.pending, (state) => {
-        state.listStatus = 'loading';
+      .addCase(fetchUploads.pending, (state, action) => {
+        const { category = 'ahd-nama', kind = 'pdf' } = action.meta.arg || {};
+        const scopeKey = getUploadScopeKey(category, kind);
+        const scope = ensureScope(state, scopeKey);
+        scope.status = 'loading';
+        scope.error = '';
         state.error = '';
       })
       .addCase(fetchUploads.fulfilled, (state, action) => {
-        state.listStatus = 'succeeded';
-        state.items = action.payload;
+        const scope = ensureScope(state, action.payload.scopeKey);
+        scope.status = 'succeeded';
+        scope.items = action.payload.items;
+        scope.hasLoaded = true;
+        scope.lastFetchedAt = Date.now();
+        scope.error = '';
       })
       .addCase(fetchUploads.rejected, (state, action) => {
-        state.listStatus = 'failed';
-        state.error = action.error.message || 'Could not load PDFs.';
+        const { category = 'ahd-nama', kind = 'pdf' } = action.meta.arg || {};
+        const scope = ensureScope(state, getUploadScopeKey(category, kind));
+        scope.status = 'failed';
+        scope.error = action.error.message || 'Could not load PDFs.';
+        state.error = scope.error;
       })
       .addCase(uploadPdf.pending, (state) => {
         state.uploadStatus = 'loading';
@@ -65,7 +109,9 @@ const uploadsSlice = createSlice({
       })
       .addCase(uploadPdf.fulfilled, (state, action) => {
         state.uploadStatus = 'succeeded';
-        state.items.unshift(action.payload);
+        const scope = ensureScope(state, getUploadScopeKey(action.payload.category, action.payload.kind || 'pdf'));
+        scope.items.unshift(action.payload);
+        scope.hasLoaded = true;
       })
       .addCase(uploadPdf.rejected, (state, action) => {
         state.uploadStatus = 'failed';
@@ -79,7 +125,9 @@ const uploadsSlice = createSlice({
       .addCase(deleteUpload.fulfilled, (state, action) => {
         state.deleteStatus = 'succeeded';
         state.deletingId = '';
-        state.items = state.items.filter((item) => item.id !== action.payload);
+        Object.values(state.scopes || {}).forEach((scope) => {
+          scope.items = scope.items.filter((item) => item.id !== action.payload);
+        });
       })
       .addCase(deleteUpload.rejected, (state, action) => {
         state.deleteStatus = 'failed';

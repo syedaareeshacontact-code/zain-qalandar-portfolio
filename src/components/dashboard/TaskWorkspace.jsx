@@ -26,6 +26,7 @@ import {
   deleteTask,
   deleteTaskList,
   fetchTaskWorkspace,
+  isTaskWorkspaceStale,
   optimisticallyUpdateTask,
   replaceTasks,
   reorderTasks as persistTaskOrder,
@@ -85,9 +86,17 @@ function repeatLabel(value) {
   }[value] || '';
 }
 
+function TaskListSkeleton() {
+  return (
+    <ul className="bk-task-items bk-task-items-skeleton" aria-label="Loading tasks">
+      {[0, 1, 2].map((item) => <li className="bk-task-item" key={item}><span /><span /><div><i /><i /></div></li>)}
+    </ul>
+  );
+}
+
 export default function TaskWorkspace() {
   const dispatch = useAppDispatch();
-  const { tasks, lists, status, error: workspaceError } = useAppSelector((state) => state.tasks);
+  const { tasks, lists, status, lastFetchedAt, error: workspaceError } = useAppSelector((state) => state.tasks);
   const [view, setView] = useState('all');
   const [activeListId, setActiveListId] = useState('all');
   const [search, setSearch] = useState('');
@@ -107,13 +116,15 @@ export default function TaskWorkspace() {
   const [listColor, setListColor] = useState(LIST_COLORS[0]);
   const [confirmDeleteList, setConfirmDeleteList] = useState(false);
   const [draggedTaskId, setDraggedTaskId] = useState('');
-  const isLoading = status === 'idle' || status === 'loading';
+  const isInitialLoading = !lastFetchedAt && (status === 'idle' || status === 'loading');
+  const isRefreshing = Boolean(lastFetchedAt && status === 'loading');
 
   useEffect(() => {
+    if (!isTaskWorkspaceStale({ status, lastFetchedAt })) return;
     void dispatch(fetchTaskWorkspace()).unwrap().catch((loadError) => {
       setError(loadError instanceof Error ? loadError.message : 'Tasks could not be loaded.');
     });
-  }, [dispatch]);
+  }, [dispatch, lastFetchedAt, status]);
 
   useEffect(() => {
     if (workspaceError) setError(workspaceError);
@@ -429,7 +440,7 @@ export default function TaskWorkspace() {
               <span className="sr-only">Search tasks</span>
               <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search tasks…" />
             </label>
-            <span>{visibleTasks.length} {visibleTasks.length === 1 ? 'task' : 'tasks'}</span>
+            <span>{isRefreshing ? 'Refreshing…' : `${visibleTasks.length} ${visibleTasks.length === 1 ? 'task' : 'tasks'}`}</span>
           </div>
 
           <form className="bk-task-quick-add" onSubmit={createQuickTask}>
@@ -438,8 +449,8 @@ export default function TaskWorkspace() {
             {isQuickSaving && <LoaderCircle size={16} className="bk-spin" />}
           </form>
 
-          {isLoading ? (
-            <div className="bk-task-state"><LoaderCircle size={22} className="bk-spin" /><span>Loading your tasks…</span></div>
+          {isInitialLoading ? (
+            <TaskListSkeleton />
           ) : visibleTasks.length === 0 ? (
             <div className="bk-task-state">
               <span className="bk-task-state-icon"><CheckCircle2 size={25} /></span>

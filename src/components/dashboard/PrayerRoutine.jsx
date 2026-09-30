@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Check, Clock3, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useMemo } from 'react';
+import { ArrowUpRight, Check, CheckCircle2, Clock3, FileText, ListTodo, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 import DashboardHero from '@/components/dashboard/DashboardHero';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPrayerRoutine, refreshPrayerProgress } from '@/store/features/prayerRoutine/prayerRoutineSlice';
+import { fetchTaskWorkspace, isTaskWorkspaceStale } from '@/store/features/tasks/tasksSlice';
+import { fetchUploads, getUploadScopeKey, isUploadScopeStale } from '@/store/features/uploads/uploadsSlice';
 import { getPrayerDateKey } from '@/lib/prayerTimes';
 
 const HERO_IMAGES = [
@@ -69,10 +72,19 @@ const BLOCKS = [
 export default function PrayerRoutine() {
   const dispatch = useAppDispatch();
   const { data: prayerData, status } = useAppSelector((state) => state.prayerRoutine);
+  const { tasks, status: tasksStatus, lastFetchedAt: tasksLastFetchedAt } = useAppSelector((state) => state.tasks);
+  const noteUploadScope = useAppSelector((state) => state.uploads.scopes?.[getUploadScopeKey('notes', 'pdf')]);
+  const noteUploads = noteUploadScope?.items || [];
+  const uploadsStatus = noteUploadScope?.status || 'idle';
 
   useEffect(() => {
     if (status === 'idle') void dispatch(fetchPrayerRoutine());
   }, [dispatch, status]);
+
+  useEffect(() => {
+    if (isTaskWorkspaceStale({ status: tasksStatus, lastFetchedAt: tasksLastFetchedAt })) void dispatch(fetchTaskWorkspace());
+    if (noteUploadScope?.status !== 'loading' && noteUploadScope?.status !== 'failed' && isUploadScopeStale(noteUploadScope)) void dispatch(fetchUploads({ category: 'notes', kind: 'pdf' }));
+  }, [dispatch, noteUploadScope, tasksLastFetchedAt, tasksStatus]);
 
   useEffect(() => {
     if (status !== 'succeeded' || !prayerData?.dateKey) return undefined;
@@ -98,6 +110,52 @@ export default function PrayerRoutine() {
   const heroImage = HERO_IMAGES[prayerData?.heroBlockIndex >= 0 ? prayerData.heroBlockIndex : 0];
   const overnightProgress = prayerData?.progress[4];
   const isOvernight = Boolean(prayerData?.overnightReview && overnightProgress);
+  const glance = useMemo(() => {
+    const today = getPrayerDateKey();
+    const recentThreshold = new Date();
+    recentThreshold.setDate(recentThreshold.getDate() - 7);
+
+    return {
+      pendingToday: tasks.filter((task) => !task.completed && task.dueDate === today).length,
+      completedToday: tasks.filter((task) => task.completed && task.completedAt && (
+        new Date(task.completedAt).toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' }) === today
+      )).length,
+      totalPdfs: noteUploads.length,
+      recentNotes: noteUploads.filter((upload) => new Date(upload.createdAt) >= recentThreshold).length,
+    };
+  }, [noteUploads, tasks]);
+  const tasksLoading = !tasksLastFetchedAt && (tasksStatus === 'idle' || tasksStatus === 'loading');
+  const notesLoading = !noteUploadScope?.hasLoaded && (uploadsStatus === 'idle' || uploadsStatus === 'loading');
+  const glanceCards = [
+    {
+      label: 'Pending today',
+      description: 'Tasks still to do',
+      value: tasksLoading ? '—' : glance.pendingToday,
+      icon: ListTodo,
+      href: '/dashboard/tasks',
+    },
+    {
+      label: 'Completed today',
+      description: 'Tasks finished today',
+      value: tasksLoading ? '—' : glance.completedToday,
+      icon: CheckCircle2,
+      href: '/dashboard/tasks',
+    },
+    {
+      label: 'Total PDFs',
+      description: 'Saved in your notes',
+      value: notesLoading ? '—' : glance.totalPdfs,
+      icon: FileText,
+      href: '/dashboard/notes',
+    },
+    {
+      label: 'Recent notes',
+      description: 'Uploaded in last 7 days',
+      value: notesLoading ? '—' : glance.recentNotes,
+      icon: Clock3,
+      href: '/dashboard/notes',
+    },
+  ];
 
   return (
     <div className="bk-prayer">
@@ -106,6 +164,32 @@ export default function PrayerRoutine() {
         subtitle="Prayer-based daily work structure"
         image={heroImage}
       />
+
+      <section className="bk-dashboard-glance" aria-labelledby="today-at-a-glance">
+        <div className="bk-dashboard-glance-head">
+          <div>
+            <span>YOUR DAY</span>
+            <h2 id="today-at-a-glance">Today at a glance</h2>
+          </div>
+          <Link className="bk-glance-all-link" href="/dashboard/tasks">View tasks <ArrowUpRight size={15} aria-hidden="true" /></Link>
+        </div>
+        <div className="bk-glance-grid">
+          {glanceCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <Link className="bk-glance-card" href={card.href} key={card.label}>
+                <span className="bk-glance-icon"><Icon size={20} strokeWidth={1.9} aria-hidden="true" /></span>
+                <span className="bk-glance-copy">
+                  <strong>{card.value}</strong>
+                  <span>{card.label}</span>
+                  <small>{card.description}</small>
+                </span>
+                <ArrowUpRight className="bk-glance-arrow" size={17} aria-hidden="true" />
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       <ol className="bk-timeline">
         {blocks.map((block, index) => {
