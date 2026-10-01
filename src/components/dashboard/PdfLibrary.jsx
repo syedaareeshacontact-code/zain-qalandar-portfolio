@@ -14,7 +14,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useNotification } from '@/context/notification-context';
 import { fetchCloudinaryUsage } from '@/store/features/cloudinaryUsage/cloudinaryUsageSlice';
-import { deleteUpload, fetchUploads, getUploadScopeKey, isUploadScopeStale, uploadPdf } from '@/store/features/uploads/uploadsSlice';
+import { deleteUpload, fetchUploads, getUploadScopeKey, isUploadScopeStale, updateUploadCategory, uploadPdf } from '@/store/features/uploads/uploadsSlice';
 import { CloudinaryUsageCard } from './CloudinaryUsage';
 
 const MAX_PDF_SIZE = 20 * 1024 * 1024;
@@ -84,11 +84,12 @@ export default function PdfLibrary({
   const { success: notifySuccess, error: notifyError, warning: notifyWarning } = useNotification();
   const inputId = useId();
   const uploadScope = useAppSelector((state) => state.uploads.scopes?.[getUploadScopeKey(category, 'pdf')]);
-  const { uploadStatus, deleteStatus } = useAppSelector((state) => state.uploads);
+  const { uploadStatus, updateStatus, deleteStatus } = useAppSelector((state) => state.uploads);
   const uploads = uploadScope?.items || [];
   const isLoadingList = !uploadScope?.hasLoaded && (uploadScope?.status === 'idle' || uploadScope?.status === 'loading' || !uploadScope);
   const isRefreshingList = Boolean(uploadScope?.hasLoaded && uploadScope.status === 'loading');
   const isUploading = uploadStatus === 'loading';
+  const isUpdatingCategory = updateStatus === 'loading';
   const isDeleting = deleteStatus === 'loading';
   const listError = uploadScope?.status === 'failed' ? uploadScope.error : '';
   const hasCategories = categories.length > 0;
@@ -223,6 +224,20 @@ export default function PdfLibrary({
     } catch (uploadRequestError) {
       const message = uploadRequestError instanceof Error ? uploadRequestError.message : 'Upload failed.';
       setError(message);
+      notifyError(message);
+    }
+  };
+
+  const handleCategoryChange = async (upload, nextDocumentCategory) => {
+    const currentDocumentCategory = upload.documentCategory || 'other';
+    if (currentDocumentCategory === nextDocumentCategory || isUpdatingCategory) return;
+
+    try {
+      await dispatch(updateUploadCategory({ id: upload.id, documentCategory: nextDocumentCategory })).unwrap();
+      setSuccessMessage(`PDF moved to ${getCategoryLabel(nextDocumentCategory)}.`);
+      notifySuccess(`PDF moved to ${getCategoryLabel(nextDocumentCategory)}.`);
+    } catch (updateError) {
+      const message = updateError instanceof Error ? updateError.message : 'Could not update the PDF category.';
       notifyError(message);
     }
   };
@@ -372,9 +387,15 @@ export default function PdfLibrary({
         ) : (
           <ul className="bk-ahd-document-list">
             {visibleUploads.map((upload) => (
-              <li className="bk-ahd-document" key={upload.id}>
+              <li className={`bk-ahd-document${hasCategories ? ' has-category-control' : ''}`} key={upload.id}>
                 <span className="bk-ahd-document-icon"><FileText size={20} /></span>
                 <div className="bk-ahd-document-copy"><strong title={upload.originalName}>{upload.originalName}</strong><span><CalendarDays size={13} /> {formatDate(upload.createdAt)} <i /> {formatBytes(upload.bytes)}{hasCategories && <em>{getCategoryLabel(upload.documentCategory)}</em>}</span></div>
+                {hasCategories && <label className="bk-notes-document-category-control">
+                  <span className="sr-only">Change category for {upload.originalName}</span>
+                  <select className="bk-notes-document-category" value={upload.documentCategory || 'other'} onChange={(event) => void handleCategoryChange(upload, event.target.value)} disabled={isUpdatingCategory} title="Change PDF category">
+                    {categories.map((item) => <option value={item.value} key={item.value}>{item.label}</option>)}
+                  </select>
+                </label>}
                 <a href={upload.secureUrl} target="_blank" rel="noreferrer">Open <ExternalLink size={15} /></a>
                 <button className="bk-ahd-delete-trigger" type="button" onClick={() => { setDeleteError(''); setDeleteTarget(upload); }} aria-label={`Delete ${upload.originalName}`} title="Delete PDF"><Trash2 size={16} /></button>
               </li>

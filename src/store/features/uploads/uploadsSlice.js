@@ -40,6 +40,18 @@ export const uploadPdf = createAsyncThunk(
   },
 );
 
+export const updateUploadCategory = createAsyncThunk(
+  'uploads/updateUploadCategory',
+  async ({ id, documentCategory }) => apiRequest(
+    `/api/uploads?id=${encodeURIComponent(id)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ documentCategory }),
+    },
+  ),
+);
+
 export const deleteUpload = createAsyncThunk(
   'uploads/deleteUpload',
   async (id) => {
@@ -51,6 +63,8 @@ export const deleteUpload = createAsyncThunk(
 const initialState = {
   scopes: {},
   uploadStatus: 'idle',
+  updateStatus: 'idle',
+  updatingId: '',
   deleteStatus: 'idle',
   deletingId: '',
   error: '',
@@ -116,6 +130,23 @@ const uploadsSlice = createSlice({
       .addCase(uploadPdf.rejected, (state, action) => {
         state.uploadStatus = 'failed';
         state.error = action.error.message || 'Upload failed.';
+      })
+      .addCase(updateUploadCategory.pending, (state, action) => {
+        state.updateStatus = 'loading';
+        state.updatingId = action.meta.arg.id;
+        state.error = '';
+      })
+      .addCase(updateUploadCategory.fulfilled, (state, action) => {
+        state.updateStatus = 'succeeded';
+        state.updatingId = '';
+        Object.values(state.scopes || {}).forEach((scope) => {
+          scope.items = scope.items.map((item) => item.id === action.payload.id ? action.payload : item);
+        });
+      })
+      .addCase(updateUploadCategory.rejected, (state, action) => {
+        state.updateStatus = 'failed';
+        state.updatingId = '';
+        state.error = action.error.message || 'Could not update the PDF category.';
       })
       .addCase(deleteUpload.pending, (state, action) => {
         state.deleteStatus = 'loading';

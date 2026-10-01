@@ -227,6 +227,44 @@ export async function POST(request) {
   }
 }
 
+export async function PATCH(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id || !ObjectId.isValid(id)) {
+      return jsonError('A valid PDF id is required.');
+    }
+
+    const body = await request.json();
+    if (typeof body.documentCategory !== 'string') {
+      return jsonError('Choose a category for this PDF.');
+    }
+
+    const documentCategory = body.documentCategory.trim();
+    const database = await getDatabase();
+    const uploads = database.collection('uploads');
+    const filter = { _id: new ObjectId(id), category: 'notes', kind: 'pdf' };
+    const upload = await uploads.findOne(filter);
+
+    if (!upload) {
+      return jsonError('That notes PDF could not be found.', 404);
+    }
+
+    if (documentCategory) {
+      const category = await database.collection('noteCategories').findOne({ slug: documentCategory });
+      if (!category) {
+        return jsonError('Choose one of the available note categories.');
+      }
+    }
+
+    await uploads.updateOne(filter, { $set: { documentCategory } });
+    return NextResponse.json({ data: serializeUpload({ ...upload, documentCategory }) });
+  } catch (error) {
+    console.error('Upload category update route error:', error);
+    return jsonError('The PDF category could not be updated right now.', 500);
+  }
+}
+
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
