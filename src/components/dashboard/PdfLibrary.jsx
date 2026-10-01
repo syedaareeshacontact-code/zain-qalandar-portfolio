@@ -71,30 +71,6 @@ function DocumentListSkeleton() {
   );
 }
 
-function CategoryTreeNode({ node, activeCategory, counts, expandedIds, onToggle, onSelect, onCreate, onEdit, onDelete, editable }) {
-  const Icon = CATEGORY_ICONS[node.icon] || CATEGORY_ICONS[node.value] || Folder;
-  const isExpanded = expandedIds.has(node.id);
-
-  return (
-    <li className="bk-notes-tree-node">
-      <div className={`bk-notes-tree-row${activeCategory === node.value ? ' is-active' : ''}`}>
-        {node.children.length ? (
-          <button className="bk-notes-tree-toggle" type="button" aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${node.label}`} aria-expanded={isExpanded} onClick={() => onToggle(node.id)}><ChevronRight size={15} className={isExpanded ? 'is-open' : ''} /></button>
-        ) : <span className="bk-notes-tree-spacer" />}
-        <button className="bk-notes-tree-select" type="button" aria-current={activeCategory === node.value ? 'page' : undefined} onClick={() => onSelect(node.value)} title={node.label}><Icon size={16} /><span>{node.label}</span><b>{counts[node.value] || 0}</b></button>
-        {editable && <div className="bk-notes-tree-actions">
-          <button type="button" onClick={() => onCreate(node)} aria-label={`Add subcategory to ${node.label}`} title="Add subcategory"><Plus size={14} /></button>
-          <button type="button" onClick={() => onEdit(node)} aria-label={`Edit ${node.label}`} title="Edit category"><PencilLine size={13} /></button>
-          <button type="button" onClick={() => onDelete(node)} aria-label={`Delete ${node.label}`} title="Delete category"><Trash2 size={13} /></button>
-        </div>}
-      </div>
-      {node.children.length > 0 && isExpanded && <ul className="bk-notes-tree-children">
-        {node.children.map((child) => <CategoryTreeNode key={child.id} node={child} activeCategory={activeCategory} counts={counts} expandedIds={expandedIds} onToggle={onToggle} onSelect={onSelect} onCreate={onCreate} onEdit={onEdit} onDelete={onDelete} editable={editable} />)}
-      </ul>}
-    </li>
-  );
-}
-
 export default function PdfLibrary({
   category,
   categories = [],
@@ -143,7 +119,6 @@ export default function PdfLibrary({
   const [categoryDescription, setCategoryDescription] = useState('');
   const [categoryIcon, setCategoryIcon] = useState('code-2');
   const [categoryParentId, setCategoryParentId] = useState(null);
-  const [expandedCategoryIds, setExpandedCategoryIds] = useState(() => new Set());
   const [iconQuery, setIconQuery] = useState('');
   const [categoryError, setCategoryError] = useState('');
   const [categoryStatus, setCategoryStatus] = useState('idle');
@@ -181,15 +156,6 @@ export default function PdfLibrary({
   const activeNode = hierarchy.ordered.find((item) => item.value === activeCategory);
   const visibleFolders = activeCategory === 'all' ? hierarchy.roots : activeNode?.children || [];
   const orderedCategoryOptions = hierarchy.ordered;
-
-  useEffect(() => {
-    if (!activeItem) return;
-    const pathIds = getCategoryPath(activeItem, hierarchy.byId).map((item) => item.id);
-    setExpandedCategoryIds((previous) => {
-      if (pathIds.every((id) => previous.has(id))) return previous;
-      return new Set([...previous, ...pathIds]);
-    });
-  }, [activeItem, hierarchy.byId]);
 
   const directCategoryCounts = useMemo(() => uploads.reduce((counts, upload) => {
     const key = upload.documentCategory || '';
@@ -368,7 +334,6 @@ export default function PdfLibrary({
       onCategoriesChanged?.(nextCategories);
       if (!isEditing) {
         setActiveCategory(savedCategory.value);
-        if (savedCategory.parentId) setExpandedCategoryIds((previous) => new Set([...previous, savedCategory.parentId]));
       }
       setCategoryDialog(null);
       setCategoryStatus('idle');
@@ -420,13 +385,6 @@ export default function PdfLibrary({
       || 'Unfiled'
     : '';
 
-  const toggleCategory = (id) => setExpandedCategoryIds((previous) => {
-    const next = new Set(previous);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    return next;
-  });
-
   return (
     <section className={`bk-ahd-library${hasCategories ? ' bk-notes-library' : ''}`} aria-labelledby="uploaded-pdfs-title">
       <header className="bk-ahd-library-actionbar">
@@ -438,34 +396,37 @@ export default function PdfLibrary({
       {showUsage && <CloudinaryUsageCard />}
 
       <div className={showCategoryManager ? 'bk-notes-workspace' : undefined}>
-        {showCategoryManager && <aside className="bk-notes-sidebar" aria-labelledby="notes-categories-title">
-          <div className="bk-notes-sidebar-head">
-            <div><p className="bk-ahd-kicker">Your library</p><h2 id="notes-categories-title">Folders</h2></div>
-            {editableCategories && <button className="bk-notes-sidebar-add" type="button" onClick={() => openCreateCategory()} aria-label="New top-level category" title="New top-level category"><FolderPlus size={18} /></button>}
-          </div>
-          <nav aria-label="Note folders">
-            <button className={`bk-notes-tree-all${activeCategory === 'all' ? ' is-active' : ''}`} type="button" onClick={() => setActiveCategory('all')} aria-current={activeCategory === 'all' ? 'page' : undefined}><Library size={17} /><span>All notes</span><b>{uploads.length}</b></button>
-            {!categoriesLoading && !categoriesError && <button className={`bk-notes-tree-all${activeCategory === 'unfiled' ? ' is-active' : ''}`} type="button" onClick={() => setActiveCategory('unfiled')} aria-current={activeCategory === 'unfiled' ? 'page' : undefined}><Folder size={17} /><span>Unfiled</span><b>{unfiledCount}</b></button>}
-            {categoriesLoading && <div className="bk-notes-tree-loading">Loading folders…</div>}
-            {categoriesError && <div className="bk-notes-tree-error"><p>{categoriesError}</p><button type="button" onClick={onRetryCategories}><RefreshCw size={13} /> Retry</button></div>}
-            <ul className="bk-notes-tree">
-              {hierarchy.roots.map((node) => <CategoryTreeNode key={node.id} node={node} activeCategory={activeCategory} counts={categoryCounts} expandedIds={expandedCategoryIds} onToggle={toggleCategory} onSelect={setActiveCategory} onCreate={openCreateCategory} onEdit={openEditCategory} onDelete={(item) => { setCategoryError(''); setCategoryDeleteTarget(item); }} editable={editableCategories} />)}
-            </ul>
-          </nav>
-          {editableCategories && <button className="bk-notes-new-root" type="button" onClick={() => openCreateCategory()}><Plus size={15} /> New folder</button>}
-          <p className="bk-notes-sidebar-hint">Use + beside any folder to add a subfolder.</p>
-        </aside>}
-
-        <section className="bk-ahd-documents" aria-labelledby="uploaded-pdfs-title">
+        <section className="bk-ahd-documents bk-notes-main-panel" aria-labelledby="uploaded-pdfs-title">
           {showCategoryManager && <nav className="bk-notes-breadcrumb" aria-label="Folder path"><button type="button" onClick={() => setActiveCategory('all')}>All notes</button>{activePath.map((item) => <span key={item.id}><ChevronRight size={13} /><button type="button" onClick={() => setActiveCategory(item.value)} aria-current={item.value === activeCategory ? 'page' : undefined}>{item.label}</button></span>)}{activeCategory === 'unfiled' && <span><ChevronRight size={13} /><button type="button" aria-current="page">Unfiled</button></span>}</nav>}
-          <div className="bk-ahd-documents-head"><div><p className="bk-ahd-kicker">{activeCategory === 'all' ? collectionKicker : 'Current folder'}</p><h2 id="uploaded-pdfs-title">{activeCategory === 'all' ? collectionTitle : activeCategory === 'unfiled' ? 'Unfiled' : getCategoryLabel(activeCategory)}</h2>{activeItem?.description && <p className="bk-notes-folder-description">{activeItem.description}</p>}</div><span>{isRefreshingList ? 'Refreshing…' : `${visibleUploads.length} ${visibleUploads.length === 1 ? 'PDF' : 'PDFs'}`}</span></div>
-          {activeItem && editableCategories && <button className="bk-notes-add-subfolder" type="button" onClick={() => openCreateCategory(activeItem)}><FolderPlus size={15} /> New subfolder</button>}
+          <div className="bk-ahd-documents-head bk-notes-documents-head">
+            <div><p className="bk-ahd-kicker">{activeCategory === 'all' ? collectionKicker : 'Current folder'}</p><h2 id="uploaded-pdfs-title">{activeCategory === 'all' ? collectionTitle : activeCategory === 'unfiled' ? 'Unfiled' : getCategoryLabel(activeCategory)}</h2>{activeItem?.description && <p className="bk-notes-folder-description">{activeItem.description}</p>}</div>
+            <div className="bk-notes-folder-toolbar">
+              <span className="bk-notes-pdf-count">{isRefreshingList ? 'Refreshing…' : `${visibleUploads.length} ${visibleUploads.length === 1 ? 'PDF' : 'PDFs'}`}</span>
+              {editableCategories && <button className="bk-notes-create-folder" type="button" onClick={() => openCreateCategory(activeItem || null)}><FolderPlus size={16} /> {activeItem ? 'New subfolder' : 'New folder'}</button>}
+              {activeItem && editableCategories && <div className="bk-notes-current-folder-actions">
+                <button type="button" onClick={() => openEditCategory(activeItem)} aria-label={`Edit ${activeItem.label}`} title="Edit folder"><PencilLine size={15} /></button>
+                <button className="is-danger" type="button" onClick={() => { setCategoryError(''); setCategoryDeleteTarget(activeItem); }} aria-label={`Delete ${activeItem.label}`} title="Delete folder"><Trash2 size={15} /></button>
+              </div>}
+            </div>
+          </div>
+          {categoriesLoading && <div className="bk-notes-manager-status">Loading folders…</div>}
+          {categoriesError && <div className="bk-notes-manager-status is-error"><span>{categoriesError}</span><button type="button" onClick={onRetryCategories}><RefreshCw size={13} /> Retry</button></div>}
           {showCategoryManager && <label className="bk-notes-search"><Search size={16} /><span className="sr-only">Search PDFs</span><input value={query} onChange={(event) => setQuery(event.target.value)} type="search" placeholder={activeItem ? `Search in ${activeItem.label} and subfolders...` : 'Search all PDFs...'} /></label>}
 
-          {showCategoryManager && !query.trim() && visibleFolders.length > 0 && <div className="bk-notes-folder-grid" aria-label="Subfolders">
+          {showCategoryManager && !categoriesLoading && !categoriesError && !query.trim() && (visibleFolders.length > 0 || activeCategory === 'all') && <div className="bk-notes-folder-grid" aria-label={activeItem ? 'Subfolders' : 'Folders'}>
+            {activeCategory === 'all' && <article className="bk-notes-folder-card bk-notes-unfiled-card">
+              <button className="bk-notes-folder-card-main" type="button" onClick={() => setActiveCategory('unfiled')}><span className="bk-notes-folder-card-icon"><Folder size={19} /></span><span><strong>Unfiled</strong><small>{unfiledCount} PDFs · No assigned folder</small></span><ChevronRight size={16} /></button>
+            </article>}
             {visibleFolders.map((folder) => {
               const Icon = CATEGORY_ICONS[folder.icon] || Folder;
-              return <button className="bk-notes-folder-card" type="button" key={folder.id} onClick={() => setActiveCategory(folder.value)}><span className="bk-notes-folder-card-icon"><Icon size={19} /></span><span><strong>{folder.label}</strong><small>{categoryCounts[folder.value] || 0} PDFs · {folder.children.length} subfolders</small></span><ChevronRight size={16} /></button>;
+              return <article className="bk-notes-folder-card" key={folder.id}>
+                <button className="bk-notes-folder-card-main" type="button" onClick={() => setActiveCategory(folder.value)}><span className="bk-notes-folder-card-icon"><Icon size={19} /></span><span><strong>{folder.label}</strong><small>{categoryCounts[folder.value] || 0} PDFs · {folder.children.length} subfolders</small></span><ChevronRight size={16} /></button>
+                {editableCategories && <div className="bk-notes-folder-card-actions">
+                  <button type="button" onClick={() => openCreateCategory(folder)} aria-label={`Add subfolder to ${folder.label}`} title="Add subfolder"><Plus size={14} /></button>
+                  <button type="button" onClick={() => openEditCategory(folder)} aria-label={`Edit ${folder.label}`} title="Edit folder"><PencilLine size={14} /></button>
+                  <button className="is-danger" type="button" onClick={() => { setCategoryError(''); setCategoryDeleteTarget(folder); }} aria-label={`Delete ${folder.label}`} title="Delete folder"><Trash2 size={14} /></button>
+                </div>}
+              </article>;
             })}
           </div>}
 
