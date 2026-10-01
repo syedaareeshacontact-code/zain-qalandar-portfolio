@@ -31,8 +31,10 @@
 .bk-notes-folder-card-main > span:nth-child(2) { min-width: 0; display: grid; gap: 4px; flex: 1; }
 .bk-notes-folder-card strong { overflow: hidden; color: var(--bk-navy); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .bk-notes-folder-card small { color: var(--bk-muted); font-size: 9px; }
-.bk-notes-folder-card-actions { display: flex; align-items: center; gap: 3px; padding-right: 10px; opacity: 0; transition: opacity .18s ease; }
+.bk-notes-folder-card-actions { position: absolute; inset-block: 0; right: 0; z-index: 1; display: flex; align-items: center; gap: 3px; padding: 0 6px 0 8px; background: var(--bk-panel); opacity: 0; pointer-events: none; transition: opacity .18s ease; }
 .bk-notes-folder-card:hover .bk-notes-folder-card-actions, .bk-notes-folder-card:focus-within .bk-notes-folder-card-actions { opacity: 1; }
+.bk-notes-folder-card.is-editable:hover .bk-notes-folder-card-chevron, .bk-notes-folder-card.is-editable:focus-within .bk-notes-folder-card-chevron { opacity: 0; }
+.bk-notes-folder-card:hover .bk-notes-folder-card-actions, .bk-notes-folder-card:focus-within .bk-notes-folder-card-actions { pointer-events: auto; }
 .bk-notes-folder-card-actions button { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--bk-muted); cursor: pointer; }
 .bk-notes-folder-card-actions button:hover { border-color: color-mix(in srgb, var(--bk-teal) 35%, var(--bk-line)); background: color-mix(in srgb, var(--bk-teal) 10%, var(--bk-panel)); color: var(--bk-teal); }
 .bk-notes-folder-card-actions button.is-danger:hover { border-color: rgb(196 95 95 / 30%); background: rgb(196 95 95 / 10%); color: #c45f5f; }
@@ -84,7 +86,8 @@
 
 @media (max-width: 820px) {
   .bk-notes-folder-grid { grid-template-columns: 1fr; }
-  .bk-notes-folder-card-actions { opacity: 1; }
+  .bk-notes-folder-card-actions { opacity: 1; pointer-events: auto; }
+  .bk-notes-folder-card.is-editable .bk-notes-folder-card-chevron { opacity: 0; }
 }
 
 @media (max-width: 680px) {

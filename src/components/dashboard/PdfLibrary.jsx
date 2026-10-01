@@ -419,8 +419,8 @@ export default function PdfLibrary({
             </article>}
             {visibleFolders.map((folder) => {
               const Icon = CATEGORY_ICONS[folder.icon] || Folder;
-              return <article className="bk-notes-folder-card" key={folder.id}>
-                <button className="bk-notes-folder-card-main" type="button" onClick={() => setActiveCategory(folder.value)}><span className="bk-notes-folder-card-icon"><Icon size={19} /></span><span><strong>{folder.label}</strong><small>{categoryCounts[folder.value] || 0} PDFs · {folder.children.length} subfolders</small></span><ChevronRight size={16} /></button>
+              return <article className={`bk-notes-folder-card${editableCategories ? ' is-editable' : ''}`} key={folder.id}>
+                <button className="bk-notes-folder-card-main" type="button" onClick={() => setActiveCategory(folder.value)}><span className="bk-notes-folder-card-icon"><Icon size={19} /></span><span><strong>{folder.label}</strong><small>{categoryCounts[folder.value] || 0} PDFs · {folder.children.length} subfolders</small></span><ChevronRight className="bk-notes-folder-card-chevron" size={16} /></button>
                 {editableCategories && <div className="bk-notes-folder-card-actions">
                   <button type="button" onClick={() => openCreateCategory(folder)} aria-label={`Add subfolder to ${folder.label}`} title="Add subfolder"><Plus size={14} /></button>
                   <button type="button" onClick={() => openEditCategory(folder)} aria-label={`Edit ${folder.label}`} title="Edit folder"><PencilLine size={14} /></button>
