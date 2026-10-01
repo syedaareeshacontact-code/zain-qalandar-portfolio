@@ -3,8 +3,8 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import {
   AlertTriangle, BookOpenText, Braces, Brackets, BriefcaseBusiness, Bug, CalendarDays,
-  ChartNoAxesCombined, Check, CloudCog, Code2, Command, Component, Cpu, Database,
-  ExternalLink, FileCheck2, FileCode2, FileText, Folder, FolderCode, Github, Globe2,
+  ChartNoAxesCombined, Check, ChevronRight, CloudCog, Code2, Command, Component, Cpu, Database,
+  ExternalLink, FileCheck2, FileCode2, FileText, Folder, FolderCode, FolderPlus, Github, Globe2,
   Blocks, Boxes, BrainCircuit, Bot, GitBranch, GitMerge, Library, Lightbulb, Laptop2,
   LoaderCircle, LockKeyhole, MonitorCog, MoonStar, MoreHorizontal, Network, NotebookTabs,
   Package, PanelsTopLeft, PencilLine, Plus, Puzzle, RefreshCw, Rocket, Search, Server,
@@ -16,6 +16,7 @@ import { useNotification } from '@/context/notification-context';
 import { fetchCloudinaryUsage } from '@/store/features/cloudinaryUsage/cloudinaryUsageSlice';
 import { deleteUpload, fetchUploads, getUploadScopeKey, isUploadScopeStale, updateUploadCategory, uploadPdf } from '@/store/features/uploads/uploadsSlice';
 import { CloudinaryUsageCard } from './CloudinaryUsage';
+import { buildNoteCategoryHierarchy, getCategoryPath, getDescendantIds } from '@/lib/noteCategoryHierarchy';
 
 const MAX_PDF_SIZE = 20 * 1024 * 1024;
 const CATEGORY_ICONS = {
@@ -32,6 +33,7 @@ const CATEGORY_ICONS = {
 };
 
 const ICON_OPTIONS = [
+  ['folder', 'Folder'], ['library', 'Library'], ['moon-star', 'Moon'], ['briefcase-business', 'Work'], ['user-round', 'Personal'],
   ['code-2', 'Code'], ['terminal', 'Terminal'], ['file-code-2', 'File code'], ['braces', 'Braces'], ['brackets', 'Brackets'],
   ['database', 'Database'], ['server', 'Server'], ['cpu', 'CPU'], ['network', 'Network'], ['globe-2', 'Web'],
   ['workflow', 'Workflow'], ['git-branch', 'Git branch'], ['git-merge', 'Git merge'], ['github', 'GitHub'], ['bug', 'Bug'],
@@ -57,11 +59,39 @@ function formatDate(dateValue) {
   return new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
 }
 
+function formatCategoryOption(item) {
+  return `${'\u00a0\u00a0'.repeat(item.depth)}${item.depth ? '↳ ' : ''}${item.label}`;
+}
+
 function DocumentListSkeleton() {
   return (
     <ul className="bk-ahd-document-list bk-ahd-document-skeleton" aria-label="Loading documents">
       {[0, 1, 2].map((item) => <li className="bk-ahd-document" key={item}><span /><div><i /><i /></div><span /></li>)}
     </ul>
+  );
+}
+
+function CategoryTreeNode({ node, activeCategory, counts, expandedIds, onToggle, onSelect, onCreate, onEdit, onDelete, editable }) {
+  const Icon = CATEGORY_ICONS[node.icon] || CATEGORY_ICONS[node.value] || Folder;
+  const isExpanded = expandedIds.has(node.id);
+
+  return (
+    <li className="bk-notes-tree-node">
+      <div className={`bk-notes-tree-row${activeCategory === node.value ? ' is-active' : ''}`}>
+        {node.children.length ? (
+          <button className="bk-notes-tree-toggle" type="button" aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${node.label}`} aria-expanded={isExpanded} onClick={() => onToggle(node.id)}><ChevronRight size={15} className={isExpanded ? 'is-open' : ''} /></button>
+        ) : <span className="bk-notes-tree-spacer" />}
+        <button className="bk-notes-tree-select" type="button" aria-current={activeCategory === node.value ? 'page' : undefined} onClick={() => onSelect(node.value)} title={node.label}><Icon size={16} /><span>{node.label}</span><b>{counts[node.value] || 0}</b></button>
+        {editable && <div className="bk-notes-tree-actions">
+          <button type="button" onClick={() => onCreate(node)} aria-label={`Add subcategory to ${node.label}`} title="Add subcategory"><Plus size={14} /></button>
+          <button type="button" onClick={() => onEdit(node)} aria-label={`Edit ${node.label}`} title="Edit category"><PencilLine size={13} /></button>
+          <button type="button" onClick={() => onDelete(node)} aria-label={`Delete ${node.label}`} title="Delete category"><Trash2 size={13} /></button>
+        </div>}
+      </div>
+      {node.children.length > 0 && isExpanded && <ul className="bk-notes-tree-children">
+        {node.children.map((child) => <CategoryTreeNode key={child.id} node={child} activeCategory={activeCategory} counts={counts} expandedIds={expandedIds} onToggle={onToggle} onSelect={onSelect} onCreate={onCreate} onEdit={onEdit} onDelete={onDelete} editable={editable} />)}
+      </ul>}
+    </li>
   );
 }
 
@@ -78,6 +108,8 @@ export default function PdfLibrary({
   showUsage = true,
   editableCategories = false,
   categoriesLoading = false,
+  categoriesError = '',
+  onRetryCategories,
   onCategoriesChanged,
 }) {
   const dispatch = useAppDispatch();
@@ -93,7 +125,8 @@ export default function PdfLibrary({
   const isDeleting = deleteStatus === 'loading';
   const listError = uploadScope?.status === 'failed' ? uploadScope.error : '';
   const hasCategories = categories.length > 0;
-  const showCategoryManager = hasCategories || editableCategories || categoriesLoading;
+  const categoryByValue = useMemo(() => new Map(categories.map((item) => [item.value, item])), [categories]);
+  const showCategoryManager = hasCategories || editableCategories || categoriesLoading || Boolean(categoriesError);
   const defaultDocumentCategory = categories[0]?.value || '';
   const [activeCategory, setActiveCategory] = useState('all');
   const [documentCategory, setDocumentCategory] = useState(defaultDocumentCategory);
@@ -109,6 +142,8 @@ export default function PdfLibrary({
   const [categoryName, setCategoryName] = useState('');
   const [categoryDescription, setCategoryDescription] = useState('');
   const [categoryIcon, setCategoryIcon] = useState('code-2');
+  const [categoryParentId, setCategoryParentId] = useState(null);
+  const [expandedCategoryIds, setExpandedCategoryIds] = useState(() => new Set());
   const [iconQuery, setIconQuery] = useState('');
   const [categoryError, setCategoryError] = useState('');
   const [categoryStatus, setCategoryStatus] = useState('idle');
@@ -136,26 +171,64 @@ export default function PdfLibrary({
   }, [categoryDeleteTarget, categoryDialog, categoryStatus, deleteTarget, isDeleting, isModalOpen, isUploading]);
 
   useEffect(() => {
-    if (activeCategory !== 'all' && !categories.some((item) => item.value === activeCategory)) setActiveCategory('all');
-    if (documentCategory && !categories.some((item) => item.value === documentCategory)) setDocumentCategory(defaultDocumentCategory);
-  }, [activeCategory, categories, defaultDocumentCategory, documentCategory]);
+    if (activeCategory !== 'all' && activeCategory !== 'unfiled' && !categoryByValue.has(activeCategory)) setActiveCategory('all');
+    if (documentCategory && !categoryByValue.has(documentCategory)) setDocumentCategory(defaultDocumentCategory);
+  }, [activeCategory, categoryByValue, defaultDocumentCategory, documentCategory]);
 
-  const categoryCounts = useMemo(() => uploads.reduce((counts, upload) => {
-    const key = upload.documentCategory || 'other';
+  const hierarchy = useMemo(() => buildNoteCategoryHierarchy(categories), [categories]);
+  const activeItem = categoryByValue.get(activeCategory);
+  const activePath = activeItem ? getCategoryPath(activeItem, hierarchy.byId) : [];
+  const activeNode = hierarchy.ordered.find((item) => item.value === activeCategory);
+  const visibleFolders = activeCategory === 'all' ? hierarchy.roots : activeNode?.children || [];
+  const orderedCategoryOptions = hierarchy.ordered;
+
+  useEffect(() => {
+    if (!activeItem) return;
+    const pathIds = getCategoryPath(activeItem, hierarchy.byId).map((item) => item.id);
+    setExpandedCategoryIds((previous) => {
+      if (pathIds.every((id) => previous.has(id))) return previous;
+      return new Set([...previous, ...pathIds]);
+    });
+  }, [activeItem, hierarchy.byId]);
+
+  const directCategoryCounts = useMemo(() => uploads.reduce((counts, upload) => {
+    const key = upload.documentCategory || '';
     counts[key] = (counts[key] || 0) + 1;
     return counts;
   }, {}), [uploads]);
+  const unfiledCount = uploads.filter((upload) => !categoryByValue.has(upload.documentCategory)).length;
+
+  const categoryCounts = useMemo(() => {
+    const counts = {};
+    const visit = (node) => {
+      const total = (directCategoryCounts[node.value] || 0) + node.children.reduce((sum, child) => sum + visit(child), 0);
+      counts[node.value] = total;
+      return total;
+    };
+    hierarchy.roots.forEach(visit);
+    return counts;
+  }, [directCategoryCounts, hierarchy.roots]);
+
+  const activeSubtreeValues = useMemo(() => {
+    if (!activeItem) return null;
+    const ids = getDescendantIds(activeItem, hierarchy.byId);
+    return new Set(categories.filter((item) => ids.has(item.id)).map((item) => item.value));
+  }, [activeItem, categories, hierarchy.byId]);
 
   const visibleUploads = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return uploads.filter((upload) => {
-      const matchesCategory = activeCategory === 'all' || (upload.documentCategory || 'other') === activeCategory;
+      const matchesCategory = activeCategory === 'all' || (activeCategory === 'unfiled'
+        ? !categoryByValue.has(upload.documentCategory)
+        : normalizedQuery
+          ? activeSubtreeValues?.has(upload.documentCategory)
+          : upload.documentCategory === activeCategory);
       const matchesQuery = !normalizedQuery || upload.originalName.toLowerCase().includes(normalizedQuery);
       return matchesCategory && matchesQuery;
     });
-  }, [activeCategory, query, uploads]);
+  }, [activeCategory, activeSubtreeValues, categoryByValue, query, uploads]);
 
-  const getCategoryLabel = (value) => categories.find((item) => item.value === value)?.label || 'Other';
+  const getCategoryLabel = (value) => categoryByValue.get(value)?.label || 'Unfiled';
 
   const closeModal = () => {
     if (isUploading) return;
@@ -167,7 +240,7 @@ export default function PdfLibrary({
   const openModal = () => {
     setSuccessMessage('');
     setError('');
-    setDocumentCategory(activeCategory === 'all' ? defaultDocumentCategory : activeCategory);
+    setDocumentCategory(activeCategory === 'all' ? defaultDocumentCategory : activeCategory === 'unfiled' ? '' : activeCategory);
     setIsModalOpen(true);
   };
 
@@ -229,7 +302,7 @@ export default function PdfLibrary({
   };
 
   const handleCategoryChange = async (upload, nextDocumentCategory) => {
-    const currentDocumentCategory = upload.documentCategory || 'other';
+    const currentDocumentCategory = upload.documentCategory || '';
     if (currentDocumentCategory === nextDocumentCategory || isUpdatingCategory) return;
 
     try {
@@ -242,11 +315,12 @@ export default function PdfLibrary({
     }
   };
 
-  const openCreateCategory = () => {
+  const openCreateCategory = (parent = null) => {
     setCategoryDialog({ mode: 'create' });
     setCategoryName('');
     setCategoryDescription('');
-    setCategoryIcon('code-2');
+    setCategoryIcon(parent?.icon || 'folder');
+    setCategoryParentId(parent?.id || null);
     setIconQuery('');
     setCategoryError('');
   };
@@ -256,6 +330,7 @@ export default function PdfLibrary({
     setCategoryName(item.label);
     setCategoryDescription(item.description || '');
     setCategoryIcon(item.icon || 'folder');
+    setCategoryParentId(item.parentId || null);
     setIconQuery('');
     setCategoryError('');
   };
@@ -281,7 +356,7 @@ export default function PdfLibrary({
       const response = await fetch(endpoint, {
         method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ label: categoryName, description: categoryDescription, icon: categoryIcon }),
+        body: JSON.stringify({ label: categoryName, description: categoryDescription, icon: categoryIcon, parentId: categoryParentId }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.message || 'The category could not be saved.');
@@ -291,6 +366,10 @@ export default function PdfLibrary({
         ? categories.map((item) => item.id === savedCategory.id ? savedCategory : item)
         : [...categories, savedCategory];
       onCategoriesChanged?.(nextCategories);
+      if (!isEditing) {
+        setActiveCategory(savedCategory.value);
+        if (savedCategory.parentId) setExpandedCategoryIds((previous) => new Set([...previous, savedCategory.parentId]));
+      }
       setCategoryDialog(null);
       setCategoryStatus('idle');
       setSuccessMessage(isEditing ? 'Category updated.' : 'Category created.');
@@ -312,13 +391,16 @@ export default function PdfLibrary({
       const response = await fetch(`/api/note-categories?id=${encodeURIComponent(categoryDeleteTarget.id)}`, { method: 'DELETE' });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.message || 'The category could not be deleted.');
-      onCategoriesChanged?.(categories.filter((item) => item.id !== categoryDeleteTarget.id));
-      void dispatch(fetchUploads({ category, kind: 'pdf' }));
+      onCategoriesChanged?.(categories
+        .filter((item) => item.id !== categoryDeleteTarget.id)
+        .map((item) => item.parentId === categoryDeleteTarget.id ? { ...item, parentId: payload.data.parentId } : item));
+      void dispatch(fetchUploads({ category, kind: 'pdf', force: true }));
       setCategoryDeleteTarget(null);
       setCategoryStatus('idle');
-      setActiveCategory('all');
-      setSuccessMessage('Category deleted. Its PDFs were moved to Other.');
-      notifySuccess('Category deleted. Its PDFs were moved to Other.');
+      setActiveCategory(categories.find((item) => item.id === payload.data.parentId)?.value || 'all');
+      const destination = categoryByValue.get(payload.data.fallbackCategory)?.label || 'Unfiled';
+      setSuccessMessage(`Category deleted. Its PDFs were moved to ${destination}.`);
+      notifySuccess(`Category deleted. Its PDFs were moved to ${destination}.`);
     } catch (deleteErrorMessage) {
       const message = deleteErrorMessage instanceof Error ? deleteErrorMessage.message : 'The category could not be deleted.';
       setCategoryError(message);
@@ -329,87 +411,100 @@ export default function PdfLibrary({
 
   const filteredIconOptions = ICON_OPTIONS.filter(([, label]) => label.toLowerCase().includes(iconQuery.trim().toLowerCase()));
   const SelectedCategoryIcon = CATEGORY_ICONS[categoryIcon] || Code2;
+  const unavailableParentIds = categoryDialog?.mode === 'edit'
+    ? getDescendantIds(categoryDialog.item, hierarchy.byId)
+    : new Set();
+  const deleteFallbackLabel = categoryDeleteTarget
+    ? hierarchy.byId.get(categoryDeleteTarget.parentId)?.label
+      || categories.find((item) => item.value === 'other' && item.id !== categoryDeleteTarget.id)?.label
+      || 'Unfiled'
+    : '';
+
+  const toggleCategory = (id) => setExpandedCategoryIds((previous) => {
+    const next = new Set(previous);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
 
   return (
     <section className={`bk-ahd-library${hasCategories ? ' bk-notes-library' : ''}`} aria-labelledby="uploaded-pdfs-title">
       <header className="bk-ahd-library-actionbar">
-        <div><p className="bk-ahd-kicker">{actionKicker}</p>{hasCategories && <p className="bk-notes-action-copy">Keep every PDF in the right place, ready when you need it.</p>}</div>
+        <div><p className="bk-ahd-kicker">{actionKicker}</p>{showCategoryManager && <p className="bk-notes-action-copy">A place for every PDF, from main folders to the smallest subfolder.</p>}</div>
         <button className="bk-ahd-upload-trigger" type="button" onClick={openModal} aria-label="Upload a PDF" title="Upload a PDF"><Upload size={21} strokeWidth={2.1} /><span>Upload PDF</span></button>
       </header>
 
       {successMessage && <p className="bk-ahd-success-message" role="status"><FileCheck2 size={16} />{successMessage}</p>}
       {showUsage && <CloudinaryUsageCard />}
 
-      {showCategoryManager && (
-        <section className="bk-notes-categories" aria-labelledby="notes-categories-title">
-          <div className="bk-notes-section-heading">
-            <div><p className="bk-ahd-kicker">Browse your library</p><h2 id="notes-categories-title">Categories</h2></div>
-            <div className="bk-notes-section-actions">
-              <span>{uploads.length} total</span>
-              {editableCategories && <button className="bk-notes-add-category" type="button" onClick={openCreateCategory}><Plus size={15} /> New category</button>}
-            </div>
+      <div className={showCategoryManager ? 'bk-notes-workspace' : undefined}>
+        {showCategoryManager && <aside className="bk-notes-sidebar" aria-labelledby="notes-categories-title">
+          <div className="bk-notes-sidebar-head">
+            <div><p className="bk-ahd-kicker">Your library</p><h2 id="notes-categories-title">Folders</h2></div>
+            {editableCategories && <button className="bk-notes-sidebar-add" type="button" onClick={() => openCreateCategory()} aria-label="New top-level category" title="New top-level category"><FolderPlus size={18} /></button>}
           </div>
-          <div className="bk-notes-category-grid">
-            <article className={`bk-notes-category-card${activeCategory === 'all' ? ' is-active' : ''}`}>
-              <button className="bk-notes-category-main" type="button" onClick={() => setActiveCategory('all')} aria-pressed={activeCategory === 'all'}>
-                <span className="bk-notes-category-icon"><Library size={19} /></span><span><strong>All notes</strong><small>Complete PDF library</small></span><b>{uploads.length}</b>
-              </button>
-            </article>
-            {categories.map((item) => {
-              const Icon = CATEGORY_ICONS[item.icon] || CATEGORY_ICONS[item.value] || Folder;
-              return (
-                <article className={`bk-notes-category-card${activeCategory === item.value ? ' is-active' : ''}`} key={item.value}>
-                  <button className="bk-notes-category-main" type="button" onClick={() => setActiveCategory(item.value)} aria-pressed={activeCategory === item.value}>
-                    <span className="bk-notes-category-icon"><Icon size={19} /></span><span><strong>{item.label}</strong><small>{item.description}</small></span><b>{categoryCounts[item.value] || 0}</b>
-                  </button>
-                  {editableCategories && <div className="bk-notes-category-actions">
-                    <button type="button" onClick={() => openEditCategory(item)} aria-label={`Change icon for ${item.label}`} title="Change icon"><PencilLine size={14} strokeWidth={2.1} /></button>
-                    <button className="is-danger" type="button" onClick={() => { setCategoryError(''); setCategoryDeleteTarget(item); }} aria-label={`Delete ${item.label}`} title="Delete category"><Trash2 size={14} /></button>
-                  </div>}
-                </article>
-              );
+          <nav aria-label="Note folders">
+            <button className={`bk-notes-tree-all${activeCategory === 'all' ? ' is-active' : ''}`} type="button" onClick={() => setActiveCategory('all')} aria-current={activeCategory === 'all' ? 'page' : undefined}><Library size={17} /><span>All notes</span><b>{uploads.length}</b></button>
+            {!categoriesLoading && !categoriesError && <button className={`bk-notes-tree-all${activeCategory === 'unfiled' ? ' is-active' : ''}`} type="button" onClick={() => setActiveCategory('unfiled')} aria-current={activeCategory === 'unfiled' ? 'page' : undefined}><Folder size={17} /><span>Unfiled</span><b>{unfiledCount}</b></button>}
+            {categoriesLoading && <div className="bk-notes-tree-loading">Loading folders…</div>}
+            {categoriesError && <div className="bk-notes-tree-error"><p>{categoriesError}</p><button type="button" onClick={onRetryCategories}><RefreshCw size={13} /> Retry</button></div>}
+            <ul className="bk-notes-tree">
+              {hierarchy.roots.map((node) => <CategoryTreeNode key={node.id} node={node} activeCategory={activeCategory} counts={categoryCounts} expandedIds={expandedCategoryIds} onToggle={toggleCategory} onSelect={setActiveCategory} onCreate={openCreateCategory} onEdit={openEditCategory} onDelete={(item) => { setCategoryError(''); setCategoryDeleteTarget(item); }} editable={editableCategories} />)}
+            </ul>
+          </nav>
+          {editableCategories && <button className="bk-notes-new-root" type="button" onClick={() => openCreateCategory()}><Plus size={15} /> New folder</button>}
+          <p className="bk-notes-sidebar-hint">Use + beside any folder to add a subfolder.</p>
+        </aside>}
+
+        <section className="bk-ahd-documents" aria-labelledby="uploaded-pdfs-title">
+          {showCategoryManager && <nav className="bk-notes-breadcrumb" aria-label="Folder path"><button type="button" onClick={() => setActiveCategory('all')}>All notes</button>{activePath.map((item) => <span key={item.id}><ChevronRight size={13} /><button type="button" onClick={() => setActiveCategory(item.value)} aria-current={item.value === activeCategory ? 'page' : undefined}>{item.label}</button></span>)}{activeCategory === 'unfiled' && <span><ChevronRight size={13} /><button type="button" aria-current="page">Unfiled</button></span>}</nav>}
+          <div className="bk-ahd-documents-head"><div><p className="bk-ahd-kicker">{activeCategory === 'all' ? collectionKicker : 'Current folder'}</p><h2 id="uploaded-pdfs-title">{activeCategory === 'all' ? collectionTitle : activeCategory === 'unfiled' ? 'Unfiled' : getCategoryLabel(activeCategory)}</h2>{activeItem?.description && <p className="bk-notes-folder-description">{activeItem.description}</p>}</div><span>{isRefreshingList ? 'Refreshing…' : `${visibleUploads.length} ${visibleUploads.length === 1 ? 'PDF' : 'PDFs'}`}</span></div>
+          {activeItem && editableCategories && <button className="bk-notes-add-subfolder" type="button" onClick={() => openCreateCategory(activeItem)}><FolderPlus size={15} /> New subfolder</button>}
+          {showCategoryManager && <label className="bk-notes-search"><Search size={16} /><span className="sr-only">Search PDFs</span><input value={query} onChange={(event) => setQuery(event.target.value)} type="search" placeholder={activeItem ? `Search in ${activeItem.label} and subfolders...` : 'Search all PDFs...'} /></label>}
+
+          {showCategoryManager && !query.trim() && visibleFolders.length > 0 && <div className="bk-notes-folder-grid" aria-label="Subfolders">
+            {visibleFolders.map((folder) => {
+              const Icon = CATEGORY_ICONS[folder.icon] || Folder;
+              return <button className="bk-notes-folder-card" type="button" key={folder.id} onClick={() => setActiveCategory(folder.value)}><span className="bk-notes-folder-card-icon"><Icon size={19} /></span><span><strong>{folder.label}</strong><small>{categoryCounts[folder.value] || 0} PDFs · {folder.children.length} subfolders</small></span><ChevronRight size={16} /></button>;
             })}
-            {categoriesLoading && Array.from({ length: 5 }, (_, index) => <div className="bk-notes-category-skeleton" key={`category-loading-${index}`} aria-hidden="true" />)}
-          </div>
+          </div>}
+
+          {showCategoryManager && <div className="bk-notes-files-heading"><strong>{query.trim() ? 'Search results' : activeCategory === 'all' ? 'All documents' : 'Documents in this folder'}</strong><span>{activeItem && !query.trim() ? `${categoryCounts[activeCategory] || 0} including subfolders` : `${visibleUploads.length} total`}</span></div>}
+
+          {isLoadingList ? (
+            <DocumentListSkeleton />
+          ) : listError ? (
+            <div className="bk-ahd-list-error"><span>{listError}</span><button type="button" onClick={() => void dispatch(fetchUploads({ category, kind: 'pdf', force: true }))}><RefreshCw size={15} /> Try again</button></div>
+          ) : visibleUploads.length === 0 ? (
+            <div className="bk-ahd-empty"><span><FileText size={24} /></span><strong>{query.trim() ? 'No matching PDFs' : 'No PDFs here yet'}</strong><p>{query.trim() ? 'Try another file name or folder.' : activeItem ? 'Upload a PDF here or open a subfolder.' : emptyCopy}</p></div>
+          ) : (
+            <ul className="bk-ahd-document-list">
+              {visibleUploads.map((upload) => (
+                <li className={`bk-ahd-document${hasCategories ? ' has-category-control' : ''}`} key={upload.id}>
+                  <span className="bk-ahd-document-icon"><FileText size={20} /></span>
+                  <div className="bk-ahd-document-copy"><strong title={upload.originalName}>{upload.originalName}</strong><span><CalendarDays size={13} /> {formatDate(upload.createdAt)} <i /> {formatBytes(upload.bytes)}{hasCategories && <em>{getCategoryLabel(upload.documentCategory)}</em>}</span></div>
+                  {hasCategories && <label className="bk-notes-document-category-control">
+                    <span className="sr-only">Change category for {upload.originalName}</span>
+                    <select className="bk-notes-document-category" value={categoryByValue.has(upload.documentCategory) ? upload.documentCategory : ''} onChange={(event) => void handleCategoryChange(upload, event.target.value)} disabled={isUpdatingCategory} title="Change PDF category">
+                      <option value="">Unfiled</option>
+                      {orderedCategoryOptions.map((item) => <option value={item.value} key={item.id}>{formatCategoryOption(item)}</option>)}
+                    </select>
+                  </label>}
+                  <a href={upload.secureUrl} target="_blank" rel="noreferrer">Open <ExternalLink size={15} /></a>
+                  <button className="bk-ahd-delete-trigger" type="button" onClick={() => { setDeleteError(''); setDeleteTarget(upload); }} aria-label={`Delete ${upload.originalName}`} title="Delete PDF"><Trash2 size={16} /></button>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
-      )}
-
-      <section className="bk-ahd-documents" aria-labelledby="uploaded-pdfs-title">
-        <div className="bk-ahd-documents-head"><div><p className="bk-ahd-kicker">{collectionKicker}</p><h2 id="uploaded-pdfs-title">{activeCategory === 'all' ? collectionTitle : getCategoryLabel(activeCategory)}</h2></div><span>{isRefreshingList ? 'Refreshing…' : `${visibleUploads.length} ${visibleUploads.length === 1 ? 'document' : 'documents'}`}</span></div>
-        {hasCategories && <label className="bk-notes-search"><Search size={16} /><span className="sr-only">Search PDFs</span><input value={query} onChange={(event) => setQuery(event.target.value)} type="search" placeholder="Search PDFs by file name..." /></label>}
-
-        {isLoadingList ? (
-          <DocumentListSkeleton />
-        ) : listError ? (
-          <div className="bk-ahd-list-error"><span>{listError}</span><button type="button" onClick={() => void dispatch(fetchUploads({ category, kind: 'pdf', force: true }))}><RefreshCw size={15} /> Try again</button></div>
-        ) : visibleUploads.length === 0 ? (
-          <div className="bk-ahd-empty"><span><FileText size={24} /></span><strong>{uploads.length ? 'No matching PDFs' : 'No PDFs yet'}</strong><p>{uploads.length ? 'Try another category or search term.' : emptyCopy}</p></div>
-        ) : (
-          <ul className="bk-ahd-document-list">
-            {visibleUploads.map((upload) => (
-              <li className={`bk-ahd-document${hasCategories ? ' has-category-control' : ''}`} key={upload.id}>
-                <span className="bk-ahd-document-icon"><FileText size={20} /></span>
-                <div className="bk-ahd-document-copy"><strong title={upload.originalName}>{upload.originalName}</strong><span><CalendarDays size={13} /> {formatDate(upload.createdAt)} <i /> {formatBytes(upload.bytes)}{hasCategories && <em>{getCategoryLabel(upload.documentCategory)}</em>}</span></div>
-                {hasCategories && <label className="bk-notes-document-category-control">
-                  <span className="sr-only">Change category for {upload.originalName}</span>
-                  <select className="bk-notes-document-category" value={upload.documentCategory || 'other'} onChange={(event) => void handleCategoryChange(upload, event.target.value)} disabled={isUpdatingCategory} title="Change PDF category">
-                    {categories.map((item) => <option value={item.value} key={item.value}>{item.label}</option>)}
-                  </select>
-                </label>}
-                <a href={upload.secureUrl} target="_blank" rel="noreferrer">Open <ExternalLink size={15} /></a>
-                <button className="bk-ahd-delete-trigger" type="button" onClick={() => { setDeleteError(''); setDeleteTarget(upload); }} aria-label={`Delete ${upload.originalName}`} title="Delete PDF"><Trash2 size={16} /></button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      </div>
 
       {isModalOpen && (
         <div className="bk-ahd-modal-layer" role="presentation" onMouseDown={closeModal}>
           <section className="bk-ahd-modal" role="dialog" aria-modal="true" aria-labelledby={`${inputId}-title`} onMouseDown={(event) => event.stopPropagation()}>
             <button className="bk-ahd-modal-close" type="button" aria-label="Close upload dialog" onClick={closeModal} disabled={isUploading}><X size={19} /></button>
             <span className="bk-ahd-modal-icon"><Upload size={22} /></span><p className="bk-ahd-kicker">{modalKicker}</p><h2 id={`${inputId}-title`}>Upload a PDF</h2><p className="bk-ahd-modal-copy">{modalCopy}</p>
-            {hasCategories && <fieldset className="bk-notes-category-picker"><legend>Choose a category</legend><div>{categories.map((item) => <button className={documentCategory === item.value ? 'is-active' : ''} type="button" key={item.value} onClick={() => setDocumentCategory(item.value)} aria-pressed={documentCategory === item.value} disabled={isUploading}>{item.label}</button>)}</div></fieldset>}
+            {showCategoryManager && <label className="bk-notes-category-field"><span>Save in folder</span><select value={documentCategory} onChange={(event) => setDocumentCategory(event.target.value)} disabled={isUploading}><option value="">Unfiled</option>{orderedCategoryOptions.map((item) => <option value={item.value} key={item.id}>{formatCategoryOption(item)}</option>)}</select></label>}
             <label className={`bk-ahd-file-picker${selectedFile ? ' has-file' : ''}`} htmlFor={`${inputId}-file`}>
               <input id={`${inputId}-file`} type="file" accept="application/pdf,.pdf" onChange={(event) => { chooseFile(event.target.files?.[0]); event.target.value = ''; }} disabled={isUploading} />
               <FileText size={20} /><span>{selectedFile ? selectedFile.name : 'Choose a PDF from your device'}</span><small>{selectedFile ? formatBytes(selectedFile.size) : 'Maximum file size: 20 MB'}</small>
@@ -427,7 +522,9 @@ export default function PdfLibrary({
             <span className="bk-ahd-modal-icon"><SelectedCategoryIcon size={22} /></span>
             <p className="bk-ahd-kicker">Category settings</p>
             <h2 id={`${inputId}-category-title`}>{categoryDialog.mode === 'edit' ? 'Change category' : 'Create a category'}</h2>
-            <p className="bk-ahd-modal-copy">Choose a development icon so this folder is easy to recognize at a glance.</p>
+            <p className="bk-ahd-modal-copy">Organize this folder anywhere in your notes library.</p>
+
+            <label className="bk-notes-category-field"><span>Parent folder</span><select value={categoryParentId || ''} onChange={(event) => setCategoryParentId(event.target.value || null)} disabled={categoryStatus === 'loading'}><option value="">Top level</option>{orderedCategoryOptions.filter((item) => !unavailableParentIds.has(item.id)).map((item) => <option value={item.id} key={item.id}>{formatCategoryOption(item)}</option>)}</select></label>
 
             <label className="bk-notes-category-field">
               <span>Name</span>
@@ -440,8 +537,8 @@ export default function PdfLibrary({
 
             <div className="bk-notes-icon-picker">
               <div className="bk-notes-icon-picker-head"><strong>Choose an icon</strong><span>{filteredIconOptions.length} available</span></div>
-              <label className="bk-notes-icon-search"><Search size={14} /><span className="sr-only">Search development icons</span><input value={iconQuery} onChange={(event) => setIconQuery(event.target.value)} placeholder="Search icons..." /></label>
-              <div className="bk-notes-icon-grid" role="listbox" aria-label="Development icons">
+              <label className="bk-notes-icon-search"><Search size={14} /><span className="sr-only">Search folder icons</span><input value={iconQuery} onChange={(event) => setIconQuery(event.target.value)} placeholder="Search icons..." /></label>
+              <div className="bk-notes-icon-grid" role="listbox" aria-label="Folder icons">
                 {filteredIconOptions.map(([value, label]) => {
                   const Icon = CATEGORY_ICONS[value] || Code2;
                   return <button className={categoryIcon === value ? 'is-active' : ''} type="button" key={value} onClick={() => setCategoryIcon(value)} aria-label={label} aria-selected={categoryIcon === value} role="option"><Icon size={17} /><small>{label}</small>{categoryIcon === value && <Check size={12} />}</button>;
@@ -461,7 +558,7 @@ export default function PdfLibrary({
             <span className="bk-ahd-delete-icon"><AlertTriangle size={22} /></span>
             <p className="bk-ahd-kicker">Remove category</p>
             <h2 id={`${inputId}-category-delete-title`}>Delete {categoryDeleteTarget.label}?</h2>
-            <p className="bk-ahd-modal-copy">Any PDFs in this category will be moved to Other. This cannot be undone.</p>
+            <p className="bk-ahd-modal-copy">PDFs in this folder will move to {deleteFallbackLabel}. Its subfolders will move up one level. The PDFs and subfolders will remain available.</p>
             {categoryError && <p className="bk-ahd-upload-error" role="alert">{categoryError}</p>}
             <div className="bk-ahd-modal-actions"><button className="bk-ahd-cancel-button" type="button" onClick={() => setCategoryDeleteTarget(null)} disabled={categoryStatus === 'loading'}>Keep category</button><button className="bk-ahd-delete-button" type="button" onClick={() => void deleteCategory()} disabled={categoryStatus === 'loading'}>{categoryStatus === 'loading' ? <LoaderCircle size={17} className="bk-spin" /> : <Trash2 size={17} />}{categoryStatus === 'loading' ? 'Deleting…' : 'Delete category'}</button></div>
           </section>

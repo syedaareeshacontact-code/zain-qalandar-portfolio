@@ -18,6 +18,7 @@ export const DEFAULT_NOTE_CATEGORIES = [
 export function serializeNoteCategory(category) {
   return {
     id: category._id?.toString() || category.id || category.slug,
+    parentId: category.parentId || null,
     value: category.slug,
     label: category.label,
     description: category.description,

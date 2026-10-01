@@ -60,19 +60,29 @@ export async function POST(request) {
     const label = typeof body.label === 'string' ? body.label.trim() : '';
     const description = typeof body.description === 'string' ? body.description.trim() : '';
     const icon = typeof body.icon === 'string' ? body.icon : '';
-    const slug = slugify(label);
+    const requestedParentId = body.parentId ?? null;
+    const baseSlug = slugify(label) || 'folder';
 
-    if (!validText(label, 32) || !slug) return jsonError('Category name must be between 1 and 32 characters.');
+    if (!validText(label, 32)) return jsonError('Category name must be between 1 and 32 characters.');
     if (description.length > 52) return jsonError('Category description must be 52 characters or less.');
     if (!ICON_KEYS.has(icon)) return jsonError('Choose an icon for this category.');
+    if (requestedParentId !== null && (typeof requestedParentId !== 'string' || !ObjectId.isValid(requestedParentId))) return jsonError('Choose a valid parent category.');
+    const parentId = requestedParentId ? new ObjectId(requestedParentId).toString() : null;
 
     const database = await getDatabase();
     const collection = database.collection('noteCategories');
-    const existing = await collection.findOne({ slug });
-    if (existing) return jsonError('A category with this name already exists.', 409);
+    if (parentId && !await collection.findOne({ _id: new ObjectId(parentId) })) return jsonError('The parent category could not be found.', 404);
+
+    let slug = baseSlug;
+    let suffix = 2;
+    while (await collection.findOne({ slug })) {
+      slug = `${baseSlug.slice(0, 40 - String(suffix).length - 1)}-${suffix}`;
+      suffix += 1;
+    }
 
     const category = {
       slug,
+      parentId,
       label,
       description: description || 'Custom notes',
       icon,
@@ -108,12 +118,28 @@ export async function PATCH(request) {
       if (!ICON_KEYS.has(body.icon)) return jsonError('Choose an icon for this category.');
       updates.icon = body.icon;
     }
+    if (body.parentId !== undefined) {
+      if (body.parentId !== null && (typeof body.parentId !== 'string' || !ObjectId.isValid(body.parentId))) return jsonError('Choose a valid parent category.');
+      updates.parentId = body.parentId ? new ObjectId(body.parentId).toString() : null;
+    }
     if (!Object.keys(updates).length) return jsonError('There is nothing to update.');
 
     const database = await getDatabase();
     const collection = database.collection('noteCategories');
     const category = await collection.findOne({ _id: new ObjectId(id) });
     if (!category) return jsonError('That category could not be found.', 404);
+
+    if (updates.parentId) {
+      const visited = new Set([category._id.toString()]);
+      let ancestorId = updates.parentId;
+      while (ancestorId) {
+        if (visited.has(ancestorId)) return jsonError('A folder cannot be moved inside itself or one of its subfolders.');
+        visited.add(ancestorId);
+        const ancestor = await collection.findOne({ _id: new ObjectId(ancestorId) }, { projection: { parentId: 1 } });
+        if (!ancestor) return jsonError('The parent category could not be found.', 404);
+        ancestorId = ancestor.parentId ? new ObjectId(ancestor.parentId).toString() : null;
+      }
+    }
 
     await collection.updateOne({ _id: category._id }, { $set: updates });
     return NextResponse.json({ data: serializeNoteCategory({ ...category, ...updates }) });
@@ -134,13 +160,18 @@ export async function DELETE(request) {
     const category = await categories.findOne({ _id: new ObjectId(id) });
     if (!category) return jsonError('That category could not be found.', 404);
 
-    const fallbackCategory = category.slug === 'other'
-      ? null
-      : await categories.findOne({ slug: 'other', _id: { $ne: category._id } });
+    const parent = category.parentId
+      ? await categories.findOne({ _id: new ObjectId(category.parentId) })
+      : null;
+    const fallbackCategory = parent || await categories.findOne({ slug: 'other', _id: { $ne: category._id } });
 
     await database.collection('uploads').updateMany(
       { category: 'notes', documentCategory: category.slug },
       { $set: { documentCategory: fallbackCategory?.slug || '' } },
+    );
+    await categories.updateMany(
+      { parentId: category._id.toString() },
+      { $set: { parentId: parent?._id.toString() || null } },
     );
     await database.collection('noteCategoryConfig').updateOne(
       { key: 'initialized' },
@@ -148,7 +179,7 @@ export async function DELETE(request) {
       { upsert: true },
     );
     await categories.deleteOne({ _id: category._id });
-    return NextResponse.json({ data: { id } });
+    return NextResponse.json({ data: { id, parentId: parent?._id.toString() || null, fallbackCategory: fallbackCategory?.slug || '' } });
   } catch (error) {
     console.error('Note category delete route error:', error);
     return jsonError('The category could not be deleted right now.', 500);

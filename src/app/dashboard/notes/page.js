@@ -6,7 +6,7 @@ export const metadata = { title: 'Notes | Barakah' };
 export default function NotesPage() {
   return (
     <section className="bk-notes-page" aria-labelledby="notes-title">
-      <DashboardHero title="Notes" subtitle="Organize every useful PDF into a library that stays simple to browse." image="/images/barakah/hero/notes-hero.webp" />
+      <DashboardHero title="Notes" subtitle="Keep your PDFs organized in folders and subfolders, however deep you need." image="/images/barakah/hero/notes-hero.webp" />
       <NotesLibrary />
     </section>
   );

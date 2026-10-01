@@ -114,12 +114,9 @@ export async function GET(request) {
     }
 
     const database = await getDatabase();
-    const uploads = await database
-      .collection('uploads')
-      .find(filter)
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .toArray();
+    const cursor = database.collection('uploads').find(filter).sort({ createdAt: -1, _id: -1 });
+    if (category !== 'notes') cursor.limit(50);
+    const uploads = await cursor.toArray();
 
     return NextResponse.json({ data: uploads.map(serializeUpload) });
   } catch (error) {
@@ -153,8 +150,9 @@ export async function POST(request) {
     let documentCategory = '';
     if (category === 'notes' && typeof requestedDocumentCategory === 'string') {
       const database = await getDatabase();
-      const categoryRecord = await database.collection('noteCategories').findOne({ slug: requestedDocumentCategory });
-      documentCategory = categoryRecord?.slug || '';
+      const categoryRecord = await database.collection('noteCategories').findOne({ slug: requestedDocumentCategory.trim() });
+      if (!categoryRecord) return jsonError('Choose one of the available note categories.');
+      documentCategory = categoryRecord.slug;
     }
     const kind = getFileKind(file);
 
