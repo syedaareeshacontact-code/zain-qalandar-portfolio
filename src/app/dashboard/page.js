@@ -1,4 +1,5 @@
 import PrayerRoutine from '@/components/dashboard/PrayerRoutine';
+import GoogleAttendance from '@/components/dashboard/GoogleAttendance';
 
 export const metadata = {
   title: 'Dashboard | Barakah',
@@ -6,5 +7,10 @@ export const metadata = {
 };
 
 export default function DashboardPage() {
-  return <PrayerRoutine />;
+  return (
+    <>
+      <PrayerRoutine />
+      <GoogleAttendance />
+    </>
+  );
 }
