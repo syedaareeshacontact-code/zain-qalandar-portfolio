@@ -9,8 +9,8 @@ export const metadata = {
 export default function DashboardPage() {
   return (
     <>
-      <PrayerRoutine />
       <GoogleAttendance />
+      <PrayerRoutine />
     </>
   );
 }

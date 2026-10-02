@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CalendarCheck2, Check, ExternalLink, LoaderCircle, RefreshCw, Unlink } from 'lucide-react';
+import { CalendarCheck2, Check, LoaderCircle, RefreshCw, Unlink } from 'lucide-react';
 import { getPrayerDateKey } from '@/lib/prayerTimes';
 
 const STATUS_OPTIONS = [
@@ -11,12 +11,24 @@ const STATUS_OPTIONS = [
 ];
 
 export default function GoogleAttendance() {
-  const date = getPrayerDateKey();
+  const [date, setDate] = useState(() => getPrayerDateKey());
   const [connection, setConnection] = useState({ loading: true, connected: false, calendarName: '' });
   const [attendance, setAttendance] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const recordedStatus = STATUS_OPTIONS.find((option) => option.value === attendance?.status);
+  const attendanceRecorded = Boolean(recordedStatus);
+
+  useEffect(() => {
+    const refreshDate = () => {
+      const currentDate = getPrayerDateKey();
+      setDate((previousDate) => previousDate === currentDate ? previousDate : currentDate);
+    };
+
+    const timer = window.setInterval(refreshDate, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   async function loadAttendance() {
     const response = await fetch(`/api/calendar/attendance?date=${date}`, { cache: 'no-store' });
@@ -33,6 +45,8 @@ export default function GoogleAttendance() {
   }
 
   useEffect(() => {
+    setAttendance(null);
+    setError('');
     Promise.all([loadConnection(), loadAttendance()]).catch((loadError) => {
       setConnection((current) => ({ ...current, loading: false }));
       setError(loadError.message);
@@ -53,7 +67,7 @@ export default function GoogleAttendance() {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.message || 'Attendance could not be synced.');
       setAttendance(payload.data.attendance);
-      setMessage('Attendance Google Calendar mein sync ho gayi.');
+      setMessage('');
     } catch (markError) {
       setError(markError.message);
     } finally {
@@ -74,24 +88,36 @@ export default function GoogleAttendance() {
   }
 
   return (
-    <section className="bk-attendance-card" aria-labelledby="google-attendance-title">
+    <section className={`bk-attendance-card${attendanceRecorded ? ' is-complete' : ''}`} aria-labelledby="google-attendance-title">
       <div className="bk-attendance-head">
         <div className="bk-attendance-heading">
-          <span className="bk-attendance-icon"><CalendarCheck2 size={20} aria-hidden="true" /></span>
+          <span className="bk-attendance-icon">
+            {attendanceRecorded ? <Check size={18} aria-hidden="true" /> : <CalendarCheck2 size={18} aria-hidden="true" />}
+          </span>
           <div>
-            <span className="bk-attendance-kicker">ATTENDANCE</span>
-            <h2 id="google-attendance-title">Today&apos;s attendance</h2>
-            <p>{connection.connected ? `Calendar: ${connection.calendarName || 'Primary calendar'}` : 'Mark attendance and highlight it on Google Calendar.'}</p>
+            <span className="bk-attendance-kicker">{attendanceRecorded ? 'TODAY · RECORDED' : 'ATTENDANCE'}</span>
+            <h2 id="google-attendance-title">{attendanceRecorded ? 'Attendance complete' : 'Today\'s attendance'}</h2>
+            <p>
+              {attendanceRecorded
+                ? `${recordedStatus.label} · Saved to Google Calendar`
+                : connection.connected
+                  ? `Calendar: ${connection.calendarName || 'Primary calendar'}`
+                  : 'Mark attendance and highlight it on Google Calendar.'}
+            </p>
           </div>
         </div>
-        {connection.connected && (
+        {attendanceRecorded ? (
+          <span className={`bk-attendance-recorded ${recordedStatus.className}`}>
+            <Check size={13} aria-hidden="true" /> {recordedStatus.label}
+          </span>
+        ) : connection.connected && (
           <button className="bk-attendance-disconnect" type="button" onClick={disconnect} disabled={busy}>
             <Unlink size={14} aria-hidden="true" /> Disconnect
           </button>
         )}
       </div>
 
-      {connection.loading ? (
+      {attendanceRecorded ? null : connection.loading ? (
         <p className="bk-attendance-status"><LoaderCircle className="bk-spin" size={16} /> Checking Google Calendar...</p>
       ) : !connection.connected ? (
         <div className="bk-attendance-connect">
@@ -114,11 +140,6 @@ export default function GoogleAttendance() {
               {option.label}
             </button>
           ))}
-          {attendance?.googleEventLink && (
-            <a className="bk-attendance-calendar-link" href={attendance.googleEventLink} target="_blank" rel="noreferrer">
-              <ExternalLink size={14} aria-hidden="true" /> Open event
-            </a>
-          )}
         </div>
       )}
 
