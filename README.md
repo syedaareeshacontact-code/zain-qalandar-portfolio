@@ -143,6 +143,8 @@ npm run build
 
 The application runs as a Next.js server because the upload Route Handler needs a Node.js runtime. Configure the four environment variables above in your deployment platform before running `npm start`.
 
+For Google Calendar in production, also configure `JWT_SECRET` with the same long random value across deployments and set `GOOGLE_REDIRECT_URI` to `https://zainqalandar.online/api/auth/google/callback`. Add that exact URL under Google Cloud Console → OAuth client → Authorized redirect URIs. Set these variables for Vercel's **Production** environment, then redeploy.
+
 ---
 
 Built by **Syed Zain Qalandar** in Sheikhupura, Pakistan.

@@ -17,6 +17,12 @@ function dashboardRedirect(request, reason) {
   return url;
 }
 
+function getFailureReason(error) {
+  if (error?.message?.includes('JWT_SECRET')) return 'missing_jwt_secret';
+  if (error?.message?.includes('Google Calendar environment variables')) return 'missing_google_config';
+  return 'error';
+}
+
 export async function GET(request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
@@ -52,6 +58,6 @@ export async function GET(request) {
     return response;
   } catch (error) {
     console.error('Google OAuth callback error:', error);
-    return NextResponse.redirect(dashboardRedirect(request, 'error'));
+    return NextResponse.redirect(dashboardRedirect(request, getFailureReason(error)));
   }
 }

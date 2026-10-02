@@ -30,6 +30,27 @@ export default function GoogleAttendance() {
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const googleStatus = params.get('google') || (window.location.search.includes('google-error') ? 'error' : '');
+    const statusMessages = {
+      connected: 'Google Calendar connected successfully.',
+      denied: 'Google Calendar access was denied. Please allow access and try again.',
+      invalid_state: 'Google Calendar connection could not be verified. Please try again.',
+      missing_refresh_token: 'Google Calendar did not return a refresh token. Please try again.',
+      missing_jwt_secret: 'Google Calendar is not configured on this deployment. Add JWT_SECRET in Vercel and redeploy.',
+      missing_google_config: 'Google Calendar is not configured on this deployment. Check the Google OAuth environment variables.',
+      error: 'Google Calendar connection failed. Please check the production OAuth settings and try again.',
+    };
+
+    if (statusMessages[googleStatus]) {
+      if (googleStatus === 'connected') setMessage(statusMessages[googleStatus]);
+      else setError(statusMessages[googleStatus]);
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   async function loadAttendance() {
     const response = await fetch(`/api/calendar/attendance?date=${date}`, { cache: 'no-store' });
     if (!response.ok) throw new Error('Attendance could not be loaded.');
