@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CalendarCheck2, Check, LoaderCircle, RefreshCw, Unlink } from 'lucide-react';
+import { CalendarCheck2, Check, LoaderCircle, RefreshCw, RotateCcw, Unlink } from 'lucide-react';
 import { getPrayerDateKey } from '@/lib/prayerTimes';
 
 const STATUS_OPTIONS = [
@@ -87,6 +87,24 @@ export default function GoogleAttendance() {
     }
   }
 
+  async function resetAttendance() {
+    setBusy(true);
+    setMessage('');
+    setError('');
+
+    try {
+      const response = await fetch(`/api/calendar/attendance?date=${date}`, { method: 'DELETE' });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.message || 'Attendance could not be reset.');
+      setAttendance(null);
+      setMessage('Aaj ki attendance reset ho gayi.');
+    } catch (resetError) {
+      setError(resetError.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <section className={`bk-attendance-card${attendanceRecorded ? ' is-complete' : ''}`} aria-labelledby="google-attendance-title">
       <div className="bk-attendance-head">
@@ -107,9 +125,14 @@ export default function GoogleAttendance() {
           </div>
         </div>
         {attendanceRecorded ? (
-          <span className={`bk-attendance-recorded ${recordedStatus.className}`}>
-            <Check size={13} aria-hidden="true" /> {recordedStatus.label}
-          </span>
+          <div className="bk-attendance-complete-actions">
+            <span className={`bk-attendance-recorded ${recordedStatus.className}`}>
+              <Check size={13} aria-hidden="true" /> {recordedStatus.label}
+            </span>
+            <button className="bk-attendance-reset" type="button" onClick={resetAttendance} disabled={busy}>
+              <RotateCcw size={13} aria-hidden="true" /> Reset
+            </button>
+          </div>
         ) : connection.connected && (
           <button className="bk-attendance-disconnect" type="button" onClick={disconnect} disabled={busy}>
             <Unlink size={14} aria-hidden="true" /> Disconnect

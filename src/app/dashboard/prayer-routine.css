@@ -276,9 +276,13 @@
 .bk-attendance-disconnect, .bk-attendance-calendar-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 9px; background: transparent; color: var(--text-muted); font-size: 10px; font-weight: 750; cursor: pointer; text-decoration: none; }
 .bk-attendance-disconnect:hover, .bk-attendance-calendar-link:hover { border-color: var(--accent); color: var(--accent); }
 .bk-attendance-disconnect:disabled, .bk-attendance-option:disabled { cursor: wait; opacity: .65; }
+.bk-attendance-complete-actions { display: flex; align-items: center; gap: 7px; flex: 0 0 auto; }
 .bk-attendance-recorded { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; min-height: 27px; padding: 0 9px; border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border)); border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, var(--surface)); color: var(--accent); font-size: 10px; font-weight: 800; }
 .bk-attendance-recorded.is-late { border-color: color-mix(in srgb, #c48a2d 55%, var(--border)); background: color-mix(in srgb, #c48a2d 12%, var(--surface)); color: #c48a2d; }
 .bk-attendance-recorded.is-absent { border-color: color-mix(in srgb, #c45f5f 55%, var(--border)); background: color-mix(in srgb, #c45f5f 12%, var(--surface)); color: #c45f5f; }
+.bk-attendance-reset { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 27px; padding: 0 9px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--text-muted); font-size: 10px; font-weight: 750; cursor: pointer; }
+.bk-attendance-reset:hover { border-color: var(--accent); color: var(--accent); }
+.bk-attendance-reset:disabled { cursor: wait; opacity: .65; }
 .bk-attendance-connect { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--border); }
 .bk-attendance-connect p { max-width: 540px; color: var(--text-muted); font-size: 11px; line-height: 1.45; }
 .bk-attendance-connect-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 32px; flex: 0 0 auto; padding: 0 11px; border-radius: 9px; background: var(--accent); color: var(--on-accent); font-size: 10px; font-weight: 800; text-decoration: none; transition: background-color .2s ease, transform .2s ease; }
@@ -395,6 +399,7 @@
   .bk-glance-card { min-height: 104px; }
   .bk-attendance-head, .bk-attendance-connect { align-items: stretch; flex-direction: column; }
   .bk-attendance-card.is-complete .bk-attendance-head { align-items: center; flex-direction: row; }
+  .bk-attendance-card.is-complete .bk-attendance-complete-actions { align-self: flex-start; }
   .bk-attendance-disconnect, .bk-attendance-connect-button { width: 100%; }
   .bk-attendance-actions { align-items: stretch; }
   .bk-attendance-option, .bk-attendance-calendar-link { flex: 1 1 calc(50% - 8px); }

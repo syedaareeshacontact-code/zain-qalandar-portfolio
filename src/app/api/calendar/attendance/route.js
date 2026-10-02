@@ -34,6 +34,18 @@ async function findCalendarEvent(calendar, eventId) {
   }
 }
 
+async function deleteCalendarEvent(calendar, eventId) {
+  try {
+    await calendar.events.delete({ calendarId: 'primary', eventId, sendUpdates: 'none' });
+  } catch (error) {
+    const statusCode = error?.code || error?.response?.status;
+    // The event may have been removed directly in Google Calendar already.
+    // In that case the attendance record can still be safely reset locally.
+    if (statusCode === 404 || statusCode === 410) return;
+    throw error;
+  }
+}
+
 export async function GET(request) {
   const date = cleanDate(new URL(request.url).searchParams.get('date'));
   if (!isDateKey(date)) return jsonError('A valid attendance date is required.');
@@ -45,6 +57,46 @@ export async function GET(request) {
   } catch (error) {
     console.error('Attendance GET error:', error);
     return jsonError('Attendance could not be loaded.', 500);
+  }
+}
+
+export async function DELETE(request) {
+  const date = cleanDate(new URL(request.url).searchParams.get('date'));
+  if (!isDateKey(date)) return jsonError('A valid attendance date is required.');
+
+  try {
+    const database = await getDatabase();
+    const attendance = await database.collection('attendance').findOne({ date });
+
+    if (!attendance) return NextResponse.json({ data: { attendance: null } });
+
+    if (attendance.googleEventId) {
+      let connection;
+      try {
+        connection = getGoogleCalendarConnection(request);
+      } catch (error) {
+        console.error('Attendance reset connection error:', error);
+        return jsonError('Google Calendar is not configured correctly.', 500);
+      }
+
+      if (!connection) {
+        return jsonError('Google Calendar connection expired. Please reconnect, then reset attendance.', 401);
+      }
+
+      await deleteCalendarEvent(connection.calendar, attendance.googleEventId);
+    }
+
+    await database.collection('attendance').deleteOne({ date });
+    return NextResponse.json({ data: { attendance: null } });
+  } catch (error) {
+    console.error('Attendance reset error:', error);
+    const statusCode = error?.code || error?.response?.status;
+    return jsonError(
+      statusCode === 401 || statusCode === 403
+        ? 'Google Calendar connection expired. Please reconnect, then reset attendance.'
+        : 'Attendance could not be reset.',
+      statusCode === 401 || statusCode === 403 ? 401 : 500,
+    );
   }
 }
 
