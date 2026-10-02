@@ -36,7 +36,7 @@ const PRAYER_LOCATIONS = [
   },
 ];
 
-// 0 se 6 tak number badal kar city switch karo:
+// Change the number from 0 to 6 to switch the city:
 const PRAYER_LOCATION = PRAYER_LOCATIONS[0];
 
 function getDatePartsInTimezone() {

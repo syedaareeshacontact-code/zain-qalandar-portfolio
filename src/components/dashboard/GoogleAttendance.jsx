@@ -81,7 +81,7 @@ export default function GoogleAttendance() {
     try {
       await fetch('/api/auth/google/disconnect', { method: 'POST' });
       setConnection({ loading: false, connected: false, calendarName: '' });
-      setMessage('Google Calendar disconnect ho gaya.');
+      setMessage('Google Calendar disconnected.');
     } finally {
       setBusy(false);
     }
@@ -97,7 +97,7 @@ export default function GoogleAttendance() {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.message || 'Attendance could not be reset.');
       setAttendance(null);
-      setMessage('Aaj ki attendance reset ho gayi.');
+      setMessage('Today\'s attendance has been reset.');
     } catch (resetError) {
       setError(resetError.message);
     } finally {
@@ -144,7 +144,7 @@ export default function GoogleAttendance() {
         <p className="bk-attendance-status"><LoaderCircle className="bk-spin" size={16} /> Checking Google Calendar...</p>
       ) : !connection.connected ? (
         <div className="bk-attendance-connect">
-          <p>Google Calendar ko connect karein, phir yahan se Present/Late/Absent mark karein.</p>
+          <p>Connect Google Calendar to mark Present, Late, or Absent attendance here.</p>
           <a className="bk-attendance-connect-button" href="/api/auth/google">
             <CalendarCheck2 size={16} aria-hidden="true" /> Connect Google Calendar
           </a>
