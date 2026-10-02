@@ -28,7 +28,7 @@ const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: CalendarDays, shortcut: 'Alt ⇧ D', aliases: ['/dashboard/prayer-routine'] },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare, shortcut: 'Alt ⇧ T' },
   { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen, shortcut: 'Alt ⇧ N' },
-  { href: '/dashboard/goals', label: 'Goals', icon: Target },
+  { href: '/dashboard/goals', label: 'Goals', icon: Target, shortcut: 'Alt ⇧ G' },
   { href: '/dashboard/manage', label: 'Manage', icon: SlidersHorizontal },
   { href: '/dashboard/ahd-nama', label: 'Ahd Nama', iconOnly: true, premium: true, premiumIcon: '/images/barakah/perimum icon/ahd_nama_icon.png' },
 ];
@@ -45,6 +45,7 @@ export default function DashboardShell({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(null);
+  const [topbarVisible, setTopbarVisible] = useState(true);
   const [dark, setDark] = useState(true);
 
   useEffect(() => {
@@ -93,7 +94,7 @@ export default function DashboardShell({ children }) {
       if (event.ctrlKey || event.metaKey || !event.altKey || !event.shiftKey || event.repeat) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target?.tagName) || event.target?.isContentEditable) return;
 
-      const shortcutRoutes = { d: '/dashboard', t: '/dashboard/tasks', n: '/dashboard/notes' };
+      const shortcutRoutes = { d: '/dashboard', t: '/dashboard/tasks', n: '/dashboard/notes', g: '/dashboard/goals' };
       const route = shortcutRoutes[event.key.toLowerCase()];
       if (!route) return;
 
@@ -104,6 +105,19 @@ export default function DashboardShell({ children }) {
     document.addEventListener('keydown', navigateWithShortcut);
     return () => document.removeEventListener('keydown', navigateWithShortcut);
   }, [router]);
+
+  useEffect(() => {
+    const toggleTopbarWithShortcut = (event) => {
+      if (event.ctrlKey || event.metaKey || !event.altKey || !event.shiftKey || event.key.toLowerCase() !== 'h') return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target?.tagName) || event.target?.isContentEditable) return;
+
+      event.preventDefault();
+      setTopbarVisible((visible) => !visible);
+    };
+
+    document.addEventListener('keydown', toggleTopbarWithShortcut);
+    return () => document.removeEventListener('keydown', toggleTopbarWithShortcut);
+  }, []);
 
   useEffect(() => {
     if (!sidebarOpen) return undefined;
@@ -179,7 +193,7 @@ export default function DashboardShell({ children }) {
       </aside>
 
       <div className="bk-main">
-        <header className="bk-topbar">
+        {topbarVisible && <header className="bk-topbar">
           {sidebarOpen === false && <button className="bk-sidebar-toggle" type="button" aria-label="Open sidebar" aria-expanded={false} onClick={() => setSidebarOpen(true)}><PanelLeftOpen size={19} /></button>}
           <button className="bk-menu" type="button" aria-label="Open sidebar" onClick={() => setSidebarOpen(true)}>
             <Menu size={20} />
@@ -214,7 +228,7 @@ export default function DashboardShell({ children }) {
               <ChevronDown size={16} strokeWidth={1.8} />
             </button>
           </div>
-        </header>
+        </header>}
 
         <main className="bk-content" id="main-content">
           {children}
