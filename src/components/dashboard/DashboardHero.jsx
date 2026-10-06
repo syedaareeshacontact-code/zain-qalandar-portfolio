@@ -35,8 +35,8 @@ export default function DashboardHero({ title, subtitle, image }) {
         <div className="bk-reminder-head"><span>A MOMENT OF REMEMBRANCE</span><button type="button" aria-label="Show another ayah" title="Another reminder" onClick={() => setReminderOffset((value) => value + 1)}><RefreshCw size={13} aria-hidden="true" /></button></div>
         <div key={ayah.reference} className="bk-reminder-content" aria-live="polite">
           <p className="bk-reminder-arabic" lang="ar" dir="rtl">{ayah.arabic}</p>
-          <p>“{ayah.text}”</p>
-          <cite><a href={`https://quran.com/${ayah.reference.replace(':', '/')}`} target="_blank" rel="noopener noreferrer">Quran {ayah.reference}<ArrowUpRight size={11} aria-hidden="true" /></a><small>{ayah.excerpt ? 'Translation excerpt' : 'The Clear Quran'}</small></cite>
+          <p className="bk-reminder-translation" lang="ur" dir="rtl">{ayah.text}</p>
+          <cite><a href={`https://quran.com/${ayah.reference.replace(':', '/')}`} target="_blank" rel="noopener noreferrer">Quran {ayah.reference}<ArrowUpRight size={11} aria-hidden="true" /></a><small lang="ur" dir="rtl">اردو ترجمہ</small></cite>
         </div>
       </blockquote>
     </section>

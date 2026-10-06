@@ -73,6 +73,7 @@
 .bk-quote .bk-reminder-arabic { margin: 10px 0; color: var(--accent); font-family: 'Noto Naskh Arabic', 'Traditional Arabic', Georgia, serif; font-size: 21px; line-height: 1.7; }
 .bk-shell.is-dark .bk-quote .bk-reminder-arabic { color: var(--accent); }
 .bk-reminder-content > p:last-of-type { font-size: 12px; line-height: 1.6; }
+.bk-shell .bk-quote .bk-reminder-translation { margin: 9px 0; color: var(--text); font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Traditional Arabic', Georgia, serif; font-size: 15px; font-style: normal; line-height: 2; }
 .bk-reminder cite { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; font-style: normal; }
 .bk-reminder cite a { display: inline-flex; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; text-decoration: none; }
 .bk-reminder cite a:hover { color: var(--accent); }

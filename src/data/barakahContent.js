@@ -1,15 +1,15 @@
-// Short excerpts from The Clear Quran, with links to the full verse on Quran.com.
+// Short Quranic passages with Urdu meanings and links to their full verse on Quran.com.
 export const AYAT = {
-  prayer: { arabic: 'وَأَقِمِ الصَّلَاةَ لِذِكْرِي', text: 'and establish prayer for My remembrance.', reference: '20:14', excerpt: true },
-  patience: { arabic: 'إِنَّ اللَّهَ مَعَ الصَّابِرِينَ', text: 'Allah is truly with those who are patient.', reference: '2:153', excerpt: true },
-  peace: { arabic: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ', text: 'Surely in the remembrance of Allah do hearts find comfort.', reference: '13:28', excerpt: true },
-  gratitude: { arabic: 'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ', text: 'If you are grateful, I will certainly give you more.', reference: '14:7', excerpt: true },
-  rest: { arabic: 'وَجَعَلْنَا نَوْمَكُمْ سُبَاتًا', text: 'and made your sleep for rest,', reference: '78:9' },
-  knowledge: { arabic: 'رَّبِّ زِدْنِي عِلْمًا', text: 'My Lord! Increase me in knowledge.', reference: '20:114', excerpt: true },
-  effort: { arabic: 'وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ', text: 'and that each person will only have what they endeavoured towards,', reference: '53:39' },
-  ease: { arabic: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا', text: 'So, surely with hardship comes ease.', reference: '94:5' },
-  promise: { arabic: 'وَأَوْفُوا بِالْعَهْدِ', text: 'Honour ˹your˺ pledges, for you will surely be accountable for them.', reference: '17:34', excerpt: true },
-  remembrance: { arabic: 'فَاذْكُرُونِي أَذْكُرْكُمْ', text: 'remember Me; I will remember you.', reference: '2:152', excerpt: true },
+  prayer: { arabic: 'وَأَقِمِ الصَّلَاةَ لِذِكْرِي', text: 'اور میری یاد کے لیے نماز قائم کرو۔', reference: '20:14' },
+  patience: { arabic: 'إِنَّ اللَّهَ مَعَ الصَّابِرِينَ', text: 'بے شک اللہ صبر کرنے والوں کے ساتھ ہے۔', reference: '2:153' },
+  peace: { arabic: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ', text: 'سن لو! اللہ کے ذکر سے دلوں کو اطمینان ملتا ہے۔', reference: '13:28' },
+  gratitude: { arabic: 'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ', text: 'اگر تم شکر کرو گے تو میں تمہیں اور زیادہ دوں گا۔', reference: '14:7' },
+  rest: { arabic: 'وَجَعَلْنَا نَوْمَكُمْ سُبَاتًا', text: 'اور ہم نے تمہاری نیند کو آرام کا ذریعہ بنایا۔', reference: '78:9' },
+  knowledge: { arabic: 'رَّبِّ زِدْنِي عِلْمًا', text: 'اے میرے رب! میرے علم میں اضافہ فرما۔', reference: '20:114' },
+  effort: { arabic: 'وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ', text: 'اور یہ کہ انسان کے لیے وہی ہے جس کی اس نے کوشش کی۔', reference: '53:39' },
+  ease: { arabic: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا', text: 'پس بے شک مشکل کے ساتھ آسانی ہے۔', reference: '94:5' },
+  promise: { arabic: 'وَأَوْفُوا بِالْعَهْدِ', text: 'اور عہد کو پورا کرو۔', reference: '17:34' },
+  remembrance: { arabic: 'فَاذْكُرُونِي أَذْكُرْكُمْ', text: 'تم مجھے یاد کرو، میں تمہیں یاد کروں گا۔', reference: '2:152' },
 };
 
 export const PRAYER_MOMENTS = [
