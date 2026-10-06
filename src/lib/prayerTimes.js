@@ -1,273 +1,145 @@
-const PRAYER_LOCATIONS = [
-  {
-    label: 'Lahore, Pakistan',
-    city: 'Lahore', country: 'PK', timezone: 'Asia/Karachi',
-    method: '1', school: '1',
-  },
-  {
-    label: 'Makkah, Saudi Arabia',
-    city: 'Makkah', country: 'SA', timezone: 'Asia/Riyadh',
-    method: '4', school: '0',
-  },
-  {
-    label: 'Cairo, Egypt',
-    city: 'Cairo', country: 'EG', timezone: 'Africa/Cairo',
-    method: '5', school: '0',
-  },
-  {
-    label: 'Istanbul, Turkey',
-    city: 'Istanbul', country: 'TR', timezone: 'Europe/Istanbul',
-    method: '13', school: '0',
-  },
-  {
-    label: 'London, UK',
-    city: 'London', country: 'GB', timezone: 'Europe/London',
-    method: '3', school: '0',
-  },
-  {
-    label: 'New York, USA',
-    city: 'New York', country: 'US', timezone: 'America/New_York',
-    method: '2', school: '0',
-  },
-  {
-    label: 'Jakarta, Indonesia',
-    city: 'Jakarta', country: 'ID', timezone: 'Asia/Jakarta',
-    method: '20', school: '0',
-  },
+export const PRAYER_LOCATIONS = [
+  { id: 'lahore', label: 'Lahore, Pakistan', city: 'Lahore', country: 'PK', timezone: 'Asia/Karachi', method: '1', school: '1' },
+  { id: 'karachi', label: 'Karachi, Pakistan', city: 'Karachi', country: 'PK', timezone: 'Asia/Karachi', method: '1', school: '1' },
+  { id: 'islamabad', label: 'Islamabad, Pakistan', city: 'Islamabad', country: 'PK', timezone: 'Asia/Karachi', method: '1', school: '1' },
+  { id: 'makkah', label: 'Makkah, Saudi Arabia', city: 'Makkah', country: 'SA', timezone: 'Asia/Riyadh', method: '4', school: '0' },
+  { id: 'cairo', label: 'Cairo, Egypt', city: 'Cairo', country: 'EG', timezone: 'Africa/Cairo', method: '5', school: '0' },
+  { id: 'istanbul', label: 'Istanbul, Turkey', city: 'Istanbul', country: 'TR', timezone: 'Europe/Istanbul', method: '13', school: '0' },
+  { id: 'london', label: 'London, UK', city: 'London', country: 'GB', timezone: 'Europe/London', method: '3', school: '0' },
+  { id: 'new-york', label: 'New York, USA', city: 'New York', country: 'US', timezone: 'America/New_York', method: '2', school: '0' },
+  { id: 'jakarta', label: 'Jakarta, Indonesia', city: 'Jakarta', country: 'ID', timezone: 'Asia/Jakarta', method: '20', school: '0' },
 ];
 
-// Change the number from 0 to 6 to switch the city:
-const PRAYER_LOCATION = PRAYER_LOCATIONS[0];
+export const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+export const DEFAULT_PRAYER_LOCATION = PRAYER_LOCATIONS[0];
 
-function getDatePartsInTimezone() {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: PRAYER_LOCATION.timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date()).reduce((parts, part) => {
-    if (part.type !== 'literal') parts[part.type] = Number(part.value);
-    return parts;
-  }, {});
+export function getPrayerLocation(id) {
+  return PRAYER_LOCATIONS.find((location) => location.id === id) || DEFAULT_PRAYER_LOCATION;
 }
 
-function getDateKey(dayOffset = 0) {
-  const { year, month, day } = getDatePartsInTimezone();
-  const date = new Date(Date.UTC(year, month - 1, day + dayOffset));
-  const nextYear = date.getUTCFullYear();
-  const nextMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const nextDay = String(date.getUTCDate()).padStart(2, '0');
-  return `${nextYear}-${nextMonth}-${nextDay}`;
-}
-
-function shiftDateKey(dateKey, dayOffset) {
-  const [year, month, day] = dateKey.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day + dayOffset));
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
-}
-
-export function getPrayerDateKey() {
-  return getDateKey();
-}
-
-function toApiDate(dateKey) {
-  const [year, month, day] = dateKey.split('-');
-  return `${day}-${month}-${year}`;
-}
-
-async function fetchPrayerDay(dateKey) {
-  const params = new URLSearchParams({
-    city: PRAYER_LOCATION.city,
-    country: PRAYER_LOCATION.country,
-    method: PRAYER_LOCATION.method,
-    school: PRAYER_LOCATION.school,
-    timezonestring: PRAYER_LOCATION.timezone,
-    iso8601: 'true',
-  });
-  const response = await fetch(
-    `https://api.aladhan.com/v1/timingsByCity/${toApiDate(dateKey)}?${params}`,
-  );
-
-  if (!response.ok) throw new Error(`Prayer API responded with ${response.status}`);
-
-  const payload = await response.json();
-  if (payload.code !== 200 || !payload.data?.timings) throw new Error('Prayer API returned no timings');
-  return payload.data.timings;
-}
-
-function parsePrayerTime(value, dateKey) {
-  if (typeof value !== 'string') return null;
-  if (value.includes('T')) return new Date(value);
-
-  const time = value.match(/\d{1,2}:\d{2}/)?.[0];
-  return time ? new Date(`${dateKey}T${time.padStart(5, '0')}:00+05:00`) : null;
-}
-
-function formatTime(value, dateKey) {
-  const date = parsePrayerTime(value, dateKey);
-  if (!date || Number.isNaN(date.getTime())) return null;
-
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: PRAYER_LOCATION.timezone,
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  }).format(date);
-}
-
-function getMinutesInLahore(date) {
+export function getPrayerDateKey(location = DEFAULT_PRAYER_LOCATION, now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: PRAYER_LOCATION.timezone,
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(date).reduce((result, part) => {
-    if (part.type === 'hour' || part.type === 'minute') result[part.type] = Number(part.value);
+    timeZone: location.timezone, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(now).reduce((result, part) => {
+    if (part.type !== 'literal') result[part.type] = part.value;
     return result;
   }, {});
-
-  return (parts.hour * 60) + parts.minute;
+  return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
-function formatDuration(minutes) {
+export function shiftPrayerDate(dateKey, offset) {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day + offset));
+  return date.toISOString().slice(0, 10);
+}
+
+// The API is requested in ISO 8601 so each prayer carries its actual timezone offset.
+export function parsePrayerTime(value) {
+  if (typeof value !== 'string' || !/T.*(?:Z|[+-]\d{2}:?\d{2})$/.test(value)) return null;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+export function formatPrayerTime(value, location = DEFAULT_PRAYER_LOCATION) {
+  const timestamp = typeof value === 'number' ? value : parsePrayerTime(value);
+  if (timestamp === null || !Number.isFinite(timestamp)) return '—';
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: location.timezone, hour: 'numeric', minute: '2-digit', hour12: true,
+  }).format(timestamp);
+}
+
+export function formatPrayerCountdown(milliseconds) {
+  const minutes = Math.max(0, Math.ceil(milliseconds / 60_000));
   const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  return [
-    hours ? `${hours}h` : null,
-    remainingMinutes ? `${remainingMinutes}min` : null,
-  ].filter(Boolean).join(' ') || '0min';
+  return hours ? `${hours}h ${minutes % 60}m` : `${minutes}m`;
 }
 
-function getPrayerGap(start, end, dateKey) {
-  const startDate = parsePrayerTime(start, dateKey);
-  const endDate = parsePrayerTime(end, dateKey);
-  if (!startDate || !endDate || Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return null;
-
-  return formatDuration(Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / 60_000)));
-}
-
-function getIntervalProgress(start, end, now) {
-  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
-
-  const elapsed = Math.max(0, Math.min(100, Math.round(((now - start) / (end - start)) * 100)));
-  return { elapsed, remaining: 100 - elapsed };
-}
-
-export function getPrayerIntervalProgress(timings, dateKey, { previousTimings, nextTimings } = {}) {
-  const now = Date.now();
-  const intervals = [
-    ['Fajr', 'Dhuhr'],
-    ['Dhuhr', 'Asr'],
-    ['Asr', 'Maghrib'],
-    ['Maghrib', 'Isha'],
-  ];
-
-  const progress = intervals.map(([from, to]) => {
-    const start = parsePrayerTime(timings[from], dateKey)?.getTime();
-    const end = parsePrayerTime(timings[to], dateKey)?.getTime();
-    return getIntervalProgress(start, end, now);
-  });
-
-  const todayFajr = parsePrayerTime(timings.Fajr, dateKey)?.getTime();
-  const beforeFajr = Number.isFinite(todayFajr) && now < todayFajr;
-  const overnightStart = beforeFajr
-    ? parsePrayerTime(previousTimings?.Isha, shiftDateKey(dateKey, -1))?.getTime()
-    : parsePrayerTime(timings.Isha, dateKey)?.getTime();
-  const overnightEnd = beforeFajr
-    ? todayFajr
-    : parsePrayerTime(nextTimings?.Fajr, shiftDateKey(dateKey, 1))?.getTime();
-
-  progress.push(getIntervalProgress(overnightStart, overnightEnd, now));
-  return progress;
-}
-
-export function getActivePrayerBlockIndex(timings, dateKey) {
-  const starts = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib'].map((prayer) => {
-    const date = parsePrayerTime(timings[prayer], dateKey);
-    return date && !Number.isNaN(date.getTime()) ? getMinutesInLahore(date) : null;
-  });
-  const ends = ['Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((prayer) => {
-    const date = parsePrayerTime(timings[prayer], dateKey);
-    return date && !Number.isNaN(date.getTime()) ? getMinutesInLahore(date) : null;
-  });
-
-  if (starts.some((time) => time === null) || ends.some((time) => time === null)) return -1;
-
-  const now = getMinutesInLahore(new Date());
-  return starts.findIndex((start, index) => now >= start && now < ends[index]);
-}
-
-export function getHeroBlockIndex(timings, dateKey) {
-  const starts = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((prayer) => {
-    const date = parsePrayerTime(timings[prayer], dateKey);
-    return date && !Number.isNaN(date.getTime()) ? getMinutesInLahore(date) : null;
-  });
-  const ends = ['Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((prayer) => {
-    const date = parsePrayerTime(timings[prayer], dateKey);
-    return date && !Number.isNaN(date.getTime()) ? getMinutesInLahore(date) : null;
-  });
-  ends.push(22 * 60);
-
-  if (starts.some((time) => time === null) || ends.some((time) => time === null)) return -1;
-
-  const now = getMinutesInLahore(new Date());
-  if (now < starts[0] || now >= starts[4]) return 4;
-  return starts.findIndex((start, index) => now >= start && now < ends[index]);
-}
-
-export function isOvernightReview(timings, dateKey) {
-  const fajr = parsePrayerTime(timings.Fajr, dateKey);
-  const isha = parsePrayerTime(timings.Isha, dateKey);
-  if (!fajr || !isha || Number.isNaN(fajr.getTime()) || Number.isNaN(isha.getTime())) return false;
-
-  const now = getMinutesInLahore(new Date());
-  return now < getMinutesInLahore(fajr) || now >= getMinutesInLahore(isha);
-}
-
-export async function getPrayerRoutineData() {
-  const today = getDateKey();
-
-  try {
-    const [todayTimings, previousTimings, nextTimings] = await Promise.all([
-      fetchPrayerDay(today),
-      fetchPrayerDay(getDateKey(-1)),
-      fetchPrayerDay(getDateKey(1)),
-    ]);
-
-    const prayerTimes = {
-      Fajr: formatTime(todayTimings.Fajr, today),
-      Dhuhr: formatTime(todayTimings.Dhuhr, today),
-      Asr: formatTime(todayTimings.Asr, today),
-      Maghrib: formatTime(todayTimings.Maghrib, today),
-      Isha: formatTime(todayTimings.Isha, today),
-    };
-
-    if (Object.values(prayerTimes).some((time) => !time)) throw new Error('Prayer API returned an incomplete day');
-
-    const durations = [
-      getPrayerGap(todayTimings.Fajr, todayTimings.Dhuhr, today),
-      getPrayerGap(todayTimings.Dhuhr, todayTimings.Asr, today),
-      getPrayerGap(todayTimings.Asr, todayTimings.Maghrib, today),
-      getPrayerGap(todayTimings.Maghrib, todayTimings.Isha, today),
-    ];
-
-    if (durations.some((duration) => !duration)) throw new Error('Prayer API returned incomplete prayer gaps');
-
-    const progress = getPrayerIntervalProgress(todayTimings, today, { previousTimings, nextTimings });
-    if (progress.some((segment) => !segment)) throw new Error('Prayer API returned incomplete prayer intervals');
-
-    return {
-      dateKey: today,
-      timings: todayTimings,
-      previousTimings,
-      nextTimings,
-      activeBlockIndex: getActivePrayerBlockIndex(todayTimings, today),
-      heroBlockIndex: getHeroBlockIndex(todayTimings, today),
-      overnightReview: isOvernightReview(todayTimings, today),
-      durations,
-      progress,
-    };
-  } catch {
-    return null;
+export function getHeroBlockIndex(timings, dateKey, now = Date.now()) {
+  const starts = PRAYER_NAMES.map((name) => parsePrayerTime(timings?.[name]));
+  if (starts.some((time) => time === null)) return -1;
+  if (now < starts[0]) return 4;
+  for (let index = starts.length - 1; index >= 0; index -= 1) {
+    if (now >= starts[index]) return index;
   }
+  return -1;
+}
+
+export function getActivePrayerBlockIndex(timings, dateKey, now = Date.now()) {
+  const index = getHeroBlockIndex(timings, dateKey, now);
+  return index === 4 ? -1 : index;
+}
+
+export function isOvernightReview(timings, dateKey, now = Date.now()) {
+  return getHeroBlockIndex(timings, dateKey, now) === 4;
+}
+
+export function getPrayerIntervalProgress(timings, dateKey, { previousTimings, nextTimings } = {}, now = Date.now()) {
+  const starts = PRAYER_NAMES.map((name) => parsePrayerTime(timings?.[name]));
+  const beforeFajr = starts[0] !== null && now < starts[0];
+  return PRAYER_NAMES.map((name, index) => {
+    const start = index === 4 && beforeFajr ? parsePrayerTime(previousTimings?.Isha) : starts[index];
+    const end = index === 4 ? (beforeFajr ? starts[0] : parsePrayerTime(nextTimings?.Fajr)) : starts[index + 1];
+    if (start === null || end === null || end <= start) return null;
+    const elapsed = Math.round(Math.max(0, Math.min(100, ((now - start) / (end - start)) * 100)));
+    return { elapsed, remaining: 100 - elapsed };
+  });
+}
+
+export function getLivePrayerState(data, now = Date.now()) {
+  if (!data?.timings || data.dateKey !== getPrayerDateKey(getPrayerLocation(data.locationId), new Date(now))) return null;
+  const entries = PRAYER_NAMES.map((name) => ({ name, time: parsePrayerTime(data.timings[name]) }));
+  const tomorrowFajr = parsePrayerTime(data.nextTimings?.Fajr);
+  const sunrise = parsePrayerTime(data.timings.Sunrise);
+  if (entries.some((entry) => entry.time === null) || tomorrowFajr === null || sunrise === null) return null;
+  const next = entries.find((entry) => entry.time > now) || { name: 'Fajr', time: tomorrowFajr, tomorrow: true };
+  const blockIndex = getHeroBlockIndex(data.timings, data.dateKey, now);
+  const betweenPrayers = now >= sunrise && now < entries[1].time;
+  return {
+    blockIndex, next, sunrise, betweenPrayers,
+    label: betweenPrayers ? 'Between prayers' : blockIndex === 4 ? 'Isha → Fajr' : `${PRAYER_NAMES[blockIndex]} time`,
+    countdown: formatPrayerCountdown(next.time - now),
+    progress: getPrayerIntervalProgress(data.timings, data.dateKey, data, now)[blockIndex],
+  };
+}
+
+async function fetchPrayerDay(dateKey, location) {
+  const [year, month, day] = dateKey.split('-');
+  const params = new URLSearchParams({
+    city: location.city, country: location.country, method: location.method,
+    school: location.school, timezonestring: location.timezone, iso8601: 'true',
+  });
+  const response = await fetch(`https://api.aladhan.com/v1/timingsByCity/${day}-${month}-${year}?${params}`, {
+    next: { revalidate: 3600 }, signal: AbortSignal.timeout(12_000),
+  });
+  if (!response.ok) throw new Error('Prayer times are temporarily unavailable.');
+  const payload = await response.json();
+  if (payload.code !== 200 || !payload.data?.timings) throw new Error('Prayer times are temporarily unavailable.');
+  return payload.data;
+}
+
+export async function getPrayerRoutineData(location = DEFAULT_PRAYER_LOCATION) {
+  const dateKey = getPrayerDateKey(location);
+  const [today, previous, next] = await Promise.all([
+    fetchPrayerDay(dateKey, location),
+    fetchPrayerDay(shiftPrayerDate(dateKey, -1), location),
+    fetchPrayerDay(shiftPrayerDate(dateKey, 1), location),
+  ]);
+  const timings = today.timings;
+  const previousTimings = previous.timings;
+  const nextTimings = next.timings;
+  const progress = getPrayerIntervalProgress(timings, dateKey, { previousTimings, nextTimings });
+  if (progress.some((segment) => !segment) || parsePrayerTime(timings.Sunrise) === null) {
+    throw new Error('Prayer provider returned incomplete timings. Please retry.');
+  }
+  return {
+    locationId: location.id, dateKey, timings, previousTimings, nextTimings,
+    hijri: `${today.date.hijri.day} ${today.date.hijri.month.en} ${today.date.hijri.year} AH`,
+    activeBlockIndex: getActivePrayerBlockIndex(timings, dateKey),
+    heroBlockIndex: getHeroBlockIndex(timings, dateKey),
+    overnightReview: isOvernightReview(timings, dateKey),
+    durations: PRAYER_NAMES.slice(0, 4).map((name, index) => formatPrayerCountdown(
+      parsePrayerTime(timings[PRAYER_NAMES[index + 1]]) - parsePrayerTime(timings[name]),
+    )),
+    progress,
+  };
 }

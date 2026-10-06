@@ -132,6 +132,20 @@ The form validates the visitor’s name, email, subject, and message, then opens
 
 The status explains the draft action and keeps entered text in the form. A direct email link remains available if an email application is not configured. Sending messages directly from the site would require a separate email service or backend integration.
 
+## Dynamic Barakah dashboard
+
+`/dashboard` follows the current prayer routine with changing hero scenery, contextual reminders, and a live next-prayer countdown. Header search opens workspace pages (`Ctrl` / `⌘ K`); the bell shows prayer and task reminders. The profile menu lists navigation shortcuts. Each hero has page-specific Arabic ayah excerpts with links to the full verse on Quran.com; reminders change with the day or prayer block, and the refresh button shows another ayah.
+
+Prayer times come from AlAdhan through `/api/prayer-times?city=lahore`. Lahore is the default; the city selector supports Pakistan and international cities and remembers the selection in this browser. Pakistan cities use Karachi calculation / Hanafi Asr. Each location uses its own timezone and calculation method. The schedule is checked every five minutes, the clock and active block update every 15 seconds and on returning to the tab, and dates refresh at midnight. Fetches have a 12-second timeout and failures expose a Retry button. The Fajr prayer indicator ends at sunrise; the Fajr → Dhuhr **work routine** continues until Dhuhr.
+
+Daily intentions and the light/dark preference are saved in browser storage. The intention starts fresh each day; it is not synced to the database. Existing task due dates and attendance remain based on the Pakistan workspace calendar. Prayer times are calculated start times, rather than local mosque congregation times.
+
+Run the prayer boundary, sunrise, overnight, timezone, and invalid-data checks:
+
+```bash
+npm run test:prayer
+```
+
 ## Build and deployment
 
 Run the code checks and create the production build:

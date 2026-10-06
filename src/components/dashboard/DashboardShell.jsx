@@ -5,22 +5,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  Bell,
   CalendarDays,
   CheckSquare,
-  ChevronDown,
-  Menu,
-  Moon,
   PanelLeftClose,
-  PanelLeftOpen,
-  Search,
-  Sun,
   NotebookPen,
   SlidersHorizontal,
   Target,
   X,
 } from 'lucide-react';
 import MongoDBUsageSidebar from './MongoDBUsageSidebar';
+import DashboardHeader from './DashboardHeader';
 
 const SIDEBAR_STORAGE_KEY = 'barakah.sidebar.open';
 
@@ -49,6 +43,7 @@ export default function DashboardShell({ children }) {
   const [dark, setDark] = useState(true);
 
   useEffect(() => {
+    try { setDark(localStorage.getItem('barakah.theme.v1') !== 'light'); } catch { /* Keep the default theme. */ }
     const desktop = window.matchMedia('(min-width: 781px)');
     let storedPreference = null;
     try {
@@ -122,7 +117,7 @@ export default function DashboardShell({ children }) {
   useEffect(() => {
     if (!sidebarOpen) return undefined;
     const onKey = (event) => {
-      if (event.key === 'Escape') setSidebarOpen(false);
+      if (event.key === 'Escape' && !event.defaultPrevented) setSidebarOpen(false);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
@@ -193,42 +188,11 @@ export default function DashboardShell({ children }) {
       </aside>
 
       <div className="bk-main">
-        {topbarVisible && <header className="bk-topbar">
-          {sidebarOpen === false && <button className="bk-sidebar-toggle" type="button" aria-label="Open sidebar" aria-expanded={false} onClick={() => setSidebarOpen(true)}><PanelLeftOpen size={19} /></button>}
-          <button className="bk-menu" type="button" aria-label="Open sidebar" onClick={() => setSidebarOpen(true)}>
-            <Menu size={20} />
-          </button>
-
-          <label className="bk-search">
-            <Search size={16} strokeWidth={1.9} />
-            <span className="sr-only">Search anything</span>
-            <input type="search" placeholder="Search anything..." />
-          </label>
-
-          <div className="bk-top-actions">
-            <button
-              className="bk-icon-btn"
-              type="button"
-              aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-              onClick={() => setDark((value) => !value)}
-            >
-              {dark ? <Moon size={18} strokeWidth={1.8} /> : <Sun size={18} strokeWidth={1.8} />}
-            </button>
-            <button className="bk-icon-btn has-alert" type="button" aria-label="Notifications">
-              <Bell size={18} strokeWidth={1.8} />
-            </button>
-            <button className="bk-user" type="button">
-              <span className="bk-avatar">
-                <Image src="/images/barakah/zain-avatar.png" alt="Zain Qalandar" width={34} height={34} />
-              </span>
-              <span className="bk-user-copy">
-                <strong>Zain Qalandar</strong>
-                <small dir="rtl">نَاهِي النَّفْسِ عَنِ الْهَوَىٰ</small>
-              </span>
-              <ChevronDown size={16} strokeWidth={1.8} />
-            </button>
-          </div>
-        </header>}
+        {topbarVisible && <DashboardHeader sidebarOpen={sidebarOpen} onOpenSidebar={() => setSidebarOpen(true)} dark={dark} onToggleTheme={() => {
+          const nextDark = !dark;
+          setDark(nextDark);
+          try { localStorage.setItem('barakah.theme.v1', nextDark ? 'dark' : 'light'); } catch { /* Storage is optional. */ }
+        }} />}
 
         <main className="bk-content" id="main-content">
           {children}

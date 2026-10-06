@@ -5,10 +5,14 @@ import { useEffect, useMemo } from 'react';
 import { ArrowUpRight, Check, CheckCircle2, Clock3, FileText, ListTodo, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 import DashboardHero from '@/components/dashboard/DashboardHero';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchPrayerRoutine, refreshPrayerProgress } from '@/store/features/prayerRoutine/prayerRoutineSlice';
+import { usePrayer } from '@/context/prayer-context';
+import PrayerNow from './PrayerNow';
+import DailyIntention from './DailyIntention';
 import { fetchTaskWorkspace, isTaskWorkspaceStale } from '@/store/features/tasks/tasksSlice';
 import { fetchUploads, getUploadScopeKey, isUploadScopeStale } from '@/store/features/uploads/uploadsSlice';
 import { getPrayerDateKey } from '@/lib/prayerTimes';
+
+const EMPTY_UPLOADS = [];
 
 const HERO_IMAGES = [
   '/images/barakah/hero/01-fajr-to-dhuhr.webp',
@@ -71,37 +75,17 @@ const BLOCKS = [
 
 export default function PrayerRoutine() {
   const dispatch = useAppDispatch();
-  const { data: prayerData, status } = useAppSelector((state) => state.prayerRoutine);
+  const { data: prayerData, now } = usePrayer();
+  const taskDateKey = now ? getPrayerDateKey(undefined, new Date(now)) : null;
   const { tasks, status: tasksStatus, lastFetchedAt: tasksLastFetchedAt } = useAppSelector((state) => state.tasks);
   const noteUploadScope = useAppSelector((state) => state.uploads.scopes?.[getUploadScopeKey('notes', 'pdf')]);
-  const noteUploads = noteUploadScope?.items || [];
+  const noteUploads = noteUploadScope?.items || EMPTY_UPLOADS;
   const uploadsStatus = noteUploadScope?.status || 'idle';
-
-  useEffect(() => {
-    if (status === 'idle') void dispatch(fetchPrayerRoutine());
-  }, [dispatch, status]);
 
   useEffect(() => {
     if (isTaskWorkspaceStale({ status: tasksStatus, lastFetchedAt: tasksLastFetchedAt })) void dispatch(fetchTaskWorkspace());
     if (noteUploadScope?.status !== 'loading' && noteUploadScope?.status !== 'failed' && isUploadScopeStale(noteUploadScope)) void dispatch(fetchUploads({ category: 'notes', kind: 'pdf' }));
   }, [dispatch, noteUploadScope, tasksLastFetchedAt, tasksStatus]);
-
-  useEffect(() => {
-    if (status !== 'succeeded' || !prayerData?.dateKey) return undefined;
-
-    const updateCurrentBlock = () => {
-      if (prayerData.dateKey !== getPrayerDateKey()) {
-        void dispatch(fetchPrayerRoutine());
-        return;
-      }
-      dispatch(refreshPrayerProgress());
-    };
-
-    const timer = window.setInterval(updateCurrentBlock, 60_000);
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [dispatch, prayerData?.dateKey, status]);
 
   const blocks = BLOCKS.map((block, index) => ({
     ...block,
@@ -111,7 +95,7 @@ export default function PrayerRoutine() {
   const overnightProgress = prayerData?.progress[4];
   const isOvernight = Boolean(prayerData?.overnightReview && overnightProgress);
   const glance = useMemo(() => {
-    const today = getPrayerDateKey();
+    const today = taskDateKey;
     const recentThreshold = new Date();
     recentThreshold.setDate(recentThreshold.getDate() - 7);
 
@@ -123,7 +107,7 @@ export default function PrayerRoutine() {
       totalPdfs: noteUploads.length,
       recentNotes: noteUploads.filter((upload) => new Date(upload.createdAt) >= recentThreshold).length,
     };
-  }, [noteUploads, tasks]);
+  }, [noteUploads, tasks, taskDateKey]);
   const tasksLoading = !tasksLastFetchedAt && (tasksStatus === 'idle' || tasksStatus === 'loading');
   const notesLoading = !noteUploadScope?.hasLoaded && (uploadsStatus === 'idle' || uploadsStatus === 'loading');
   const glanceCards = [
@@ -164,6 +148,9 @@ export default function PrayerRoutine() {
         subtitle="Prayer-based daily work structure"
         image={heroImage}
       />
+
+      <PrayerNow />
+      <DailyIntention />
 
       <section className="bk-dashboard-glance" aria-labelledby="today-at-a-glance">
         <div className="bk-dashboard-glance-head">
@@ -215,7 +202,8 @@ export default function PrayerRoutine() {
                 </div>
               </div>
 
-              <article className={`bk-banner bk-banner-${block.tone}${focusClass}`} aria-label={isCurrent ? `Current prayer window: ${block.range}` : undefined}>
+              <article className={`bk-banner bk-banner-${block.tone}${focusClass}`} aria-label={isCurrent ? `Current routine window: ${block.range}` : undefined}>
+                {isCurrent && <span className="bk-banner-badge"><span className="bk-live-dot" />Current block</span>}
                 <div className="bk-banner-copy">
                   <div className="bk-banner-text">
                     <p className="bk-banner-kicker">{block.id} &nbsp;{block.range}</p>
