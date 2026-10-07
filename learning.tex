@@ -1,0 +1,8 @@
+features branch ke woh commits dekho jo main mein abhi nahi hain:
+git log --oneline main..features
+
+Har line ke shuru mein jo code hai, woh us commit ka hash hai. Commit ki details confirm karne ke liye, misaal ke taur par:
+git show --stat --oneline 0804807
+
+main par reh kar sirf ek commit lane ke liye uska hash cherry-pick karein. Dashboard wala:
+git cherry-pick 0804807
