@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:prayer": "node --test tests/prayerTimes.test.mjs",
-    "test:projects": "node --test tests/projects.test.mjs"
+    "test:projects": "node --test tests/projects.test.mjs",
+    "test:dashboard": "node --test tests/dashboard.test.mjs"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.13.0",

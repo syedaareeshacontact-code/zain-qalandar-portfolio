@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { usePrayer } from '@/context/prayer-context';
 import PrayerNow from './PrayerNow';
 import DailyIntention from './DailyIntention';
+import DashboardHub from './DashboardHub';
 import { fetchTaskWorkspace, isTaskWorkspaceStale } from '@/store/features/tasks/tasksSlice';
 import { fetchUploads, getUploadScopeKey, isUploadScopeStale } from '@/store/features/uploads/uploadsSlice';
 import { getPrayerDateKey } from '@/lib/prayerTimes';
@@ -110,32 +111,34 @@ export default function PrayerRoutine() {
   }, [noteUploads, tasks, taskDateKey]);
   const tasksLoading = !tasksLastFetchedAt && (tasksStatus === 'idle' || tasksStatus === 'loading');
   const notesLoading = !noteUploadScope?.hasLoaded && (uploadsStatus === 'idle' || uploadsStatus === 'loading');
+  const tasksUnavailable = tasksLoading || (!tasksLastFetchedAt && tasksStatus === 'failed');
+  const notesUnavailable = notesLoading || (!noteUploadScope?.hasLoaded && uploadsStatus === 'failed');
   const glanceCards = [
     {
       label: 'Pending today',
       description: 'Tasks still to do',
-      value: tasksLoading ? '—' : glance.pendingToday,
+      value: tasksUnavailable ? '—' : glance.pendingToday,
       icon: ListTodo,
       href: '/dashboard/tasks',
     },
     {
       label: 'Completed today',
       description: 'Tasks finished today',
-      value: tasksLoading ? '—' : glance.completedToday,
+      value: tasksUnavailable ? '—' : glance.completedToday,
       icon: CheckCircle2,
       href: '/dashboard/tasks',
     },
     {
       label: 'Total PDFs',
       description: 'Saved in your notes',
-      value: notesLoading ? '—' : glance.totalPdfs,
+      value: notesUnavailable ? '—' : glance.totalPdfs,
       icon: FileText,
       href: '/dashboard/notes',
     },
     {
       label: 'Recent notes',
       description: 'Uploaded in last 7 days',
-      value: notesLoading ? '—' : glance.recentNotes,
+      value: notesUnavailable ? '—' : glance.recentNotes,
       icon: Clock3,
       href: '/dashboard/notes',
     },
@@ -178,6 +181,9 @@ export default function PrayerRoutine() {
         </div>
       </section>
 
+      <DashboardHub />
+
+      <div className="bk-rhythm-heading"><div><span className="bk-section-kicker">RETURN TO YOUR RHYTHM</span><h2>Your prayer-led day</h2></div><p>A natural pause. A clear next step.</p></div>
       <ol className="bk-timeline">
         {blocks.map((block, index) => {
           const Icon = block.icon;

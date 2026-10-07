@@ -21,6 +21,7 @@ export const PRAYER_MOMENTS = [
 ];
 
 export const HERO_CONTENT = {
+  'Your Workspace': { kicker: 'A DAY WITH PURPOSE', ayat: ['effort', 'gratitude', 'peace'], messages: ['A little focus. A little consistency. A meaningful day.', 'Begin gently, keep showing up, and notice your progress.', 'Bring your next step into focus, with a clear intention.'] },
   Tasks: { kicker: 'INTENTION INTO ACTION', ayat: ['effort', 'patience', 'ease'], messages: ['One meaningful task is a good beginning.', 'Take the next small step, with a clear intention.', 'Progress grows from the things you finish.'] },
   Notes: { kicker: 'A SPACE TO LEARN', ayat: ['knowledge', 'remembrance', 'peace'], messages: ['Keep what you learn close. Return to it often.', 'A useful note today can bring clarity tomorrow.', 'Make room for ideas worth remembering.'] },
   Goals: { kicker: 'PURPOSE OVER PACE', ayat: ['ease', 'effort', 'gratitude'], messages: ['Choose a direction that matters, then take one step.', 'Build a life of meaningful, consistent progress.', 'Notice how far you have come. Keep going gently.'] },

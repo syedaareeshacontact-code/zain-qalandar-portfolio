@@ -8,6 +8,7 @@ import StoreProvider from '@/store/provider';
 import { PrayerProvider } from '@/context/prayer-context';
 import './dynamic-dashboard.css';
 import './projects.css';
+import './workspace.css';
 
 export const metadata = {
   title: 'Barakah | Prayer Routine',

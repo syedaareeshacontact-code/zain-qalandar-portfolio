@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   CalendarDays,
+  LayoutGrid,
   CheckSquare,
   PanelLeftClose,
   NotebookPen,
@@ -20,6 +21,7 @@ const SIDEBAR_STORAGE_KEY = 'barakah.sidebar.open';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: CalendarDays, shortcut: 'Alt ⇧ D', aliases: ['/dashboard/prayer-routine'] },
+  { href: '/dashboard/overview', label: 'Workspace', icon: LayoutGrid },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare, shortcut: 'Alt ⇧ T' },
   { href: '/dashboard/notes', label: 'Notes', icon: NotebookPen, shortcut: 'Alt ⇧ N' },
   { href: '/dashboard/goals', label: 'Goals', icon: Target, shortcut: 'Alt ⇧ G' },
@@ -169,6 +171,7 @@ export default function DashboardShell({ children }) {
                 href={item.href}
                 className={`bk-nav-item${active ? ' is-active' : ''}${item.premium ? ' is-premium' : ''}${item.iconOnly ? ' is-icon-only' : ''}`}
                 aria-label={item.label}
+                aria-current={active ? 'page' : undefined}
                 title={item.iconOnly ? item.label : undefined}
               >
                 {item.premiumIcon ? (

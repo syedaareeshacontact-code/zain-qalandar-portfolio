@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ArrowUpRight, Bell, CalendarDays, CheckSquare, ChevronDown, Clock3, ExternalLink, Menu, Moon, NotebookPen, PanelLeftOpen, Search, SlidersHorizontal, Sun, Target } from 'lucide-react';
+import { ArrowUpRight, Bell, CalendarDays, CheckSquare, ChevronDown, Clock3, ExternalLink, LayoutGrid, Menu, Moon, NotebookPen, PanelLeftOpen, Search, SlidersHorizontal, Sun, Target } from 'lucide-react';
 import { usePrayer } from '@/context/prayer-context';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTaskWorkspace, isTaskWorkspaceStale } from '@/store/features/tasks/tasksSlice';
@@ -13,6 +13,7 @@ import PrayerNow from './PrayerNow';
 
 const PAGES = [
   { href: '/dashboard', label: 'Prayer Routine', description: 'Daily rhythm, prayer times, and intention', icon: CalendarDays, keywords: 'dashboard namaz salah prayer routine today' },
+  { href: '/dashboard/overview', label: 'Workspace', description: 'Focus timer, habits, momentum, and daily reflection', icon: LayoutGrid, keywords: 'overview focus timer pomodoro habits streaks momentum statistics reflection journal capture widgets' },
   { href: '/dashboard/tasks', label: 'Tasks', description: 'Your to-dos, lists, and priorities', icon: CheckSquare, keywords: 'work todo task lists' },
   { href: '/dashboard/notes', label: 'Notes', description: 'Your PDF library and folders', icon: NotebookPen, keywords: 'pdf documents notes files learning' },
   { href: '/dashboard/goals', label: 'Goals', description: 'Track the progress that matters', icon: Target, keywords: 'goals progress targets' },

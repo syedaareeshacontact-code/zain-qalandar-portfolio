@@ -134,6 +134,26 @@ The status explains the draft action and keeps entered text in the form. A direc
 
 ## Dynamic Barakah dashboard
 
+### Personal workspace
+
+The dashboard now includes a personal workspace alongside the prayer routine. Open `/dashboard/overview` from the **Workspace** navigation item for the same widgets in a dedicated view:
+
+- **Focus timer:** 25-minute focus, 50-minute deep work, or a 5-minute break, with start, pause, resume, reset, an optional task, and a distraction-free focus view. The timer uses its scheduled finish time, so it survives refreshes and background tabs. Completed work sessions appear in the weekly chart; breaks are excluded.
+- **Priority tasks:** switch between today (including overdue), starred, or all pending tasks, and complete a task directly from the dashboard. Completion uses the existing task API, including its recurring-task behavior.
+- **Weekly momentum:** browse the last year of weeks, compare completed focus minutes and tasks, and select a day for details. Charts use real task completions and recorded focus sessions, with explicit loading and failure states.
+- **Daily habits:** add up to 12 personal habits, check them off, and see consecutive-day streaks and the last seven days of activity. Today's unchecked habit preserves yesterday's streak until the day is over.
+- **Quick capture:** create a task in an existing list with priority and an optional today deadline. Successful saves appear immediately in the shared task board; failed saves keep the draft.
+- **Daily reflection:** record your mood and a short reflection, with a fresh entry each day. **Daily review** downloads a text summary of your focus, completed tasks, habits, and saved reflection.
+- **Customize:** show or hide individual widgets; hidden timers continue running. Preferences persist when switching between the dashboard and workspace view.
+
+Habits, focus sessions, reflections, and widget preferences are stored locally under `barakah.workspace.v1`, with bounded history and a warning when storage is unavailable. These records are not synced to MongoDB. Tasks continue to use the existing database. Workspace dates consistently use `Asia/Karachi`, independent of the selected prayer city. The timer's completed session is attributed to its scheduled completion date, even if you return on a later day.
+
+Run the timer persistence, duplicate completion, midnight, streak, chart, and storage-recovery checks:
+
+```bash
+npm run test:dashboard
+```
+
 ### Portfolio project manager
 
 Open `/dashboard/manage` to add, edit, and delete projects and create, rename, or delete categories for any stack. Each project supports a title, description, category, comma-separated skills, project date, live link, source code link, optional cover image, and a featured toggle. Featured projects appear first with a larger card. Category filters on the homepage show all projects in the selected stack.

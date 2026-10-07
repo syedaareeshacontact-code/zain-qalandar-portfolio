@@ -3,7 +3,7 @@ import GoogleAttendance from '@/components/dashboard/GoogleAttendance';
 
 export const metadata = {
   title: 'Dashboard | Barakah',
-  description: 'A prayer-based daily work structure.',
+  description: 'Your prayer-led workspace with focus sessions, daily habits, task priorities, and progress.',
 };
 
 export default function DashboardPage() {

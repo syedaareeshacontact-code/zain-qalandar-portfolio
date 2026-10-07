@@ -1,19 +1,12 @@
-import BarakahPage from '@/components/dashboard/BarakahPage';
+import DashboardHero from '@/components/dashboard/DashboardHero';
+import DashboardHub from '@/components/dashboard/DashboardHub';
 
 export const metadata = {
-  title: 'Dashboard | Barakah',
+  title: 'Workspace Overview | Barakah',
 };
 
 export default function OverviewPage() {
   return (
-    <BarakahPage
-      title="Dashboard"
-      subtitle="A calm overview of your prayer-led day."
-      items={[
-        { kicker: 'Today', title: 'Stay with the block', body: 'Deep work lives between Fajr and Dhuhr. Protect that window first.' },
-        { kicker: 'Focus', title: 'One priority', body: 'Choose the work that actually moves your life, then leave the rest for later.' },
-        { kicker: 'Close', title: 'Review before night', body: 'After Maghrib, look back with gratitude. After Isha, decide tomorrow with clarity.' },
-      ]}
-    />
+    <div className="bk-overview-page"><DashboardHero title="Your Workspace" subtitle="A little clarity for your focus, habits, and next steps." image="/images/barakah/hero/01-fajr-to-dhuhr.webp" /><DashboardHub /></div>
   );
 }
