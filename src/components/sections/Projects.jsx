@@ -10,11 +10,12 @@ import SectionHeading from '@/components/ui/SectionHeading';
 
 export default function Projects({ workspace }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const { projects, categories } = workspace;
+  const { projects: allProjects, categories } = workspace;
+  const projects = allProjects.filter((project) => !project.isDemo);
   const categoryNames = new Map(categories.map((category) => [category.id, category.name]));
   const counts = new Map();
   for (const project of projects) counts.set(project.categoryId, (counts.get(project.categoryId) || 0) + 1);
-  const filters = [{ id: 'all', name: 'All projects', count: projects.length }, ...categories.map((category) => ({ ...category, count: counts.get(category.id) || 0 }))];
+  const filters = [{ id: 'all', name: 'All projects', count: projects.length }, ...categories.filter((category) => counts.has(category.id)).map((category) => ({ ...category, count: counts.get(category.id) }))];
   if (counts.get(null)) filters.push({ id: 'uncategorized', name: 'Uncategorized', count: counts.get(null) });
   const visibleProjects = selectedCategory === 'all' ? projects : projects.filter((project) => (project.categoryId || 'uncategorized') === selectedCategory);
   return (

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { ArrowDown, ArrowUpRight, Download } from 'lucide-react';
 import { profile } from '@/data/profile';
+import TechnologyIcon from '@/components/ui/TechnologyIcon';
 
 function Architecture() {
   const { design } = profile;
@@ -59,6 +60,7 @@ export default function Hero({ latestCv = null }) {
             <span>{profile.hero.greetingPrefix} <strong>{profile.basic.fullName}.</strong></span>
           </div>
           <p className="hero-description">{profile.hero.subheading}</p>
+          <ul className="hero-stack" aria-label="Core technologies">{profile.hero.stack.map((skill) => <li key={skill}><TechnologyIcon name={skill} /><span>{skill}</span></li>)}</ul>
           <div className="hero-actions">
             <a className="button button-primary" href={profile.secondaryCta.href}>{profile.secondaryCta.label}<ArrowUpRight size={18} /></a>
             <a className="button button-text" href={cvHref} download={cvDownloadName}>{profile.primaryCta.label}<Download size={16} /></a>

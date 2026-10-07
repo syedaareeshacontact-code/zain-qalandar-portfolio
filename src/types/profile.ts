@@ -17,12 +17,14 @@ export type NavItem = {
 export type AboutCard = {
 	title: string;
 	value: string;
+	detail?: string;
 	icon?: LucideIcon;
 };
 
 export type SkillCategory = {
 	title: string;
 	items: string[];
+	notes?: string[];
 };
 
 export type SkillProficiency = {
@@ -180,6 +182,7 @@ export type Profile = {
 		greetingPrefix: string;
 		subheading: string;
 		scrollHint: string;
+		stack?: string[];
 		socialLinks: SocialLink[];
 	};
 	stats: StatItem[];
@@ -207,6 +210,7 @@ export type Profile = {
 	experience: ExperienceItem[];
 	skills: {
 		title: string;
+		description?: string;
 		categories: SkillCategory[];
 		itemPrefix?: string;
 		proficiency: {

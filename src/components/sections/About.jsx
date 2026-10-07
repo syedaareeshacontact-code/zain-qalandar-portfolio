@@ -17,7 +17,7 @@ export default function About() {
         <p className="about-lead">{profile.about.longBio}</p>
         {profile.about.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
         <ul className="about-highlights">{profile.about.highlights.map((highlight) => <li key={highlight}><span className="small-cross" aria-hidden="true">+</span>{highlight}</li>)}</ul>
-        <div className="about-facts">{profile.about.summaryCards.map((card) => <div key={card.title}><span className="eyebrow">{card.title}</span><span>{card.value}</span></div>)}</div>
+        <div className="about-facts">{profile.about.summaryCards.map((card) => <div key={card.title}><span className="eyebrow">{card.title}</span><span className="about-fact-value">{card.value}</span>{card.detail && <span className="about-fact-detail">{card.detail}</span>}</div>)}</div>
         {profile.resume?.resumeUrl && <a className="text-link" href={profile.resume.resumeUrl} target="_blank" rel="noopener noreferrer">{profile.design.resumeLabel}<ArrowUpRight size={17} /></a>}
       </Reveal>
     </section>
