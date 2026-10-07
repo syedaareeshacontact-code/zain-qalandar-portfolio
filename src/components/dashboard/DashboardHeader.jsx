@@ -16,7 +16,7 @@ const PAGES = [
   { href: '/dashboard/tasks', label: 'Tasks', description: 'Your to-dos, lists, and priorities', icon: CheckSquare, keywords: 'work todo task lists' },
   { href: '/dashboard/notes', label: 'Notes', description: 'Your PDF library and folders', icon: NotebookPen, keywords: 'pdf documents notes files learning' },
   { href: '/dashboard/goals', label: 'Goals', description: 'Track the progress that matters', icon: Target, keywords: 'goals progress targets' },
-  { href: '/dashboard/manage', label: 'Manage', description: 'Workspace storage and settings', icon: SlidersHorizontal, keywords: 'manage settings storage cloudinary' },
+  { href: '/dashboard/manage', label: 'Manage', description: 'Portfolio projects, categories, CV, and storage', icon: SlidersHorizontal, keywords: 'manage settings storage cloudinary portfolio projects categories stacks code' },
   { href: '/dashboard/ahd-nama', label: 'Ahd Nama', description: 'Return to your personal commitments', icon: NotebookPen, keywords: 'ahd nama promise pledges' },
 ];
 

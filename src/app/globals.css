@@ -330,6 +330,28 @@ h1 em { display: block; color: var(--accent); font-weight: 400; margin-top: 4px;
 .project-highlights li::before { content: '+'; position: absolute; left: 0; color: var(--accent); }
 .project-links { display: flex; flex-wrap: wrap; gap: 18px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 25px; }
 .project-featured .project-links { padding-top: 17px; margin-top: 20px; }
+.portfolio-project-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: -6px 0 28px; }
+.portfolio-category-filters { display: flex; flex-wrap: wrap; gap: 9px; }
+.portfolio-category-filters button { display: inline-flex; align-items: center; gap: 9px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--text-muted); font-size: 11px; cursor: pointer; }
+.portfolio-category-filters button:hover { border-color: var(--accent); }
+.portfolio-category-filters button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.portfolio-category-filters button span { font-family: var(--mono); font-size: 9px; opacity: .75; }
+.portfolio-project-count { flex-shrink: 0; color: var(--text-muted); font-size: 10px; font-family: var(--mono); }
+.portfolio-project-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 13px; margin-bottom: 12px; color: var(--text-muted); font-size: 10px; }
+.portfolio-project-meta > span, .portfolio-project-meta time { display: inline-flex; align-items: center; gap: 5px; }
+.portfolio-project-meta > span:first-child { color: var(--accent); }
+.portfolio-project-meta .portfolio-demo-badge { padding: 3px 6px; border: 1px solid var(--border); border-radius: 3px; font-size: 8px; }
+.portfolio-managed-card .project-art img { aspect-ratio: 16 / 9; object-fit: cover; }
+.portfolio-managed-card.project-featured .project-art img { aspect-ratio: 3 / 1; }
+.portfolio-managed-card .project-content h3, .portfolio-managed-card .project-description, .portfolio-managed-card .tech-tags li { overflow-wrap: anywhere; }
+.portfolio-managed-card .project-description { white-space: pre-line; }
+.portfolio-project-empty { padding: 42px 20px; border: 1px dashed var(--border); border-radius: 6px; color: var(--text-muted); text-align: center; font-size: 14px; }
+@media (max-width: 640px) {
+  .portfolio-project-toolbar { flex-direction: column; align-items: flex-start; gap: 13px; }
+  .portfolio-category-filters { gap: 7px; }
+  .portfolio-category-filters button { padding: 8px 11px; }
+  .portfolio-managed-card.project-featured .project-art img { aspect-ratio: 16 / 9; }
+}
 .about-section { display: grid; grid-template-columns: .85fr 1.6fr; gap: 95px; align-items: center; }
 .about-portrait { padding: 12px; border: 1px solid var(--border); align-self: start; transform: rotate(-2deg); background: var(--surface); }
 .portrait-frame { overflow: hidden; background: var(--surface-raised); }

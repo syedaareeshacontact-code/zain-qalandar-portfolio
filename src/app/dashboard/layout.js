@@ -7,6 +7,7 @@ import DashboardShell from '@/components/dashboard/DashboardShell';
 import StoreProvider from '@/store/provider';
 import { PrayerProvider } from '@/context/prayer-context';
 import './dynamic-dashboard.css';
+import './projects.css';
 
 export const metadata = {
   title: 'Barakah | Prayer Routine',

@@ -23,7 +23,7 @@ The design carries the visual identity of my GitHub profile into the web: a dark
 ## Inside the portfolio
 
 - **Introduction:** an animated illustration of interface, application, and data layers, with links to selected work and my CV.
-- **Selected work:** project illustrations, technology stacks, and descriptions of my contributions.
+- **Selected work:** projects managed from the dashboard, with stack/category filters, cover images, skills, dates, and live/source links.
 - **About and expertise:** background, development services, and an everyday toolkit.
 - **Experience:** roles, responsibilities, and technologies used in professional and independent work.
 - **FAQ:** native, keyboard-accessible accordions.
@@ -83,7 +83,7 @@ The main content source is [`src/data/profile.ts`](./src/data/profile.ts). Updat
 | Contact details and social links | `contact`, `socials`, `contactSection` |
 | Navigation and calls to action | `sections`, `primaryCta`, `secondaryCta` |
 | CV link and download | `resume`, `primaryCta` |
-| Projects and their illustrations | `projects`, `projectsSection` |
+| Project headings and initial seed content | `projectsSection`, `projects` (manage saved projects at `/dashboard/manage`) |
 | Services, skills, and experience | `services`, `skills`, `experience` |
 | Questions and answers | `faq`, `faqSection` |
 | Headlines, labels, and footer text | `design`, section settings, `footer`, `ui` |
@@ -133,6 +133,24 @@ The form validates the visitor’s name, email, subject, and message, then opens
 The status explains the draft action and keeps entered text in the form. A direct email link remains available if an email application is not configured. Sending messages directly from the site would require a separate email service or backend integration.
 
 ## Dynamic Barakah dashboard
+
+### Portfolio project manager
+
+Open `/dashboard/manage` to add, edit, and delete projects and create, rename, or delete categories for any stack. Each project supports a title, description, category, comma-separated skills, project date, live link, source code link, optional cover image, and a featured toggle. Featured projects appear first with a larger card. Category filters on the homepage show all projects in the selected stack.
+
+MongoDB stores projects in `portfolioProjects`, categories in `portfolioProjectCategories`, and a one-time initialization marker in `portfolioProjectConfig`. The first load imports the five existing profile projects and adds five clearly labeled demo projects across MERN, Next.js, React, and Python. Deleting demo projects does not seed them again. After initialization, edit projects through Manage; changes to `profile.projects` only affect the fallback content.
+
+JPG, PNG, and WEBP covers up to 10 MB are uploaded to Cloudinary under `portfolio/projects` when a project is saved. Image replacement/removal and project deletion clean up managed cover assets. A local SVG cover is used when no image is provided or an image fails to load. Deleting a category preserves its projects under Uncategorized. Project/category counts have no application-level limit.
+
+`GET /api/projects` returns the portfolio workspace; `POST`, `PATCH ?id=…`, and `DELETE ?id=…` manage projects. Save using JSON, or multipart form data with a JSON `project` field and optional `image` file. `POST`, `PATCH ?id=…`, and `DELETE ?id=…` on `/api/project-categories` manage category names. Saves invalidate the homepage, so new requests show the latest work. MongoDB and the existing Cloudinary environment variables above are required for management and image uploads.
+
+Run project input, URL, date, category, and image validation checks:
+
+```bash
+npm run test:projects
+```
+
+### Prayer routine
 
 `/dashboard` follows the current prayer routine with changing hero scenery, contextual reminders, and a live next-prayer countdown. Header search opens workspace pages (`Ctrl` / `⌘ K`); the bell shows prayer and task reminders. The profile menu lists navigation shortcuts. Each hero has page-specific Arabic ayah excerpts with links to the full verse on Quran.com; reminders change with the day or prayer block, and the refresh button shows another ayah.
 
