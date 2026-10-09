@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test:prayer": "node --test tests/prayerTimes.test.mjs",
     "test:projects": "node --test tests/projects.test.mjs",
-    "test:dashboard": "node --test tests/dashboard.test.mjs"
+    "test:dashboard": "node --test tests/dashboard.test.mjs",
+    "test:goals": "node --experimental-vm-modules --test tests/goals*.test.mjs"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.13.0",
@@ -25,7 +26,9 @@
     "postcss": "^8.5.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-redux": "^9.3.0"
+    "react-markdown": "^10.1.0",
+    "react-redux": "^9.3.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

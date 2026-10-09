@@ -184,6 +184,26 @@ Run the prayer boundary, sunrise, overnight, timezone, and invalid-data checks:
 npm run test:prayer
 ```
 
+### Goals workspace
+
+`/dashboard/goals` saves goals, pins, descriptions, priorities, target dates, and milestones in MongoDB. Pins stay first in every live view. Priority changes the card accent, title, badge, and progress color in both themes. Search includes descriptions and milestone titles; category, priority, sorting, grid/list, completed, pinned, and overdue views help organize the workspace.
+
+The description editor supports bold, italic, strikethrough, headings, bullet/numbered lists, quotes, inline code, and links, with Write/Preview modes and Ctrl/⌘ B and I shortcuts. Descriptions allow up to 12,000 characters. Existing descriptions remain plain text until formatting is deliberately applied. HTML and images are not rendered, and links accept only HTTP, HTTPS, and mailto destinations.
+
+Optional milestones calculate progress from checked steps. Completing all steps completes the goal; Reopen unchecks the last completed step. Goals without milestones retain manual progress. Removing the final milestone keeps the current progress available for manual adjustment.
+
+Delete now moves the complete document to Trash using `deletedAt`; Restore returns its description, milestones, progress, pin, and priority. There is no automatic purge. This protects future removals; it does not recreate documents permanently deleted before this update. Editing and deleting also check `updatedAt` to prevent stale tabs from overwriting newer changes. If an edit conflicts, its draft can be saved as a new goal to keep both versions.
+
+Unsaved forms, including a pending milestone, are stored on the current device under `barakah.goals.drafts.v1` (up to 20 drafts). Close keeps the draft; Discard draft removes it. Drafts are not synced to MongoDB until Save. Grid/list preference uses `barakah.goals.view.v1`. Export downloads the loaded workspace as JSON, including Trash. The workspace loads up to 500 live and 500 trashed goals. Dates use `Asia/Karachi`.
+
+`GET /api/goals` returns live goals; `?view=trash` returns removed goals and `?view=workspace` returns both. `PATCH` accepts `pinned`, `descriptionFormat`, `milestones`, and optional `expectedUpdatedAt`, alongside the existing fields. `PATCH { id, action: 'restore' }` restores a goal; `DELETE ?id=…` preserves it in Trash. Old records need no migration.
+
+Run the validation and API preservation checks (using an in-memory database, without accessing the live database):
+
+```bash
+npm run test:goals
+```
+
 ## Build and deployment
 
 Run the code checks and create the production build:
